@@ -285,32 +285,11 @@ const ContractTermsList: React.FC = () => {
   };
 
   const filteredTerms = useMemo(() => {
-    console.log('ContractTermsList: Filtering terms', {
-      analysisTerms: analysisTerms?.length || 0,
-      activeFilter,
-      sessionId,
-      hasTerms: Array.isArray(analysisTerms)
-    });
-    
     if (!analysisTerms) return [];
-    
-    if (analysisTerms.length > 0) {
-      console.log('ContractTermsList: Sample term data', {
-        firstTerm: analysisTerms[0],
-        termCount: analysisTerms.length
-      });
-    }
     
     return analysisTerms.filter(term => {
       if (activeFilter === 'all') return true;
       let isEffectivelyCompliant = term.is_valid_sharia;
-      
-      console.log('ContractTermsList: Term compliance check', {
-        termId: term.term_id,
-        isEffectivelyCompliant,
-        is_valid_sharia: term.is_valid_sharia,
-        activeFilter
-      });
       
       if (term.expert_override_is_valid_sharia !== null && term.expert_override_is_valid_sharia !== undefined) {
         isEffectivelyCompliant = term.expert_override_is_valid_sharia;
@@ -325,13 +304,6 @@ const ContractTermsList: React.FC = () => {
       return true;
     });
   }, [analysisTerms, activeFilter]);
-
-  console.log('ContractTermsList: Component render', {
-    sessionId,
-    isFetchingSession,
-    analysisTerms: analysisTerms ? `${analysisTerms.length} terms` : 'null',
-    sessionDetails: sessionDetails ? 'has session details' : 'no session details'
-  });
 
   if ((isFetchingSession || isAnalyzingContract) && (!analysisTerms || analysisTerms.length === 0)) {
     return (
@@ -379,31 +351,7 @@ const ContractTermsList: React.FC = () => {
     );
   }
 
-  console.log('ContractTermsList: Rendering terms', {
-    analysisTermsCount: analysisTerms?.length || 0,
-    filteredTermsCount: filteredTerms.length,
-    activeFilter,
-    sessionId
-  });
-
-  console.log('ContractTermsList: Filtered terms result', {
-    totalTerms: analysisTerms?.length || 0,
-    filteredCount: filteredTerms.length,
-    activeFilter,
-    filteredTerms: filteredTerms.map((term, index) => ({
-      id: term.term_id,
-      text: term.term_text.substring(0, 50) + '...'
-    }))
-  });
-
   const renderTerm = (term: FrontendAnalysisTerm, index: number) => {
-    console.log('ContractTermsList: Rendering term', { termId: term.term_id, index });
-    console.log('ContractTermsList: renderTerm called', {
-      termId: term.term_id,
-      index,
-      termText: term.term_text.substring(0, 50)
-    });
-
     let isEffectivelyCompliant = term.is_valid_sharia;
     if (term.expert_override_is_valid_sharia !== null && term.expert_override_is_valid_sharia !== undefined) {
       isEffectivelyCompliant = term.expert_override_is_valid_sharia;
@@ -645,7 +593,7 @@ const ContractTermsList: React.FC = () => {
         </Modal>
       )}
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <View style={styles.content}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>{t('contract.terms')}</Text>
@@ -682,90 +630,96 @@ const ContractTermsList: React.FC = () => {
         </View>
 
         {/* Terms List */}
-        {Array.isArray(analysisTerms) && filteredTerms.length > 0 ? (
-          <View style={styles.termsList}>
-            {filteredTerms.map((term, index) => renderTerm(term, index))}
-          </View>
-        ) : (
-          <View style={styles.emptyContainer}>
-            <Text style={[styles.emptyText, { color: isDark ? '#9ca3af' : '#6b7280' }]}>
-              {t('term.noTermsForFilter')}
-            </Text>
-          </View>
-        )}
+        <ScrollView 
+          style={styles.scrollView} 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {Array.isArray(analysisTerms) && filteredTerms.length > 0 ? (
+            <View style={styles.termsList}>
+              {filteredTerms.map((term, index) => renderTerm(term, index))}
+            </View>
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Text style={[styles.emptyText, { color: isDark ? '#9ca3af' : '#6b7280' }]}>
+                {t('term.noTermsForFilter')}
+              </Text>
+            </View>
+          )}
 
-        {/* Contract Generation Section */}
-        {Array.isArray(analysisTerms) && analysisTerms.length > 0 && (
-          <View style={styles.generationSection}>
-            <Text style={styles.generationTitle}>{t('contract.reviewContract')}</Text>
-            <Text style={styles.generationSubtitle}>{t('contract.generateInfo')}</Text>
-            
-            <View style={styles.generationButtons}>
-              <TouchableOpacity
-                style={[styles.generateButton, styles.generateModifiedButton]}
-                onPress={handleGenerateContract}
-                disabled={isGeneratingContract || isGeneratingMarkedContract || isFetchingSession || isAnalyzingContract}
-              >
-                {isGeneratingContract ? (
-                  <ActivityIndicator size="small" color="#ffffff" />
-                ) : (
-                  <FileCheck2 size={16} color="#ffffff" />
-                )}
-                <Text style={styles.generateButtonText}>
-                  {isGeneratingContract ? t('processing') : t('contract.generateButton')}
-                </Text>
-              </TouchableOpacity>
-
-              {sessionDetails?.modified_contract_info?.docx_cloudinary_info?.url && !isGeneratingContract && (
+          {/* Contract Generation Section */}
+          {Array.isArray(analysisTerms) && analysisTerms.length > 0 && (
+            <View style={styles.generationSection}>
+              <Text style={styles.generationTitle}>{t('contract.reviewContract')}</Text>
+              <Text style={styles.generationSubtitle}>{t('contract.generateInfo')}</Text>
+              
+              <View style={styles.generationButtons}>
                 <TouchableOpacity
-                  style={styles.previewButton}
-                  onPress={() => openPreviewModalWithType('modified')}
+                  style={[styles.generateButton, styles.generateModifiedButton]}
+                  onPress={handleGenerateContract}
+                  disabled={isGeneratingContract || isGeneratingMarkedContract || isFetchingSession || isAnalyzingContract}
                 >
-                  <Eye size={16} color={isDark ? '#10b981' : '#059669'} />
-                  <Text style={styles.previewButtonText}>{t('contract.preview.modifiedTitle')}</Text>
+                  {isGeneratingContract ? (
+                    <ActivityIndicator size="small" color="#ffffff" />
+                  ) : (
+                    <FileCheck2 size={16} color="#ffffff" />
+                  )}
+                  <Text style={styles.generateButtonText}>
+                    {isGeneratingContract ? t('processing') : t('contract.generateButton')}
+                  </Text>
                 </TouchableOpacity>
-              )}
 
-              <TouchableOpacity
-                style={[styles.generateButton, styles.generateMarkedButton]}
-                onPress={handleGenerateMarkedContract}
-                disabled={isGeneratingContract || isGeneratingMarkedContract || isFetchingSession || isAnalyzingContract}
-              >
-                {isGeneratingMarkedContract ? (
-                  <ActivityIndicator size="small" color="#ffffff" />
-                ) : (
-                  <FileSearch size={16} color="#ffffff" />
+                {sessionDetails?.modified_contract_info?.docx_cloudinary_info?.url && !isGeneratingContract && (
+                  <TouchableOpacity
+                    style={styles.previewButton}
+                    onPress={() => openPreviewModalWithType('modified')}
+                  >
+                    <Eye size={16} color={isDark ? '#10b981' : '#059669'} />
+                    <Text style={styles.previewButtonText}>{t('contract.preview.modifiedTitle')}</Text>
+                  </TouchableOpacity>
                 )}
-                <Text style={styles.generateButtonText}>
-                  {isGeneratingMarkedContract ? t('processing') : t('contract.generateMarkedButton')}
-                </Text>
-              </TouchableOpacity>
 
-              {sessionDetails?.marked_contract_info?.docx_cloudinary_info?.url && !isGeneratingMarkedContract && (
                 <TouchableOpacity
-                  style={styles.previewButton}
-                  onPress={() => openPreviewModalWithType('marked')}
+                  style={[styles.generateButton, styles.generateMarkedButton]}
+                  onPress={handleGenerateMarkedContract}
+                  disabled={isGeneratingContract || isGeneratingMarkedContract || isFetchingSession || isAnalyzingContract}
                 >
-                  <Eye size={16} color="#3b82f6" />
-                  <Text style={styles.previewButtonText}>{t('contract.preview.markedTitle')}</Text>
+                  {isGeneratingMarkedContract ? (
+                    <ActivityIndicator size="small" color="#ffffff" />
+                  ) : (
+                    <FileSearch size={16} color="#ffffff" />
+                  )}
+                  <Text style={styles.generateButtonText}>
+                    {isGeneratingMarkedContract ? t('processing') : t('contract.generateMarkedButton')}
+                  </Text>
+                </TouchableOpacity>
+
+                {sessionDetails?.marked_contract_info?.docx_cloudinary_info?.url && !isGeneratingMarkedContract && (
+                  <TouchableOpacity
+                    style={styles.previewButton}
+                    onPress={() => openPreviewModalWithType('marked')}
+                  >
+                    <Eye size={16} color="#3b82f6" />
+                    <Text style={styles.previewButtonText}>{t('contract.preview.markedTitle')}</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {sessionId && (
+                <TouchableOpacity
+                  style={styles.newAnalysisButton}
+                  onPress={handleStartNewAnalysis}
+                >
+                  <RefreshCw size={16} color="#ef4444" />
+                  <Text style={styles.newAnalysisButtonText}>
+                    {t('upload.newAnalysis') || "Start New Analysis"}
+                  </Text>
                 </TouchableOpacity>
               )}
             </View>
-
-            {sessionId && (
-              <TouchableOpacity
-                style={styles.newAnalysisButton}
-                onPress={handleStartNewAnalysis}
-              >
-                <RefreshCw size={16} color="#ef4444" />
-                <Text style={styles.newAnalysisButtonText}>
-                  {t('upload.newAnalysis') || "Start New Analysis"}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        )}
-      </ScrollView>
+          )}
+        </ScrollView>
+      </View>
 
       {/* General Question Modal */}
       <Modal
@@ -861,6 +815,9 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
     flex: 1,
     backgroundColor: isDark ? '#111827' : '#ffffff',
   },
+  content: {
+    flex: 1,
+  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -919,6 +876,9 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  scrollContent: {
+    paddingBottom: 20,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -934,6 +894,7 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 40,
+    minHeight: 200,
   },
   emptyText: {
     marginTop: 16,
@@ -946,6 +907,9 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     paddingBottom: 8,
+    backgroundColor: isDark ? '#111827' : '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: isDark ? '#374151' : '#e5e7eb',
   },
   title: {
     fontSize: 24,
@@ -1008,6 +972,7 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    marginBottom: 8,
   },
   termHeader: {
     flexDirection: isRTL ? 'row-reverse' : 'row',
@@ -1299,7 +1264,7 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
     borderTopColor: isDark ? '#374151' : '#e5e7eb',
     padding: 16,
     margin: 16,
-    marginBottom: 32,
+    marginBottom: 0,
     gap: 16,
   },
   generationTitle: {
