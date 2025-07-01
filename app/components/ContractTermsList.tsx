@@ -583,19 +583,12 @@ const ContractTermsList: React.FC = () => {
     );
   }
 
-  // Only show empty state if we truly have no terms after loading is complete
-  if (sessionId && !isFetchingSession && !isAnalyzingContract && (!analysisTerms || analysisTerms.length === 0)) {
-    console.log('ContractTermsList: No analysis terms available', { 
-      analysisTerms: analysisTerms ? 'not array or empty' : 'null/undefined', 
-      sessionId,
-      sessionDetails: sessionDetails ? 'exists' : 'missing'
-    });
+  if (sessionId && Array.isArray(analysisTerms) && analysisTerms.length === 0 && !isAnalyzingContract && !isFetchingSession) {
+    console.log('ContractTermsList: No analysis terms available');
     return (
       <View style={styles.emptyContainer}>
         <FileText size={48} color={isDark ? '#6b7280' : '#9ca3af'} />
-        <Text style={styles.emptyText}>
-          {!analysisTerms || analysisTerms.length === 0 ? t('term.noTermsExtracted') : t('term.noTermsForFilter')}
-        </Text>
+        <Text style={styles.emptyText}>{t('term.noTermsExtracted')}</Text>
         <Button 
           variant="outline" 
           style={{ marginTop: 16 }}
@@ -607,6 +600,16 @@ const ContractTermsList: React.FC = () => {
           <RefreshCw size={16} color={isDark ? '#10b981' : '#059669'} />
           <Text style={styles.buttonText}>{t('refresh')}</Text>
         </Button>
+      </View>
+    );
+  }
+
+  if (!Array.isArray(analysisTerms) && !isAnalyzingContract && !isFetchingSession && sessionId) {
+    console.error("ContractTermsList: analysisTerms is not an array and not loading.", analysisTerms);
+    return (
+      <View style={styles.emptyContainer}>
+        <FileText size={48} color={isDark ? '#6b7280' : '#9ca3af'} />
+        <Text style={styles.emptyText}>{t('term.noResults')}</Text>
       </View>
     );
   }
@@ -968,37 +971,21 @@ const ContractTermsList: React.FC = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {(() => {
-          console.log('ContractTermsList: Render decision', {
-            filteredTermsLength: filteredTerms?.length,
-            analysisTermsLength: analysisTerms?.length,
-            activeFilter,
-            sessionId
-          });
-          
-          if (Array.isArray(filteredTerms) && filteredTerms.length > 0) {
-            console.log('ContractTermsList: Rendering filtered terms', filteredTerms.length);
-            return filteredTerms.map((term, index) => renderTerm(term, index));
-          } else if (Array.isArray(analysisTerms) && analysisTerms.length > 0) {
-            console.log('ContractTermsList: Showing filter empty state');
-            return (
-              <View style={styles.emptyContainer}>
-                <FileText size={48} color={isDark ? '#6b7280' : '#9ca3af'} />
-                <Text style={styles.emptyText}>{t('term.noTermsForFilter')}</Text>
-                <Button 
-                  variant="outline" 
-                  style={{ marginTop: 16 }}
-                  onPress={() => setActiveFilter('all')}
-                >
-                  <Text style={styles.buttonText}>{t('filter.showAll') || 'Show All Terms'}</Text>
-                </Button>
-              </View>
-            );
-          } else {
-            console.log('ContractTermsList: No terms to show');
-            return null;
-          }
-        })()}
+        {filteredTerms && filteredTerms.length > 0 ? (
+          filteredTerms.map((term, index) => renderTerm(term, index))
+        ) : analysisTerms && analysisTerms.length > 0 ? (
+          <View style={styles.emptyContainer}>
+            <FileText size={48} color={isDark ? '#6b7280' : '#9ca3af'} />
+            <Text style={styles.emptyText}>{t('term.noTermsForFilter')}</Text>
+            <Button 
+              variant="outline" 
+              style={{ marginTop: 16 }}
+              onPress={() => setActiveFilter('all')}
+            >
+              <Text style={styles.buttonText}>{t('filter.showAll') || 'Show All Terms'}</Text>
+            </Button>
+          </View>
+        ) : null}
       </ScrollView>
 
       {Array.isArray(analysisTerms) && analysisTerms.length > 0 && (
