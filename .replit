@@ -22,3 +22,12 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run start"
+
+[[workflows.workflow]]
+name = "Start Application"
+author = 44477510
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run start"
