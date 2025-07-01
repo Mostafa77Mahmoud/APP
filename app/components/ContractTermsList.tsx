@@ -506,7 +506,8 @@ const ContractTermsList: React.FC = () => {
     console.log('ContractTermsList: Filtering terms', { 
       analysisTerms: analysisTerms ? analysisTerms.length : 'null/undefined',
       activeFilter,
-      sessionId 
+      sessionId,
+      hasTerms: analysisTerms && Array.isArray(analysisTerms) && analysisTerms.length > 0
     });
     
     if (!analysisTerms || !Array.isArray(analysisTerms)) {
@@ -514,9 +515,24 @@ const ContractTermsList: React.FC = () => {
       return [];
     }
     
+    console.log('ContractTermsList: Sample term data', { 
+      firstTerm: analysisTerms[0],
+      termCount: analysisTerms.length 
+    });
+    
     const filtered = analysisTerms.filter(term => {
       if (activeFilter === 'all') return true;
       const isEffectivelyCompliant = term.expert_override_is_valid_sharia ?? (term.isUserConfirmed ? (term.isReviewedSuggestionValid ?? true) : term.is_valid_sharia) ?? false;
+      
+      console.log('ContractTermsList: Term compliance check', {
+        termId: term.term_id,
+        isEffectivelyCompliant,
+        expert_override: term.expert_override_is_valid_sharia,
+        is_valid_sharia: term.is_valid_sharia,
+        isUserConfirmed: term.isUserConfirmed,
+        activeFilter
+      });
+      
       if (activeFilter === 'compliant') return isEffectivelyCompliant;
       if (activeFilter === 'non-compliant') return !isEffectivelyCompliant;
       return true;
@@ -525,7 +541,8 @@ const ContractTermsList: React.FC = () => {
     console.log('ContractTermsList: Filtered terms result', { 
       totalTerms: analysisTerms.length,
       filteredCount: filtered.length,
-      activeFilter 
+      activeFilter,
+      filteredTerms: filtered.map(t => ({ id: t.term_id, text: t.term_text.substring(0, 50) + '...' }))
     });
     
     return filtered;
@@ -951,14 +968,37 @@ const ContractTermsList: React.FC = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {Array.isArray(filteredTerms) && filteredTerms.length > 0 ? (
-          filteredTerms.map((term, index) => renderTerm(term, index))
-        ) : Array.isArray(analysisTerms) && analysisTerms.length > 0 ? (
-          <View style={styles.emptyContainer}>
-            <FileText size={48} color={isDark ? '#6b7280' : '#9ca3af'} />
-            <Text style={styles.emptyText}>{t('term.noTermsForFilter')}</Text>
-          </View>
-        ) : null}
+        {(() => {
+          console.log('ContractTermsList: Render decision', {
+            filteredTermsLength: filteredTerms?.length,
+            analysisTermsLength: analysisTerms?.length,
+            activeFilter,
+            sessionId
+          });
+          
+          if (Array.isArray(filteredTerms) && filteredTerms.length > 0) {
+            console.log('ContractTermsList: Rendering filtered terms', filteredTerms.length);
+            return filteredTerms.map((term, index) => renderTerm(term, index));
+          } else if (Array.isArray(analysisTerms) && analysisTerms.length > 0) {
+            console.log('ContractTermsList: Showing filter empty state');
+            return (
+              <View style={styles.emptyContainer}>
+                <FileText size={48} color={isDark ? '#6b7280' : '#9ca3af'} />
+                <Text style={styles.emptyText}>{t('term.noTermsForFilter')}</Text>
+                <Button 
+                  variant="outline" 
+                  style={{ marginTop: 16 }}
+                  onPress={() => setActiveFilter('all')}
+                >
+                  <Text style={styles.buttonText}>{t('filter.showAll') || 'Show All Terms'}</Text>
+                </Button>
+              </View>
+            );
+          } else {
+            console.log('ContractTermsList: No terms to show');
+            return null;
+          }
+        })()}
       </ScrollView>
 
       {Array.isArray(analysisTerms) && analysisTerms.length > 0 && (

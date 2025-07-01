@@ -279,11 +279,18 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   const loadSessionData = useCallback(async (sid: string) => {
     setIsFetchingSession(true);
     setError(null);
+    console.log('SessionContext: Loading session data for', sid);
     try {
       const [sessionData, termsData] = await Promise.all([
         api.getSessionDetails(sid), 
         api.getSessionTerms(sid)
       ]);
+
+      console.log('SessionContext: Received data', {
+        sessionId: sessionData.session_id,
+        termsCount: termsData?.length,
+        sampleTerm: termsData?.[0]
+      });
 
       // Enrich terms with interaction data
       const enrichedTerms = termsData.map(term => ({
@@ -294,6 +301,12 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0]?.timestamp,
       }));
 
+      console.log('SessionContext: Setting enriched terms', {
+        originalCount: termsData?.length,
+        enrichedCount: enrichedTerms?.length,
+        enrichedSample: enrichedTerms?.[0]
+      });
+
       setSessionId(sessionData.session_id);
       setSessionDetails({
         ...sessionData,
@@ -303,6 +316,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
       setAnalysisTerms(enrichedTerms);
       await saveSessionLocally(sessionData);
     } catch (err: any) {
+      console.error('SessionContext: Error loading session', err);
       setError(err.message || "Failed to load session.");
       Alert.alert("Session Load Error", err.message || "Failed to load session.");
       clearSession();

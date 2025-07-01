@@ -83,8 +83,9 @@
   },
   "filter": {
     "all": "جميع البنود",
-    "compliant": "متوافق",
-    "non-compliant": "غير متوافق"
+    "compliant": "متوافق", 
+    "non-compliant": "غير متوافق",
+    "showAll": "إظهار جميع البنود"
   },
   "button": {
     "confirm": "تأكيد التغييرات",

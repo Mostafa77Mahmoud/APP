@@ -82,9 +82,10 @@
     "stage4": "Finalizing Document"
   },
   "filter": {
-    "all": "All Terms",
+    "all": "All Terms", 
     "compliant": "Compliant",
-    "non-compliant": "Non-Compliant"
+    "non-compliant": "Non-Compliant",
+    "showAll": "Show All Terms"
   },
   "button": {
     "confirm": "Confirm Changes",
