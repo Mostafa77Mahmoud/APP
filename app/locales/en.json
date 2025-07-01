@@ -63,19 +63,20 @@
     "startFirst": "Start your first analysis to see it here"
   },
   "upload": {
-    "title": "Upload Contract",
-    "description": "Select a contract document to analyze for Sharia compliance",
-    "dragDrop": "Click to select a document",
-    "formats": "Supports PDF, DOCX, and TXT files",
+    "title": "Upload Document",
+    "description": "Select a contract document to analyze",
+    "dragDrop": "Click to select document",
+    "formats": "PDF, DOCX, TXT files supported",
     "uploading": "Uploading...",
-    "analyzing": "Analyzing Document...",
-    "analyzingDesc": "Please wait while we process your contract",
-    "fileSelected": "File ready for analysis",
-    "analyze": "Analyze Contract",
-    "complete": "Upload Complete!",
+    "analyzing": "Analyzing Contract",
+    "analyzingDesc": "Our AI is reviewing your contract for Sharia compliance",
+    "complete": "Analysis Complete",
     "redirecting": "Redirecting to results...",
-    "error": "Upload Error",
-    "unknownSize": "Size unknown"
+    "fileSelected": "File ready for analysis",
+    "startingAnalysis": "Starting analysis...",
+    "unknownSize": "Unknown size",
+    "analyze": "Analyze Contract",
+    "error": "Upload failed"
   },
   "analyze": {
     "step": {

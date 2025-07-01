@@ -63,19 +63,20 @@
     "startFirst": "ابدأ تحليلك الأول لرؤيته هنا"
   },
   "upload": {
-    "title": "رفع العقد",
-    "description": "اختر مستند عقد لتحليل مطابقته للشريعة الإسلامية",
-    "dragDrop": "انقر لاختيار مستند",
-    "formats": "يدعم ملفات PDF و DOCX و TXT",
+    "title": "رفع الوثيقة",
+    "description": "اختر وثيقة عقد للتحليل",
+    "dragDrop": "انقر لاختيار الوثيقة",
+    "formats": "ملفات PDF، DOCX، TXT مدعومة",
     "uploading": "جاري الرفع...",
-    "analyzing": "جاري تحليل الوثيقة...",
-    "analyzingDesc": "يرجى الانتظار بينما نعالج عقدك",
+    "analyzing": "تحليل العقد",
+    "analyzingDesc": "الذكاء الاصطناعي يراجع عقدك للتوافق مع الشريعة",
+    "complete": "اكتمل التحليل",
+    "redirecting": "إعادة التوجيه إلى النتائج...",
     "fileSelected": "الملف جاهز للتحليل",
+    "startingAnalysis": "بدء التحليل...",
+    "unknownSize": "حجم غير معروف",
     "analyze": "تحليل العقد",
-    "complete": "اكتمل الرفع!",
-    "redirecting": "جاري التوجه للنتائج...",
-    "error": "خطأ في الرفع",
-    "unknownSize": "الحجم غير معروف"
+    "error": "فشل في الرفع"
   },
   "analyze": {
     "step": {

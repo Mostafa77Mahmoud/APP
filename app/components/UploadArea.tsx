@@ -96,7 +96,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
     }
   }, [uploadComplete]);
 
-  const processFile = useCallback((file: any) => {
+  const processFile = useCallback(async (file: any) => {
     if (file) {
       const allowedMimeTypes = [
         "application/pdf", 
@@ -128,6 +128,11 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
       clearSession(); 
       setSelectedFile(file);
       setUploadComplete(false);
+      
+      // Auto-analyze the file
+      setTimeout(() => {
+        handleAnalyze(file);
+      }, 500);
     }
   }, [clearSession, t]);
 
@@ -152,22 +157,23 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
     }
   }, [processFile, isUploading, isAnalyzingContract, t]);
 
-  const handleAnalyze = async () => {
-    if (!selectedFile) return;
+  const handleAnalyze = async (file?: any) => {
+    const fileToAnalyze = file || selectedFile;
+    if (!fileToAnalyze) return;
 
     try {
-      const newSessionId = await uploadAndAnalyzeContract(selectedFile);
+      const newSessionId = await uploadAndAnalyzeContract(fileToAnalyze);
       if (newSessionId) {
         setUploadComplete(true);
         
         // Add to contract history
         addContract({
           id: newSessionId,
-          name: selectedFile.name,
+          name: fileToAnalyze.name,
           analysisDate: new Date().toISOString(),
           complianceScore: 0,
           sessionId: newSessionId,
-          fileSize: selectedFile.size ? `${(selectedFile.size / 1024).toFixed(1)} KB` : 'Unknown',
+          fileSize: fileToAnalyze.size ? `${(fileToAnalyze.size / 1024).toFixed(1)} KB` : 'Unknown',
         });
 
         setTimeout(() => {
@@ -272,7 +278,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
                 <Text style={styles.fileSize}>
                   {selectedFile.size ? `${(selectedFile.size / 1024).toFixed(1)} KB` : t('upload.unknownSize')}
                 </Text>
-                <Text style={styles.statusSubText}>{t('upload.fileSelected')}</Text>
+                <Text style={styles.statusSubText}>{t('upload.startingAnalysis')}</Text>
               </View>
             ) : hasError ? (
               <View style={styles.statusContainer}>
@@ -293,20 +299,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
           </TouchableOpacity>
         </CardContent>
 
-        {selectedFile && !sessionId && !isProcessing && !hasError && (
-          <View style={styles.cardFooter}>
-            <TouchableOpacity 
-              style={styles.analyzeButton} 
-              onPress={handleAnalyze}
-              activeOpacity={0.8}
-            >
-              <View style={[styles.buttonContent, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-                <ChevronRight size={20} color="#fff" />
-                <Text style={styles.analyzeButtonText}>{t('upload.analyze')}</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        )}
+        
       </Card>
     </Animated.View>
   );

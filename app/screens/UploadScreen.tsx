@@ -6,7 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSession } from '../contexts/SessionContext';
 import UploadArea from '../components/UploadArea';
-import AnalyzingAnimation from '../components/AnalyzingAnimation'; // Import the animation
+import AnalyzingAnimation from '../components/AnalyzingAnimation';
 import { ArrowLeft, ArrowRight } from 'lucide-react-native';
 
 interface UploadScreenProps {
@@ -34,10 +34,13 @@ const UploadScreen: React.FC<UploadScreenProps> = ({ onAnalysisComplete, onBack 
         <UploadArea onAnalysisComplete={onAnalysisComplete} />
       </ScrollView>
 
-      {/* --- MODIFICATION START --- */}
-      {/* Show the AnalyzingAnimation as a full-screen overlay */}
-      {isAnalyzingContract && <AnalyzingAnimation isAnalyzing={isAnalyzingContract} />}
-      {/* --- MODIFICATION END --- */}
+      {/* Show the AnalyzingAnimation as a full-screen overlay during analysis */}
+      <AnalyzingAnimation 
+        isVisible={isAnalyzingContract} 
+        stage={1}
+        progress={0}
+        currentStage="Analyzing your contract..."
+      />
 
     </SafeAreaView>
   );
