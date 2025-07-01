@@ -1,4 +1,3 @@
-javascript
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Alert, Modal, Animated, Dimensions } from 'react-native';
 import { useLanguage } from '../contexts/LanguageContext';
