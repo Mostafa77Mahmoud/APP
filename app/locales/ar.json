@@ -182,6 +182,7 @@
     "generationFailed": "فشل في إنشاء العقد",
     "interactionFailed": "فشل في معالجة الطلب"
   },
+  "processing": "جاري المعالجة...",
   "loading": "جاري التحميل...",
-  "processing": "جاري المعالجة..."
+  "refresh": "تحديث"
 }

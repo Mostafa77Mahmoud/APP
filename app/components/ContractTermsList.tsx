@@ -391,17 +391,43 @@ const ContractTermsList: React.FC = () => {
   }, [expertFeedbackTermId, sessionId, currentExpertFeedback, t, updateTermLocally, submitExpertFeedback]);
 
   const filteredTerms = useMemo(() => {
-    if (!analysisTerms || !Array.isArray(analysisTerms)) return [];
-    return analysisTerms.filter(term => {
+    console.log('ContractTermsList: Filtering terms', { 
+      analysisTerms: analysisTerms ? analysisTerms.length : 'null/undefined',
+      activeFilter,
+      sessionId 
+    });
+    
+    if (!analysisTerms || !Array.isArray(analysisTerms)) {
+      console.log('ContractTermsList: No valid analysis terms', { analysisTerms, sessionId });
+      return [];
+    }
+    
+    const filtered = analysisTerms.filter(term => {
       if (activeFilter === 'all') return true;
       const isEffectivelyCompliant = term.expert_override_is_valid_sharia ?? (term.isUserConfirmed ? (term.isReviewedSuggestionValid ?? true) : term.is_valid_sharia) ?? false;
       if (activeFilter === 'compliant') return isEffectivelyCompliant;
       if (activeFilter === 'non-compliant') return !isEffectivelyCompliant;
       return true;
     });
-  }, [analysisTerms, activeFilter]);
+    
+    console.log('ContractTermsList: Filtered terms result', { 
+      totalTerms: analysisTerms.length,
+      filteredCount: filtered.length,
+      activeFilter 
+    });
+    
+    return filtered;
+  }, [analysisTerms, activeFilter, sessionId]);
+
+  console.log('ContractTermsList: Component render', { 
+    sessionId,
+    isFetchingSession,
+    analysisTerms: analysisTerms ? `${analysisTerms.length} terms` : 'null/undefined',
+    sessionDetails: sessionDetails ? 'has session details' : 'no session details'
+  });
 
   if (isFetchingSession && !analysisTerms) {
+    console.log('ContractTermsList: Showing loading state');
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={isDark ? '#10b981' : '#059669'} />
@@ -411,7 +437,11 @@ const ContractTermsList: React.FC = () => {
   }
 
   if (!analysisTerms || !Array.isArray(analysisTerms) || analysisTerms.length === 0) {
-    console.log('ContractTermsList: No analysis terms available', { analysisTerms, sessionId });
+    console.log('ContractTermsList: No analysis terms available', { 
+      analysisTerms: analysisTerms ? 'not array or empty' : 'null/undefined', 
+      sessionId,
+      sessionDetails: sessionDetails ? 'exists' : 'missing'
+    });
     return (
       <View style={styles.emptyContainer}>
         <FileText size={48} color={isDark ? '#6b7280' : '#9ca3af'} />
@@ -425,7 +455,8 @@ const ContractTermsList: React.FC = () => {
   console.log('ContractTermsList: Rendering terms', { 
     analysisTermsCount: analysisTerms?.length, 
     filteredTermsCount: filteredTerms?.length,
-    activeFilter 
+    activeFilter,
+    sessionId
   });
 
   const renderTerm = (term: FrontendAnalysisTerm, index: number) => {
@@ -755,6 +786,20 @@ const ContractTermsList: React.FC = () => {
             <Text style={styles.emptyText}>
               {!analysisTerms || analysisTerms.length === 0 ? t('term.noTermsExtracted') : t('term.noTermsForFilter')}
             </Text>
+            {sessionId && (!analysisTerms || analysisTerms.length === 0) && (
+              <Button 
+                variant="outline" 
+                style={{ marginTop: 16 }}
+                onPress={() => {
+                  console.log('ContractTermsList: Refreshing session data');
+                  // This will trigger a re-fetch of session data
+                  clearSession();
+                }}
+              >
+                <RefreshCw size={16} color={isDark ? '#10b981' : '#059669'} />
+                <Text style={styles.buttonText}>{t('refresh')}</Text>
+              </Button>
+            )}
           </View>
         )}
       </ScrollView>

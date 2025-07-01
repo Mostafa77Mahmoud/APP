@@ -182,6 +182,7 @@
     "generationFailed": "Failed to generate contract",
     "interactionFailed": "Failed to process request"
   },
+  "processing": "Processing...",
   "loading": "Loading...",
-  "processing": "Processing..."
+  "refresh": "Refresh"
 }
