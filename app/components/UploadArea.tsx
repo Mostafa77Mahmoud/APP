@@ -6,9 +6,9 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useSession } from '../contexts/SessionContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useContract } from '../contexts/ContractContext';
-import { Upload, FileText, ChevronRight, Loader, CheckCircle, AlertCircle, FileCheck, X } from 'lucide-react-native';
+import { Upload, FileText, ChevronRight, Loader, CheckCircle, AlertCircle, FileCheck, X, Play, Sparkles } from 'lucide-react-native';
 import { Card, CardContent, CardHeader } from './ui/card';
-import { Progress } from './ui/progress';
+import { Button } from './ui/button';
 
 interface UploadAreaProps {
   onAnalysisComplete: (sessionId: string) => void;
@@ -33,7 +33,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
   
   const [selectedFile, setSelectedFile] = useState<any>(null);
   const [dragActive, setDragActive] = useState(false);
-  const [uploadComplete, setUploadComplete] = useState(false);
+  const [isReadyToAnalyze, setIsReadyToAnalyze] = useState(false);
 
   // Animations
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -41,6 +41,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
   const progressAnim = useRef(new Animated.Value(0)).current;
   const bounceAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
 
   const isDark = theme === 'dark';
   const styles = getStyles(isDark, isRTL);
@@ -78,23 +79,16 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
   }, [uploadProgress]);
 
   useEffect(() => {
-    if (uploadComplete) {
-      // Success animation
-      Animated.sequence([
-        Animated.timing(bounceAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.spring(bounceAnim, {
-          toValue: 0,
-          tension: 100,
-          friction: 8,
-          useNativeDriver: true,
-        }),
-      ]).start();
+    if (selectedFile && !isUploading && !isAnalyzingContract) {
+      setIsReadyToAnalyze(true);
+      // Slide in animation for analyze button
+      Animated.timing(slideAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
     }
-  }, [uploadComplete]);
+  }, [selectedFile, isUploading, isAnalyzingContract]);
 
   const processFile = useCallback(async (file: any) => {
     if (file) {
@@ -127,12 +121,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
 
       clearSession(); 
       setSelectedFile(file);
-      setUploadComplete(false);
-      
-      // Auto-analyze the file
-      setTimeout(() => {
-        handleAnalyze(file);
-      }, 500);
+      setIsReadyToAnalyze(false);
     }
   }, [clearSession, t]);
 
@@ -157,28 +146,26 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
     }
   }, [processFile, isUploading, isAnalyzingContract, t]);
 
-  const handleAnalyze = async (file?: any) => {
-    const fileToAnalyze = file || selectedFile;
-    if (!fileToAnalyze) return;
+  const handleAnalyze = async () => {
+    if (!selectedFile) return;
 
     try {
-      const newSessionId = await uploadAndAnalyzeContract(fileToAnalyze);
+      const newSessionId = await uploadAndAnalyzeContract(selectedFile);
       if (newSessionId) {
-        setUploadComplete(true);
-        
         // Add to contract history
         addContract({
           id: newSessionId,
-          name: fileToAnalyze.name,
+          name: selectedFile.name,
           analysisDate: new Date().toISOString(),
           complianceScore: 0,
           sessionId: newSessionId,
-          fileSize: fileToAnalyze.size ? `${(fileToAnalyze.size / 1024).toFixed(1)} KB` : 'Unknown',
+          fileSize: selectedFile.size ? `${(selectedFile.size / 1024).toFixed(1)} KB` : 'Unknown',
         });
 
+        // Call the completion callback after analysis
         setTimeout(() => {
           onAnalysisComplete(newSessionId);
-        }, 1500);
+        }, 1000);
       }
     } catch (error) {
       console.error('Analysis failed:', error);
@@ -187,8 +174,13 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
 
   const clearSelectedFile = () => {
     setSelectedFile(null);
-    setUploadComplete(false);
+    setIsReadyToAnalyze(false);
     clearSession();
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
   };
 
   const isProcessing = isUploading || isAnalyzingContract;
@@ -244,25 +236,6 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
                   <Text style={styles.progressText}>{Math.round(uploadProgress)}%</Text>
                 </View>
               </Animated.View>
-            ) : isAnalyzingContract ? (
-              <Animated.View style={[styles.statusContainer, { transform: [{ scale: pulseAnim }] }]}>
-                <Loader size={48} color="#8b5cf6" />
-                <Text style={styles.statusText}>{t('upload.analyzing')}</Text>
-                <Text style={styles.statusSubText}>{t('upload.analyzingDesc')}</Text>
-              </Animated.View>
-            ) : uploadComplete ? (
-              <Animated.View style={[
-                styles.statusContainer,
-                { transform: [{ scale: bounceAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [1, 1.1],
-                  extrapolate: 'clamp',
-                }) }] }
-              ]}>
-                <CheckCircle size={48} color="#10b981" />
-                <Text style={[styles.statusText, { color: '#10b981' }]}>{t('upload.complete')}</Text>
-                <Text style={styles.statusSubText}>{t('upload.redirecting')}</Text>
-              </Animated.View>
             ) : selectedFile ? (
               <View style={styles.statusContainer}>
                 <View style={styles.filePreview}>
@@ -278,7 +251,13 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
                 <Text style={styles.fileSize}>
                   {selectedFile.size ? `${(selectedFile.size / 1024).toFixed(1)} KB` : t('upload.unknownSize')}
                 </Text>
-                <Text style={styles.statusSubText}>{t('upload.startingAnalysis')}</Text>
+                <View style={styles.fileTypeContainer}>
+                  <Text style={styles.fileType}>
+                    {selectedFile.mimeType === 'application/pdf' ? 'PDF' :
+                     selectedFile.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' : 'TXT'}
+                  </Text>
+                </View>
+                <Text style={styles.statusSubText}>{t('upload.readyToAnalyze')}</Text>
               </View>
             ) : hasError ? (
               <View style={styles.statusContainer}>
@@ -297,9 +276,35 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
               </View>
             )}
           </TouchableOpacity>
-        </CardContent>
 
-        
+          {/* Analyze Button */}
+          {selectedFile && !isProcessing && (
+            <Animated.View 
+              style={[
+                styles.analyzeButtonContainer,
+                {
+                  opacity: slideAnim,
+                  transform: [{
+                    translateY: slideAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [20, 0],
+                    })
+                  }]
+                }
+              ]}
+            >
+              <Button 
+                onPress={handleAnalyze}
+                style={styles.analyzeButton}
+                disabled={isProcessing}
+              >
+                <Play size={20} color="#fff" />
+                <Text style={styles.analyzeButtonText}>{t('upload.analyzeContract')}</Text>
+                <Sparkles size={16} color="#fff" />
+              </Button>
+            </Animated.View>
+          )}
+        </CardContent>
       </Card>
     </Animated.View>
   );
@@ -337,11 +342,6 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
   },
   cardContent: { 
     padding: 20 
-  },
-  cardFooter: { 
-    padding: 20, 
-    borderTopWidth: 1, 
-    borderTopColor: isDark ? '#374151' : '#e5e7eb' 
   },
   dropzone: { 
     borderWidth: 2, 
@@ -406,6 +406,18 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
     borderWidth: 2,
     borderColor: '#ffffff',
   },
+  fileTypeContainer: {
+    backgroundColor: isDark ? '#10b981' : '#059669',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginTop: 8,
+  },
+  fileType: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
   statusSubText: { 
     fontSize: 14, 
     color: isDark ? '#9ca3af' : '#6b7280',
@@ -456,22 +468,25 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
     fontWeight: '600',
     color: '#3b82f6',
   },
+  analyzeButtonContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
   analyzeButton: { 
     backgroundColor: '#10b981',
     borderRadius: 12, 
-    alignItems: 'center', 
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    gap: 8,
     shadowColor: '#10b981',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
-  },
-  buttonContent: {
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    minWidth: screenWidth * 0.7,
   },
   analyzeButtonText: { 
     color: '#fff', 

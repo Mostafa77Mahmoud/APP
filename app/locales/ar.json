@@ -1,446 +1,187 @@
 {
-  "app": {
-    "title": "شرعي",
-    "subtitle": "تحليل العقود المتوافقة مع الشريعة بالذكاء الاصطناعي",
-    "logout": "تسجيل الخروج"
-  },
-  "onboarding": {
-    "skip": "تخط",
-    "next": "التالي",
-    "previous": "السابق",
-    "done": "تم",
-    "step1": {
-      "title": "رفع العقود",
-      "desc": "قم برفع مستنداتك القانونية باللغة العربية أو الإنجليزية لتحليلها بواسطة الذكاء الاصطناعي.",
-      "feature1": "دعم ملفات PDF و DOCX و TXT",
-      "feature2": "تقنية استخراج نص متقدمة",
-      "feature3": "معالجة العقود متعددة اللغات"
-    },
-    "step2": {
-      "title": "تحليل فوري",
-      "desc": "يقوم الذكاء الاصطناعي المتقدم لدينا بتحليل كل بند للتأكد من توافقه مع الشريعة بدقة الخبراء.",
-      "feature1": "فحص الامتثال في الوقت الفعلي",
-      "feature2": "تحليل القانون الإسلامي على مستوى الخبراء",
-      "feature3": "تقييم مفصل لكل بند على حدة"
-    },
-    "step3": {
-      "title": "احصل على النتائج والاقتراحات",
-      "desc": "احصل على تقارير امتثال مفصلة مع اقتراحات للتحسينات.",
-      "feature1": "تقارير امتثال شاملة",
-      "feature2": "اقتراحات تحسين مدعومة بالذكاء الاصطناعي",
-      "feature3": "تعديل تفاعلي للبنود"
-    },
-    "step4": {
-      "title": "تعاون مع الخبراء",
-      "desc": "تواصل مع خبراء معتمدين في الشريعة الإسلامية للحالات المعقدة والمراجعة.",
-      "feature1": "تعليقات الخبراء والتحقق",
-      "feature2": "الوصول إلى الاستشارة المهنية",
-      "feature3": "مراجعات ضمان الجودة"
-    }
-  },
-  "navigation": {
-    "home": "الرئيسية",
-    "camera": "الكاميرا",
-    "history": "السجل",
-    "profile": "الملف الشخصي"
-  },
-  "home": {
-    "goodMorning": "صباح الخير",
-    "goodAfternoon": "مساء الخير",
-    "goodEvening": "مساء الخير",
-    "guestUser": "مستخدم زائر",
-    "scanDocument": "مسح مستند",
-    "useCamera": "استخدم الكاميرا",
-    "uploadFile": "رفع ملف",
-    "fromDevice": "من جهازك",
-    "analytics": "التحليلات",
-    "totalAnalyses": "إجمالي التحليلات",
-    "complianceRate": "متوسط الامتثال",
-    "thisMonth": "هذا الشهر",
-    "recentAnalyses": "التحليلات الأخيرة",
-    "viewAll": "عرض الكل",
-    "noAnalyses": "لا توجد تحليلات بعد",
-    "startFirst": "ابدأ تحليلك الأول لرؤيته هنا"
-  },
+  "welcome": "مرحباً بك في محلل عقود الشريعة",
+  "tagline": "تحليل الامتثال الإسلامي بالذكاء الاصطناعي لعقودك",
+  "getStarted": "ابدأ الآن",
   "upload": {
-    "title": "رفع الوثيقة",
-    "description": "اختر وثيقة عقد للتحليل",
-    "dragDrop": "انقر لاختيار الوثيقة",
-    "formats": "ملفات PDF، DOCX، TXT مدعومة",
-    "uploading": "جاري الرفع...",
-    "analyzing": "تحليل العقد",
-    "analyzingDesc": "الذكاء الاصطناعي يراجع عقدك للتوافق مع الشريعة",
-    "complete": "اكتمل التحليل",
-    "redirecting": "إعادة التوجيه إلى النتائج...",
-    "fileSelected": "الملف جاهز للتحليل",
-    "startingAnalysis": "بدء التحليل...",
-    "unknownSize": "حجم غير معروف",
-    "analyze": "تحليل العقد",
-    "error": "فشل في الرفع"
-  },
-  "analyze": {
-    "step": {
-      "initial": "بدء التحليل...",
-      "extractText": "استخراج النص...",
-      "identifyTerms": "تحديد البنود...",
-      "shariaComplianceCheck": "فحص التوافق الشرعي...",
-      "generateSuggestions": "إنشاء الاقتراحات...",
-      "compileResults": "تجميع النتائج..."
-    },
+    "title": "رفع العقد",
+    "description": "ارفع وثيقة العقد الخاصة بك لتحليل الامتثال الإسلامي",
+    "dragDrop": "اضغط لاختيار ملف العقد",
+    "formats": "يدعم ملفات PDF و DOCX و TXT",
+    "uploading": "جاري رفع الوثيقة...",
+    "analyzing": "جاري تحليل العقد...",
+    "analyzingDesc": "يرجى الانتظار بينما نحلل عقدك للامتثال الإسلامي",
     "complete": "اكتمل التحليل!",
-    "viewResults": "جاري توجيهك إلى نتائجك...",
-    "live": "مباشر",
-    "submessage": {
-      "processing": "معالجة هيكل المستند...",
-      "examining": "فحص البنود القانونية...",
-      "validating": "التحقق من مبادئ الشريعة...",
-      "optimizing": "تحسين الاقتراحات..."
-    }
-  },
-  "results": {
-    "title": "نتائج التحليل",
-    "generateContract": "إنشاء عقد متوافق",
-    "newAnalysis": "تحليل آخر"
-  },
-  "compliance": {
-    "full": "متوافق تمامًا",
-    "partial": "متوافق جزئيًا",
-    "non": "غير متوافق",
-    "terms": "تم تحليل عقدك للتحقق من توافقه مع الشريعة.",
-    "compliantTerms": "البنود المتوافقة",
-    "nonCompliantTerms": "البنود غير المتوافقة"
-  },
-  "camera": {
-    "title": "مسح العقد",
-    "instruction": "ضع العقد داخل الإطار",
-    "noPermission": "الوصول إلى الكاميرا مطلوب لمسح المستندات.",
-    "grantPermission": "منح الإذن",
-    "gallery": "المعرض",
-    "files": "الملفات"
-  },
-  "history": {
-    "title": "سجل التحليلات",
-    "searchPlaceholder": "البحث باسم الملف...",
-    "empty": "لم يتم العثور على تحليلات.",
-    "emptyDesc": "ابدأ بتحليل العقود لرؤية سجلك هنا",
-    "delete": "حذف",
-    "deleteConfirmation": "هل أنت متأكد أنك تريد حذف هذا التحليل؟ لا يمكن التراجع عن هذا الإجراء.",
-    "results": "النتائج",
-    "interactions": "التفاعلات",
-    "views": "المشاهدات",
-    "hasContract": "تم الإنشاء",
-    "modifications": "التعديلات",
-    "sessionDetails": "تفاصيل الجلسة",
-    "filename": "اسم الملف",
-    "compliance": "الامتثال",
-    "analysisDate": "تاريخ التحليل",
-    "termsAnalyzed": "البنود المحللة",
-    "sort": {
-      "newest": "الأحدث",
-      "oldest": "الأقدم",
-      "compliance": "الامتثال",
-      "interactions": "التفاعلات"
-    },
-    "filter": {
-      "all": "الكل",
-      "high": "امتثال عالي",
-      "medium": "امتثال متوسط",
-      "low": "امتثال منخفض"
-    },
-    "compliance": {
-      "high": "امتثال عالي",
-      "medium": "امتثال متوسط",
-      "low": "امتثال منخفض"
-    }
-  },
-  "profile": {
-    "profile": "الملف الشخصي",
-    "settings": "الإعدادات",
-    "darkMode": "الوضع الداكن",
-    "language": "اللغة",
-    "account": "معلومات الحساب",
-    "privacy": "سياسة الخصوصية",
-    "support": "الدعم",
-    "help": "المساعدة والأسئلة الشائعة",
-    "share": "مشاركة شرعي",
-    "rate": "تقييمنا",
-    "temporaryAccount": "حساب زائر مؤقت",
-    "userRole": "دور المستخدم",
-    "regularUser": "مستخدم عادي",
-    "shariahExpert": "خبير شرعي",
-    "switchRole": "التبديل إلى وضع الخبير",
-    "expertMode": "وضع الخبير نشط"
-  },
-  "auth": {
-    "login": "تسجيل الدخول",
-    "signup": "إنشاء حساب",
-    "logout": "تسجيل الخروج",
-    "logoutConfirm": "هل أنت متأكد أنك تريد تسجيل الخروج؟"
-  },
-  "guest": {
-    "mode": "وضع الزائر",
-    "featuresAvailable": "الميزات المتاحة محدودة.",
-    "exit": "الخروج من وضع الزائر"
-  },
-  "sidebar": {
-    "title": "القائمة",
-    "welcome": "مرحباً بك في شرعي",
-    "description_new": "رفيقك الموثوق بالذكاء الاصطناعي لتحليل العقود المتوافقة مع الشريعة. ارفع وحلل وتأكد من أن مستنداتك القانونية تلتزم بمعايير الشريعة الإسلامية باستخدام أحدث تقنيات الذكاء الاصطناعي.",
-    "howTo_new": "كيف يعمل",
-    "step1_new": "ارفع مستند عقدك (PDF أو DOC أو DOCX أو TXT)",
-    "step2_new": "يحلل الذكاء الاصطناعي كل بند لمطابقة الشريعة تلقائياً",
-    "step3_new": "راجع التعديلات المقترحة للبنود غير المتوافقة",
-    "step4_new": "أكد أو عدل اقتراحات الذكاء الاصطناعي حسب احتياجاتك",
-    "step5_new": "اسأل أسئلة حول بنود محددة أو العقد بأكمله",
-    "step6_new": "حمل عقدك المتوافق أو تقرير التحليل",
-    "features_new": "الميزات الرئيسية"
-  },
-  "questionAnimation": {
-    "thinking": "الذكاء الاصطناعي يفكر...",
-    "processing": "معالجة سؤالك...",
-    "analyzing": "تحليل السياق...",
-    "formulating": "صياغة الإجابة...",
-    "patience": "يرجى الانتظار لحظة بينما نعالج سؤالك."
-  },
-  "expert": {
-    "feedbackTitle": "تقييم الخبير",
-    "aiAssessmentCorrect": "هل تقييم الذكاء الاصطناعي صحيح؟",
-    "yes": "نعم",
-    "no": "لا",
-    "correctedCompliance": "حالة الامتثال المصححة:",
-    "comments": "تعليقات إضافية:",
-    "commentsPlaceholder": "قدم رأيك الخبير...",
-    "provideFeedback": "تقديم ملاحظات الخبير",
-    "submitFeedback": "إرسال الملاحظات",
-    "feedbackSubmitted": "تم إرسال الملاحظات",
-    "feedbackSubmittedDesc": "تم تسجيل ملاحظاتك الخبيرة بنجاح.",
-    "submissionFailed": "فشل الإرسال",
-    "submissionFailedDesc": "لا يمكن إرسال ملاحظاتك. حاول مرة أخرى.",
-    "validation": {
-      "assessmentMissing": "التقييم مطلوب",
-      "assessmentMissingDesc": "يرجى تحديد ما إذا كان تقييم الذكاء الاصطناعي صحيحاً."
-    }
-  },
-  "user": {
-    "expert": "خبير",
-    "regular": "عادي"
+    "redirecting": "جاري التوجيه إلى النتائج...",
+    "error": "فشل في الرفع",
+    "unknownSize": "حجم غير معروف",
+    "readyToAnalyze": "الملف جاهز للتحليل",
+    "startingAnalysis": "بدء التحليل...",
+    "analyzeContract": "تحليل العقد"
   },
   "analyzing": {
     "title": "تحليل العقد",
-    "stage1": "معالجة الوثيقة",
-    "stage1.desc": "قراءة وتحليل وثيقة العقد",
-    "stage2": "استخراج البنود",
-    "stage2.desc": "تحديد بنود وشروط العقد",
-    "stage3": "التحليل الشرعي",
-    "stage3.desc": "تحليل الامتثال للشريعة الإسلامية",
-    "stage4": "التحقق",
-    "stage4.desc": "المقارنة مع معايير الشريعة",
-    "stage5": "الإنهاء",
-    "stage5.desc": "إعداد نتائج التحليل",
+    "live": "مباشر",
+    "uploading": "رفع الملف",
+    "stage1": "قراءة الوثيقة",
+    "stage1.desc": "استخراج وتحليل محتوى الوثيقة",
+    "stage2": "تحليل البنود",
+    "stage2.desc": "تحديد البنود والأحكام التعاقدية",
+    "stage3": "معالجة بالذكاء الاصطناعي",
+    "stage3.desc": "تطبيق تحليل الامتثال الشرعي",
+    "stage4": "فحص الامتثال",
+    "stage4.desc": "تقييم الامتثال للقانون الإسلامي",
+    "stage5": "إنهاء النتائج",
+    "stage5.desc": "إعداد تقرير التحليل",
     "shariaCompliant": "متوافق مع الشريعة",
-    "aiPowered": "مدعوم بالذكاء الاصطناعي",
-    "expertReviewed": "مراجعة من خبير"
+    "aiPowered": "بدعم الذكاء الاصطناعي",
+    "expertReviewed": "مراجعة الخبراء"
   },
-  "generate": {
-    "stage1": "إعداد الوثيقة",
-    "stage2": "معالجة البنود",
-    "stage3": "تطبيق التغييرات",
-    "stage4": "الإنهاء"
-  },
-  "term": {
-    "reference": "المرجع"
-  },
-  "common": {
-    "loading": "جارٍ التحميل...",
-    "retry": "إعادة المحاولة",
-    "cancel": "إلغاء",
-    "delete": "حذف",
-    "close": "إغلاق",
-    "save": "حفظ",
-    "edit": "تعديل",
-    "view": "عرض",
-    "download": "تحميل",
-    "share": "مشاركة",
-    "bookmark": "إشارة مرجعية",
-    "confirm": "تأكيد",
-    "back": "رجوع",
-    "next": "التالي",
-    "previous": "السابق",
-    "finish": "إنهاء"
-  },
-  "error": {
-    "analysisFailed": "فشل التحليل",
-    "fileType": "نوع الملف غير صالح",
-    "cameraFailed": "فشل التقاط الصورة.",
-    "confirmationFailed": "فشل التأكيد",
-    "generationFailed": "فشل الإنشاء",
-    "deleteFailed": "فشل الحذف",
-    "deleteFailedMessage": "لا يمكن حذف الجلسة في هذا الوقت.",
-    "networkError": "خطأ في الشبكة",
-    "networkErrorMessage": "يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى."
+  "results": {
+    "title": "نتائج التحليل",
+    "summary": "ملخص العقد",
+    "terms": "بنود العقد",
+    "compliance": "حالة الامتثال",
+    "recommendations": "التوصيات"
   },
   "contract": {
-    "terms": "بنود العقد",
+    "terms": "تحليل بنود العقد",
+    "reviewContract": "مراجعة وإنشاء العقد",
+    "generateInfo": "إنشاء نسخ معدلة أو مميزة من عقدك",
+    "generateButton": "إنشاء عقد معدل",
+    "generateMarkedButton": "إنشاء عقد مميز",
     "generated": "تم إنشاء العقد",
-    "generatedMessage": "تم إنشاء عقدك المتوافق بنجاح وهو متاح للتنزيل.",
-    "preview": {
-      "modifiedTitle": "معاينة العقد المعدل",
-      "markedTitle": "معاينة العقد المعلّم",
-      "loadingPdf": "جاري تحميل معاينة PDF...",
-      "errorTitle": "خطأ في المعاينة",
-      "ready": "المعاينة جاهزة",
-      "readyDescMobile": "افتح المستند في متصفحك لعرضه أو مشاركته أو طباعته.",
-      "close": "إغلاق",
-      "openInBrowser": "فتح في المتصفح"
-    }
+    "generatedMessage": "تم إنشاء عقدك المعدل بنجاح",
+    "markedGenerated": "تم إنشاء العقد المميز",
+    "markedGeneratedMessage": "تم إنشاء عقدك المميز بنجاح"
   },
   "term": {
     "compliant": "متوافق",
     "non-compliant": "غير متوافق",
-    "noTermsExtracted": "لم يتم استخراج أي بنود من هذا المستند.",
-    "noTermsForFilter": "لا توجد بنود تطابق الفلتر الحالي.",
     "fullText": "النص الكامل للبند",
-    "why": "لماذا هذا غير متوافق؟",
-    "suggestion": "اقتراح الذكاء الاصطناعي",
-    "editSuggestion": "تعديل الاقتراح",
-    "questionPlaceholder": "اطرح سؤال متابعة حول هذا البند...",
-    "confirmed": "تم تأكيد الاقتراح",
-    "confirmedMessage": "تم حفظ التعديل.",
-    "cancel": "إلغاء",
-    "saveAndReview": "حفظ ومراجعة",
-    "expertFeedback": "تعليقات الخبير",
-    "lastModified": "آخر تعديل",
-    "interactionCount": "التفاعلات",
+    "why": "لماذا هذا البند إشكالي",
     "reference": "المرجع",
-    "askGeneralQuestion": "اطرح سؤالاً عاماً",
-    "generalQuestionPlaceholder": "اطرح سؤالاً عاماً عن العقد بأكمله...",
-    "askQuestion": "اطرح سؤالاً",
-    "newShariaIssue": "مشكلة شرعية جديدة",
-    "alreadyCompliant": "هذا البند متوافق مع الشريعة بالفعل.",
-    "noSession": "لا توجد جلسة متاحة. يرجى رفع عقد أولاً.",
-    "noResults": "لا توجد نتائج تحليل متاحة.",
-    "editConfirmed": "تعديل مؤكد",
-    "initialSuggestion": "الاقتراح الأولي",
-    "reviewedSuggestion": "الاقتراح المراجع",
-    "yourEdit": "تعديلك",
+    "suggestion": "التعديل المقترح",
+    "editSuggestion": "تحرير الاقتراح",
+    "questionPlaceholder": "اسأل سؤال حول هذا البند...",
+    "saveAndReview": "حفظ ومراجعة",
+    "cancel": "إلغاء",
+    "confirmed": "تم تأكيد التغييرات",
+    "confirmedMessage": "تم تأكيد وتطبيق تغييراتك",
+    "noTermsExtracted": "لم يتم استخراج أي بنود من هذا العقد",
+    "noTermsForFilter": "لا توجد بنود تطابق المرشح الحالي",
+    "askGeneralQuestion": "اسأل سؤال عام",
+    "generalQuestionPlaceholder": "اسأل سؤال حول العقد بأكمله...",
     "answer": "الإجابة",
-    "generatingContract": "إنشاء عقد متوافق",
-    "generatingMarkedContract": "إنشاء عقد مُعلَّم"
+    "generatingContract": "إنشاء عقد معدل",
+    "generatingMarkedContract": "إنشاء عقد مميز"
   },
-  "review": {
-    "editSentForReview": "تم إرسال المراجعة",
-    "editSentForReviewDesc": "تم إرسال اقتراحك المعدل لمراجعة الذكاء الاصطناعي.",
-    "reviewFailed": "فشلت المراجعة",
-    "couldNotReviewEdit": "لم نتمكن من مراجعة تعديلك في هذا الوقت.",
-    "suggestionReviewed": "تمت مراجعة الاقتراح",
-    "suggestionReviewedDesc": "تمت مراجعة الإجابة ومعالجتها.",
-    "reviewFailed": "فشلت المراجعة",
-    "reviewFailedDesc": "لم يتمكن من مراجعة الاقتراح.",
-    "editSentForReview": "تم إرسال التعديل للمراجعة",
-    "editSentForReviewDesc": "تم إرسال تعديلك لمراجعة الذكي الاصطناعي.",
-    "couldNotReviewEdit": "لم يتمكن من مراجعة تعديلك.",
-    "looksGood": "يبدو جيداً!",
-    "concern": "قلق",
-    "complianceIssue": "مشكلة توافق محتملة"
+  "generate": {
+    "stage1": "تحليل البنية",
+    "stage2": "تطبيق التعديلات",
+    "stage3": "التحقق من التغييرات",
+    "stage4": "إنهاء الوثيقة"
   },
   "filter": {
-    "all": "الكل",
+    "all": "جميع البنود",
     "compliant": "متوافق",
     "non-compliant": "غير متوافق"
   },
   "button": {
     "confirm": "تأكيد التغييرات",
-    "send": "إرسال السؤال",
-    "generate": "إنشاء",
-    "analyze": "تحليل",
+    "send": "إرسال",
+    "useAndReview": "استخدام كاقتراح ومراجعة"
+  },
+  "review": {
+    "editSentForReview": "تم إرسال التعديل للمراجعة",
+    "editSentForReviewDesc": "تم إرسال تعديلك لمراجعة الذكاء الاصطناعي",
+    "reviewFailed": "فشلت المراجعة",
+    "reviewFailedDesc": "لا يمكن مراجعة تعديلك. يرجى المحاولة مرة أخرى.",
+    "couldNotReviewEdit": "لا يمكن مراجعة تعديلك. يرجى المحاولة مرة أخرى.",
+    "suggestionReviewed": "تمت مراجعة الاقتراح",
+    "suggestionReviewedDesc": "راجع الذكاء الاصطناعي اقتراحك"
+  },
+  "user": {
+    "regular": "مستخدم عادي",
+    "expert": "خبير"
+  },
+  "expert": {
+    "feedbackTitle": "تعليقات الخبير",
+    "provideFeedback": "تقديم تعليقات الخبير",
+    "aiAssessmentCorrect": "هل تقييم الذكاء الاصطناعي صحيح؟",
+    "yes": "نعم",
+    "no": "لا",
+    "correctedCompliance": "حالة الامتثال المصححة:",
+    "comments": "تعليقات الخبير",
+    "commentsPlaceholder": "قدم تحليلك وتعليقاتك الخبيرة...",
+    "submitFeedback": "إرسال التعليقات",
+    "feedbackSubmitted": "تم إرسال التعليقات",
+    "feedbackSubmittedDesc": "تم تسجيل تعليقاتك الخبيرة",
+    "submissionFailed": "فشل الإرسال",
+    "submissionFailedDesc": "لا يمكن إرسال تعليقاتك. يرجى المحاولة مرة أخرى.",
+    "validation": {
+      "assessmentMissing": "التقييم مطلوب",
+      "assessmentMissingDesc": "يرجى الإشارة إلى ما إذا كان تقييم الذكاء الاصطناعي صحيحاً"
+    }
+  },
+  "questionAnimation": {
+    "processing": "معالجة سؤالك...",
+    "analyzing": "التحليل",
+    "formulating": "الصياغة"
+  },
+  "camera": {
+    "title": "مسح العقد",
+    "description": "استخدم الكاميرا لمسح وتحليل العقود",
+    "noPermission": "إذن الكاميرا مطلوب لمسح العقود",
+    "grantPermission": "منح إذن الكاميرا",
+    "capture": "التقاط",
+    "retake": "إعادة الالتقاط",
+    "analyze": "تحليل"
+  },
+  "history": {
+    "title": "تاريخ العقود",
+    "noContracts": "لم يتم تحليل أي عقود بعد",
+    "noContractsDesc": "ارفع وحلل عقدك الأول لرؤيته هنا"
+  },
+  "profile": {
+    "title": "الملف الشخصي",
+    "settings": "الإعدادات",
+    "language": "اللغة",
+    "theme": "المظهر",
+    "about": "حول"
+  },
+  "onboarding": {
+    "title": "مرحباً بك في محلل عقود الشريعة",
+    "subtitle": "مساعدك في الامتثال الإسلامي بالذكاء الاصطناعي",
+    "step1": {
+      "title": "رفع العقود",
+      "description": "ارفع ملفات العقود بصيغة PDF أو DOCX أو TXT للتحليل"
+    },
+    "step2": {
+      "title": "تحليل بالذكاء الاصطناعي",
+      "description": "يحلل الذكاء الاصطناعي كل بند للامتثال للقانون الإسلامي"
+    },
+    "step3": {
+      "title": "مراجعة الخبراء",
+      "description": "احصل على رؤى خبيرة واقتراحات التعديل"
+    },
+    "skip": "تخطي",
+    "next": "التالي",
+    "getStarted": "ابدأ الآن"
+  },
+  "navigation": {
+    "home": "الرئيسية",
     "upload": "رفع",
-    "download": "تحميل",
-    "share": "مشاركة",
-    "save": "حفظ",
-    "useAndReview": "استخدام ومراجعة"
+    "camera": "الكاميرا",
+    "history": "التاريخ",
+    "profile": "الملف الشخصي"
   },
-   "generate": {
-    "stage1": "تحضير الوثيقة...",
-    "stage2": "تطبيق التعديلات...",
-    "stage3": "إنهاء العقد...",
-    "stage4": "إكمال الإنشاء..."
+  "error": {
+    "generic": "حدث خطأ",
+    "fileType": "نوع ملف غير صالح",
+    "confirmationFailed": "فشل في تأكيد التغييرات",
+    "generationFailed": "فشل في إنشاء العقد",
+    "interactionFailed": "فشل في معالجة الطلب"
   },
-  "analyzing": {
-    "title": "تحليل العقد",
-    "stage1": "قراءة العقد",
-    "stage1.desc": "معالجة هيكل الوثيقة والمحتوى",
-    "stage2": "استخراج البنود",
-    "stage2.desc": "تحديد البنود والشروط الرئيسية للعقد",
-    "stage3": "فحص الامتثال",
-    "stage3.desc": "تحليل التوافق مع الشريعة باستخدام الذكاء الاصطناعي",
-    "stage4": "التحقق من التحليل",
-    "stage4.desc": "المراجعة المرجعية مع الفقه الإسلامي",
-    "stage5": "إنهاء التقرير",
-    "stage5.desc": "إعداد نتائج التحليل الشاملة",
-    "live": "تحليل مباشر",
-    "shariaCompliant": "متوافق مع الشريعة",
-    "aiPowered": "مدعوم بالذكاء الاصطناعي",
-    "expertReviewed": "مراجعة الخبراء"
-  },
-  "term": {
-    "askQuestion": "اسأل سؤالاً",
-    "questionPlaceholder": "اسأل عن هذا البند تحديداً...",
-    "editTerm": "تعديل البند",
-    "saveTerm": "حفظ التغييرات",
-    "cancelEdit": "إلغاء",
-    "submitFeedback": "إرسال الملاحظات",
-    "generatingContract": "إنشاء عقد متوافق",
-    "generatingMarkedContract": "إنشاء عقد مُعلَّم"
-  },
-  "user": {
-    "expert": "خبير",
-    "regular": "عادي"
-  },
-  "general": {
-    "askQuestion": "اسأل سؤالاً عاماً",
-    "questionPlaceholder": "اسأل عن العقد بأكمله..."
-  },
-  "generate": {
-    "stage1": "إعداد العقد",
-    "stage2": "تطبيق التعديلات",
-    "stage3": "مراجعة التغييرات",
-    "stage4": "إنهاء الوثيقة"
-  },
-   "history": {
-    "title": "سجل التحليلات",
-    "noContracts": "لا توجد تحليلات سابقة",
-    "noContractsDesc": "قم برفع وتحليل العقود لرؤيتها هنا",
-    "deleteConfirm": "حذف التحليل",
-    "deleteMessage": "هل أنت متأكد من رغبتك في حذف هذا التحليل؟",
-    "clearAll": "مسح الكل",
-    "clearAllConfirm": "مسح جميع السجلات",
-    "clearAllMessage": "هل أنت متأكد من رغبتك في حذف جميع تحليلات العقود؟",
-    "analysisDate": "تاريخ التحليل",
-    "complianceScore": "نقاط الامتثال",
-    "clear": "مسح"
-  },
-  "term": {
-    "askQuestion": "اسأل سؤالاً",
-    "questionPlaceholder": "اسأل عن هذا البند تحديداً...",
-    "editTerm": "تعديل البند",
-    "saveTerm": "حفظ التغييرات",
-    "cancelEdit": "إلغاء",
-    "submitFeedback": "إرسال الملاحظات",
-    "generatingContract": "إنشاء عقد متوافق",
-    "generatingMarkedContract": "إنشاء عقد مُعلَّم"
-  },
-  "user": {
-    "expert": "خبير",
-    "regular": "عادي"
-  },
-  "general": {
-    "askQuestion": "اسأل سؤالاً عاماً",
-    "questionPlaceholder": "اسأل عن العقد بأكمله..."
-  },
-  "generate": {
-    "stage1": "إعداد العقد",
-    "stage2": "تطبيق التعديلات",
-    "stage3": "مراجعة التغييرات",
-    "stage4": "إنهاء الوثيقة"
-  }
+  "loading": "جاري التحميل...",
+  "processing": "جاري المعالجة..."
 }

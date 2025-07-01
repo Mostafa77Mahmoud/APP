@@ -1,338 +1,187 @@
 {
-  "app": {
-    "title": "Shar'AI",
-    "subtitle": "AI-Powered Sharia-Compliant Contract Analysis",
-    "logout": "Logout"
-  },
-  "onboarding": {
-    "skip": "Skip",
-    "next": "Next",
-    "previous": "Previous",
-    "done": "Done",
-    "step1": {
-      "title": "Upload Contracts",
-      "desc": "Upload your legal documents in Arabic or English for AI-powered analysis.",
-      "feature1": "Support for PDF, DOCX, and TXT files",
-      "feature2": "Advanced text extraction technology",
-      "feature3": "Multi-language contract processing"
-    },
-    "step2": {
-      "title": "Instant Analysis",
-      "desc": "Our advanced AI analyzes every term for Sharia compliance with expert precision.",
-      "feature1": "Real-time compliance checking",
-      "feature2": "Expert-level Islamic law analysis",
-      "feature3": "Detailed term-by-term evaluation"
-    },
-    "step3": {
-      "title": "Get Results & Suggestions",
-      "desc": "Receive detailed compliance reports with suggestions for improvements.",
-      "feature1": "Comprehensive compliance reports",
-      "feature2": "AI-powered improvement suggestions",
-      "feature3": "Interactive term modification"
-    },
-    "step4": {
-      "title": "Collaborate with Experts",
-      "desc": "Connect with certified Islamic law experts for complex cases and review.",
-      "feature1": "Expert feedback and validation",
-      "feature2": "Professional consultation access",
-      "feature3": "Quality assurance reviews"
-    }
-  },
-  "navigation": {
-    "home": "Home",
-    "camera": "Camera",
-    "history": "History",
-    "profile": "Profile"
-  },
-  "home": {
-    "goodMorning": "Good Morning",
-    "goodAfternoon": "Good Afternoon",
-    "goodEvening": "Good Evening",
-    "guestUser": "Guest User",
-    "scanDocument": "Scan Document",
-    "useCamera": "Use your camera",
-    "uploadFile": "Upload File",
-    "fromDevice": "From your device",
-    "analytics": "Analytics",
-    "totalAnalyses": "Total Analyses",
-    "complianceRate": "Avg. Compliance",
-    "thisMonth": "This Month",
-    "recentAnalyses": "Recent Analyses",
-    "viewAll": "View All",
-    "noAnalyses": "No Analyses Yet",
-    "startFirst": "Start your first analysis to see it here"
-  },
+  "welcome": "Welcome to Shariaa Contract Analyzer",
+  "tagline": "AI-powered Islamic compliance analysis for your contracts",
+  "getStarted": "Get Started",
   "upload": {
-    "title": "Upload Document",
-    "description": "Select a contract document to analyze",
-    "dragDrop": "Click to select document",
-    "formats": "PDF, DOCX, TXT files supported",
-    "uploading": "Uploading...",
-    "analyzing": "Analyzing Contract",
-    "analyzingDesc": "Our AI is reviewing your contract for Sharia compliance",
-    "complete": "Analysis Complete",
-    "redirecting": "Redirecting to results...",
-    "fileSelected": "File ready for analysis",
-    "startingAnalysis": "Starting analysis...",
-    "unknownSize": "Unknown size",
-    "analyze": "Analyze Contract",
-    "error": "Upload failed"
-  },
-  "analyze": {
-    "step": {
-      "initial": "Initializing analysis...",
-      "extractText": "Extracting text...",
-      "identifyTerms": "Identifying terms...",
-      "shariaComplianceCheck": "Checking compliance...",
-      "generateSuggestions": "Generating suggestions...",
-      "compileResults": "Compiling results..."
-    },
+    "title": "Upload Contract",
+    "description": "Upload your contract document for Islamic compliance analysis",
+    "dragDrop": "Tap to select your contract file",
+    "formats": "Supports PDF, DOCX, and TXT files",
+    "uploading": "Uploading document...",
+    "analyzing": "Analyzing contract...",
+    "analyzingDesc": "Please wait while we analyze your contract for Islamic compliance",
     "complete": "Analysis Complete!",
-    "viewResults": "Redirecting to your results...",
-    "live": "LIVE",
-    "submessage": {
-      "processing": "Processing document structure...",
-      "examining": "Examining legal clauses...",
-      "validating": "Validating against Sharia principles...",
-      "optimizing": "Optimizing suggestions..."
-    }
-  },
-  "results": {
-    "title": "Analysis Results",
-    "generateContract": "Generate Compliant Contract",
-    "newAnalysis": "Analyze Another"
-  },
-  "compliance": {
-    "full": "Fully Compliant",
-    "partial": "Partially Compliant",
-    "non": "Non-Compliant",
-    "terms": "Your contract has been analyzed for Sharia compliance.",
-    "compliantTerms": "Compliant Terms",
-    "nonCompliantTerms": "Non-Compliant Terms"
-  },
-  "camera": {
-    "title": "Scan Contract",
-    "instruction": "Position the contract within the frame",
-    "noPermission": "Camera access is required to scan documents.",
-    "grantPermission": "Grant Permission",
-    "gallery": "Gallery",
-    "files": "Files"
-  },
-  "history": {
-    "title": "Analysis History",
-    "searchPlaceholder": "Search by filename...",
-    "empty": "No analyses found.",
-    "emptyDesc": "Start analyzing contracts to see your history here",
-    "delete": "Delete",
-    "deleteConfirmation": "Are you sure you want to delete this analysis? This action cannot be undone.",
-    "results": "results",
-    "interactions": "interactions",
-    "views": "views",
-    "hasContract": "Generated",
-    "modifications": "modifications",
-    "sessionDetails": "Session Details",
-    "filename": "Filename",
-    "compliance": "Compliance",
-    "analysisDate": "Analysis Date",
-    "termsAnalyzed": "Terms Analyzed",
-    "sort": {
-      "newest": "Newest",
-      "oldest": "Oldest",
-      "compliance": "Compliance",
-      "interactions": "Interactions"
-    },
-    "filter": {
-      "all": "All",
-      "high": "High Compliance",
-      "medium": "Medium Compliance",
-      "low": "Low Compliance"
-    },
-    "compliance": {
-      "high": "High Compliance",
-      "medium": "Medium Compliance",
-      "low": "Low Compliance"
-    }
-  },
-  "profile": {
-    "profile": "Profile",
-    "settings": "Settings",
-    "darkMode": "Dark Mode",
-    "language": "Language",
-    "account": "Account Information",
-    "privacy": "Privacy Policy",
-    "support": "Support",
-    "help": "Help & FAQ",
-    "share": "Share Shar'AI",
-    "rate": "Rate Us",
-    "temporaryAccount": "Temporary Guest Account",
-    "userRole": "User Role",
-    "regularUser": "Regular User",
-    "shariahExpert": "Shariah Expert",
-    "switchRole": "Switch to Expert Mode",
-    "expertMode": "Expert Mode Active"
-  },
-  "auth": {
-    "login": "Login",
-    "signup": "Sign Up",
-    "logout": "Logout",
-    "logoutConfirm": "Are you sure you want to log out?"
-  },
-  "guest": {
-    "mode": "Guest Mode",
-    "featuresAvailable": "Limited features are available.",
-    "exit": "Exit Guest Mode"
-  },
-  "sidebar": {
-    "title": "Menu",
-    "welcome": "Welcome to Shar'AI",
-    "description_new": "Your trusted AI companion for Sharia-compliant contract analysis. Upload, analyze, and ensure your legal documents meet Islamic law standards with cutting-edge artificial intelligence.",
-    "howTo_new": "How It Works",
-    "step1_new": "Upload your contract document (PDF, DOC, DOCX, or TXT)",
-    "step2_new": "AI analyzes each term for Sharia compliance automatically",
-    "step3_new": "Review suggested modifications for non-compliant terms",
-    "step4_new": "Confirm or modify AI suggestions based on your needs",
-    "step5_new": "Ask questions about specific terms or the entire contract",
-    "step6_new": "Download your compliant contract or analysis report",
-    "features_new": "Key Features"
-  },
-  "questionAnimation": {
-    "thinking": "AI is thinking...",
-    "processing": "Processing your question...",
-    "analyzing": "Analyzing the context...",
-    "formulating": "Formulating response...",
-    "patience": "Please wait a moment while we process your question."
-  },
-  "expert": {
-    "feedbackTitle": "Expert Feedback",
-    "aiAssessmentCorrect": "Is the AI assessment correct?",
-    "yes": "Yes",
-    "no": "No",
-    "correctedCompliance": "Corrected compliance status:",
-    "comments": "Additional comments:",
-    "commentsPlaceholder": "Provide your expert opinion...",
-    "provideFeedback": "Provide Expert Feedback",
-    "submitFeedback": "Submit Feedback",
-    "feedbackSubmitted": "Feedback Submitted",
-    "feedbackSubmittedDesc": "Your expert feedback has been recorded successfully.",
-    "submissionFailed": "Submission Failed",
-    "submissionFailedDesc": "Could not submit your feedback. Please try again.",
-    "validation": {
-      "assessmentMissing": "Assessment Required",
-      "assessmentMissingDesc": "Please indicate whether the AI assessment is correct."
-    }
+    "redirecting": "Redirecting to results...",
+    "error": "Upload Failed",
+    "unknownSize": "Unknown size",
+    "readyToAnalyze": "File ready for analysis",
+    "startingAnalysis": "Starting analysis...",
+    "analyzeContract": "Analyze Contract"
   },
   "analyzing": {
     "title": "Analyzing Contract",
-    "stage1": "Document Processing",
-    "stage1.desc": "Reading and parsing contract document",
-    "stage2": "Term Extraction",
-    "stage2.desc": "Identifying contractual terms and clauses",
-    "stage3": "Sharia Analysis",
-    "stage3.desc": "Analyzing compliance with Islamic law",
-    "stage4": "Validation",
-    "stage4.desc": "Cross-referencing with Sharia standards",
-    "stage5": "Finalizing",
-    "stage5.desc": "Preparing analysis results",
+    "live": "LIVE",
+    "uploading": "Uploading File",
+    "stage1": "Reading Document",
+    "stage1.desc": "Extracting and parsing document content",
+    "stage2": "Analyzing Terms",
+    "stage2.desc": "Identifying contractual clauses and terms",
+    "stage3": "AI Processing",
+    "stage3.desc": "Applying Sharia compliance analysis",
+    "stage4": "Compliance Check",
+    "stage4.desc": "Evaluating Islamic law compliance",
+    "stage5": "Finalizing Results",
+    "stage5.desc": "Preparing analysis report",
     "shariaCompliant": "Sharia Compliant",
     "aiPowered": "AI Powered",
     "expertReviewed": "Expert Reviewed"
   },
-  "generate": {
-    "stage1": "Preparing Document",
-    "stage2": "Processing Terms",
-    "stage3": "Applying Changes",
-    "stage4": "Finalizing"
-  },
-  "term": {
-    "reference": "Reference"
-  },
-  "common": {
-    "loading": "Loading...",
-    "retry": "Retry",
-    "cancel": "Cancel",
-    "delete": "Delete",
-    "close": "Close",
-    "save": "Save",
-    "edit": "Edit",
-    "view": "View",
-    "download": "Download",
-    "share": "Share",
-    "bookmark": "Bookmark",
-    "confirm": "Confirm",
-    "back": "Back",
-    "next": "Next",
-    "previous": "Previous",
-    "finish": "Finish"
-  },
-  "error": {
-    "analysisFailed": "Analysis Failed",
-    "fileType": "Invalid File Type",
-    "cameraFailed": "Failed to capture photo.",
-    "confirmationFailed": "Confirmation Failed",
-    "generationFailed": "Generation Failed",
-    "deleteFailed": "Delete Failed",
-    "deleteFailedMessage": "Could not delete the session at this time.",
-    "networkError": "Network Error",
-    "networkErrorMessage": "Please check your internet connection and try again."
+  "results": {
+    "title": "Analysis Results",
+    "summary": "Contract Summary",
+    "terms": "Contract Terms",
+    "compliance": "Compliance Status",
+    "recommendations": "Recommendations"
   },
   "contract": {
-    "terms": "Contract Clauses",
+    "terms": "Contract Terms Analysis",
+    "reviewContract": "Review & Generate Contract",
+    "generateInfo": "Generate modified or marked versions of your contract",
+    "generateButton": "Generate Modified Contract",
+    "generateMarkedButton": "Generate Marked Contract",
     "generated": "Contract Generated",
-    "generatedMessage": "Your compliant contract has been successfully generated and is available for download.",
-    "preview": {
-      "modifiedTitle": "Modified Contract Preview",
-      "markedTitle": "Marked Contract Preview",
-      "loadingPdf": "Loading PDF preview...",
-      "errorTitle": "Preview Error",
-      "ready": "Preview Ready",
-      "readyDescMobile": "Open the document in your browser to view, share, or print.",
-      "close": "Close",
-    "openInBrowser": "Open in Browser"
-    }
+    "generatedMessage": "Your modified contract has been generated successfully",
+    "markedGenerated": "Marked Contract Generated",
+    "markedGeneratedMessage": "Your marked contract has been generated successfully"
   },
   "term": {
-    "noTermsExtracted": "No terms were extracted from the contract.",
-    "noTermsForFilter": "No terms match the current filter.",
     "compliant": "Compliant",
     "non-compliant": "Non-Compliant",
-    "fullText": "Full Clause Text",
-    "why": "Why is this non-compliant?",
-    "suggestion": "AI Suggestion",
-    "editSuggestion": "Edit Suggestion",
-    "questionPlaceholder": "Ask a follow-up question about this clause...",
-    "confirmed": "Suggestion Confirmed",
-    "confirmedMessage": "The modification has been saved.",
-    "cancel": "Cancel",
-    "saveAndReview": "Save & Review",
-    "expertFeedback": "Expert Feedback",
-    "lastModified": "Last Modified",
-    "interactionCount": "Interactions",
+    "fullText": "Full Term Text",
+    "why": "Why This Term Is Problematic",
     "reference": "Reference",
+    "suggestion": "Suggested Modification",
+    "editSuggestion": "Edit Suggestion",
+    "questionPlaceholder": "Ask a question about this term...",
+    "saveAndReview": "Save & Review",
+    "cancel": "Cancel",
+    "confirmed": "Changes Confirmed",
+    "confirmedMessage": "Your changes have been confirmed and applied",
+    "noTermsExtracted": "No terms were extracted from this contract",
+    "noTermsForFilter": "No terms match the current filter",
     "askGeneralQuestion": "Ask General Question",
-    "generalQuestionPlaceholder": "Ask a general question about the entire contract...",
+    "generalQuestionPlaceholder": "Ask a question about the entire contract...",
     "answer": "Answer",
-    "generatingContract": "Generating Compliant Contract",
+    "generatingContract": "Generating Modified Contract",
     "generatingMarkedContract": "Generating Marked Contract"
   },
-  "review": {
-    "editSentForReview": "Review Submitted",
-    "editSentForReviewDesc": "Your edited suggestion has been sent for AI review.",
-    "reviewFailed": "Review Failed",
-    "couldNotReviewEdit": "We could not review your edit at this time."
+  "generate": {
+    "stage1": "Analyzing Structure",
+    "stage2": "Applying Modifications",
+    "stage3": "Validating Changes",
+    "stage4": "Finalizing Document"
   },
   "filter": {
-    "all": "All",
+    "all": "All Terms",
     "compliant": "Compliant",
     "non-compliant": "Non-Compliant"
   },
   "button": {
     "confirm": "Confirm Changes",
-    "send": "Send Question",
-    "generate": "Generate",
-    "analyze": "Analyze",
+    "send": "Send",
+    "useAndReview": "Use as Suggestion & Review"
+  },
+  "review": {
+    "editSentForReview": "Edit Sent for Review",
+    "editSentForReviewDesc": "Your modification has been sent for AI review",
+    "reviewFailed": "Review Failed",
+    "reviewFailedDesc": "Could not review your modification. Please try again.",
+    "couldNotReviewEdit": "Could not review your edit. Please try again.",
+    "suggestionReviewed": "Suggestion Reviewed",
+    "suggestionReviewedDesc": "The AI has reviewed your suggestion"
+  },
+  "user": {
+    "regular": "Regular User",
+    "expert": "Expert"
+  },
+  "expert": {
+    "feedbackTitle": "Expert Feedback",
+    "provideFeedback": "Provide Expert Feedback",
+    "aiAssessmentCorrect": "Is the AI assessment correct?",
+    "yes": "Yes",
+    "no": "No",
+    "correctedCompliance": "Corrected compliance status:",
+    "comments": "Expert Comments",
+    "commentsPlaceholder": "Provide your expert analysis and feedback...",
+    "submitFeedback": "Submit Feedback",
+    "feedbackSubmitted": "Feedback Submitted",
+    "feedbackSubmittedDesc": "Your expert feedback has been recorded",
+    "submissionFailed": "Submission Failed",
+    "submissionFailedDesc": "Could not submit your feedback. Please try again.",
+    "validation": {
+      "assessmentMissing": "Assessment Required",
+      "assessmentMissingDesc": "Please indicate whether the AI assessment is correct"
+    }
+  },
+  "questionAnimation": {
+    "processing": "Processing your question...",
+    "analyzing": "Analyzing",
+    "formulating": "Formulating"
+  },
+  "camera": {
+    "title": "Scan Contract",
+    "description": "Use your camera to scan and analyze contracts",
+    "noPermission": "Camera permission is required to scan contracts",
+    "grantPermission": "Grant Camera Permission",
+    "capture": "Capture",
+    "retake": "Retake",
+    "analyze": "Analyze"
+  },
+  "history": {
+    "title": "Contract History",
+    "noContracts": "No contracts analyzed yet",
+    "noContractsDesc": "Upload and analyze your first contract to see it here"
+  },
+  "profile": {
+    "title": "Profile",
+    "settings": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "about": "About"
+  },
+  "onboarding": {
+    "title": "Welcome to Shariaa Contract Analyzer",
+    "subtitle": "Your AI-powered Islamic compliance assistant",
+    "step1": {
+      "title": "Upload Contracts",
+      "description": "Upload PDF, DOCX, or TXT contract files for analysis"
+    },
+    "step2": {
+      "title": "AI Analysis",
+      "description": "Our AI analyzes each clause for Islamic law compliance"
+    },
+    "step3": {
+      "title": "Expert Review",
+      "description": "Get expert insights and modification suggestions"
+    },
+    "skip": "Skip",
+    "next": "Next",
+    "getStarted": "Get Started"
+  },
+  "navigation": {
+    "home": "Home",
     "upload": "Upload",
-    "download": "Download",
-    "share": "Share",
-    "save": "Save"
-  }
+    "camera": "Camera",
+    "history": "History",
+    "profile": "Profile"
+  },
+  "error": {
+    "generic": "An error occurred",
+    "fileType": "Invalid file type",
+    "confirmationFailed": "Failed to confirm changes",
+    "generationFailed": "Failed to generate contract",
+    "interactionFailed": "Failed to process request"
+  },
+  "loading": "Loading...",
+  "processing": "Processing..."
 }

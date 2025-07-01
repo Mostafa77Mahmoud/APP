@@ -1,86 +1,125 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSession } from '../contexts/SessionContext';
-import ComplianceBanner from '../components/ComplianceBanner';
 import ContractTermsList from '../components/ContractTermsList';
-import { Button } from '../components/ui/button';
-import { ArrowLeft, ArrowRight } from 'lucide-react-native';
-import { ScreenType } from '../MobileApp';
+import { ArrowLeft, ArrowRight, FileText, CheckCircle, AlertCircle } from 'lucide-react-native';
 
 interface ResultsScreenProps {
-  onNavigate: (screen: ScreenType, data?: any) => void;
   onBack: () => void;
 }
 
-const ResultsScreen: React.FC<ResultsScreenProps> = ({ onNavigate, onBack }) => {
+const ResultsScreen: React.FC<ResultsScreenProps> = ({ onBack }) => {
   const { t, isRTL } = useLanguage();
   const { theme } = useTheme();
-  const { 
-    isFetchingSession, 
-    isAnalyzingContract,
-    generateModifiedContract,
-    isGeneratingContract,
-  } = useSession();
-
+  const { analysisTerms, sessionDetails } = useSession();
+  
   const isDark = theme === 'dark';
   const styles = getStyles(isDark, isRTL);
 
-  const handleGenerateContract = async () => {
-    const result = await generateModifiedContract();
-    if (result?.success) {
-      Alert.alert(
-        t('contract.generated'),
-        t('contract.generatedMessage')
-      );
-    } else {
-      Alert.alert(
-        t('error.generationFailed'),
-        result?.message || 'Could not generate the contract.'
-      );
-    }
-  };
+  // Animation refs
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+  const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
-  if (isFetchingSession || isAnalyzingContract) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={isDark ? '#10b981' : '#059669'} />
-          <Text style={styles.loadingText}>{t('loading')}</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
+  useEffect(() => {
+    // Smooth entrance animation
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 100,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  const compliantTerms = analysisTerms?.filter(term => 
+    term.expert_override_is_valid_sharia ?? (term.isUserConfirmed ? (term.isReviewedSuggestionValid ?? true) : term.is_valid_sharia) ?? false
+  ).length || 0;
+  
+  const totalTerms = analysisTerms?.length || 0;
+  const complianceRate = totalTerms > 0 ? Math.round((compliantTerms / totalTerms) * 100) : 0;
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          {isRTL ? <ArrowRight size={24} color={isDark ? '#fff' : '#000'} /> : <ArrowLeft size={24} color={isDark ? '#fff' : '#000'} />}
-        </TouchableOpacity>
-        <Text style={styles.title}>{t('results.title')}</Text>
-        <View style={{ width: 24 }} />
-      </View>
-      
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+      <Animated.View 
+        style={[
+          styles.header,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }]
+          }
+        ]}
       >
-        <ComplianceBanner />
-        
-        <ContractTermsList />
+        <TouchableOpacity onPress={onBack} style={styles.headerButton}>
+          {isRTL ? <ArrowRight size={24} color={styles.headerTitle.color} /> : <ArrowLeft size={24} color={styles.headerTitle.color} />}
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>{t('results.title')}</Text>
+        <View style={styles.headerButton} />
+      </Animated.View>
 
-        <View style={styles.actionsContainer}>
-          <Button onPress={handleGenerateContract} disabled={isGeneratingContract} style={{ marginBottom: 12 }}>
-            {isGeneratingContract ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{t('results.generateContract')}</Text>}
-          </Button>
-          <Button variant="outline" onPress={() => onNavigate('home')}>
-            <Text style={[styles.buttonText, { color: isDark ? '#fff' : '#000' }]}>{t('results.newAnalysis')}</Text>
-          </Button>
+      <Animated.View 
+        style={[
+          styles.summaryCard,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }, { scale: scaleAnim }]
+          }
+        ]}
+      >
+        <View style={styles.summaryHeader}>
+          <FileText size={24} color={isDark ? '#6ee7b7' : '#10b981'} />
+          <Text style={styles.summaryTitle}>{sessionDetails?.original_filename || t('results.summary')}</Text>
         </View>
-      </ScrollView>
+        
+        <View style={styles.complianceContainer}>
+          <View style={styles.complianceScore}>
+            <Text style={styles.compliancePercentage}>{complianceRate}%</Text>
+            <Text style={styles.complianceLabel}>{t('results.compliance')}</Text>
+          </View>
+          
+          <View style={styles.complianceDetails}>
+            <View style={styles.complianceItem}>
+              <CheckCircle size={16} color="#10b981" />
+              <Text style={styles.complianceText}>
+                {compliantTerms} {t('filter.compliant')}
+              </Text>
+            </View>
+            <View style={styles.complianceItem}>
+              <AlertCircle size={16} color="#ef4444" />
+              <Text style={styles.complianceText}>
+                {totalTerms - compliantTerms} {t('filter.non-compliant')}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </Animated.View>
+
+      <Animated.View 
+        style={[
+          styles.termsContainer,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }]
+          }
+        ]}
+      >
+        <ContractTermsList />
+      </Animated.View>
     </SafeAreaView>
   );
 };
@@ -90,48 +129,87 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
     flex: 1,
     backgroundColor: isDark ? '#0a0a0a' : '#f8fafc',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: isDark ? '#d1d5db' : '#6b7280',
-  },
   header: {
     flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
+    backgroundColor: isDark ? '#1f2937' : '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: isDark ? '#27272a' : '#e5e7eb',
-    backgroundColor: isDark ? '#1f2937' : '#ffffff',
   },
-  backButton: {
+  headerButton: {
     padding: 8,
+    width: 40,
+    alignItems: 'center',
   },
-  title: {
+  headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: isDark ? '#f9fafb' : '#111827',
   },
-  scrollView: {
+  summaryCard: {
+    margin: 16,
+    padding: 20,
+    backgroundColor: isDark ? '#1f2937' : '#ffffff',
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  summaryHeader: {
+    flexDirection: isRTL ? 'row-reverse' : 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  summaryTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: isDark ? '#f9fafb' : '#111827',
     flex: 1,
   },
-  scrollContent: {
-    paddingBottom: 40,
+  complianceContainer: {
+    flexDirection: isRTL ? 'row-reverse' : 'row',
+    alignItems: 'center',
+    gap: 20,
   },
-  actionsContainer: {
-    paddingHorizontal: 16,
-    marginTop: 24,
+  complianceScore: {
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: isDark ? '#064e3b' : '#ecfdf5',
+    borderRadius: 12,
+    minWidth: 100,
   },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
+  compliancePercentage: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: isDark ? '#6ee7b7' : '#10b981',
+  },
+  complianceLabel: {
+    fontSize: 12,
+    color: isDark ? '#9ca3af' : '#6b7280',
+    marginTop: 4,
+  },
+  complianceDetails: {
+    flex: 1,
+    gap: 12,
+  },
+  complianceItem: {
+    flexDirection: isRTL ? 'row-reverse' : 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  complianceText: {
+    fontSize: 14,
+    color: isDark ? '#d1d5db' : '#374151',
+    fontWeight: '500',
+  },
+  termsContainer: {
+    flex: 1,
   },
 });
 
