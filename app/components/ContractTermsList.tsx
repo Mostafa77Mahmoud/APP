@@ -1,10 +1,10 @@
 // app/components/ContractTermsList.tsx
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Alert, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Alert, Modal, Animated } from 'react-native';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSession, FrontendAnalysisTerm } from '../contexts/SessionContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { CheckCircle, AlertCircle, ChevronDown, MessageSquare, ThumbsUp, Edit3, Send, Sparkles, XCircle, FileCheck2, FileSearch, Eye, HelpCircle, RefreshCw, UserCheck as ExpertIcon } from 'lucide-react-native';
+import { CheckCircle, AlertCircle, ChevronDown, MessageSquare, ThumbsUp, Edit3, Send, Sparkles, XCircle, FileCheck2, FileSearch, Eye, HelpCircle, RefreshCw, UserCheck as ExpertIcon, FileText, Users, User } from 'lucide-react-native';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Tabs } from './ui/tabs';
@@ -31,17 +31,40 @@ const RadioGroup = ({ options, selectedValue, onValueChange, isRTL, styles }: { 
 const GeneratingContractAnimation: React.FC<{progress: number, type?: 'modified' | 'marked', styles: any}> = ({progress, type = 'modified', styles}) => {
     const { t } = useLanguage();
     const title = type === 'marked' ? t('term.generatingMarkedContract') : t('term.generatingContract');
+    
+    const stages = [
+        { nameKey: 'generate.stage1', icon: FileText, threshold: 0 },
+        { nameKey: 'generate.stage2', icon: Edit3, threshold: 30 },
+        { nameKey: 'generate.stage3', icon: FileCheck2, threshold: 60 },
+        { nameKey: 'generate.stage4', icon: Sparkles, threshold: 90 },
+    ];
+    
+    const currentStage = stages.slice().reverse().find(s => progress >= s.threshold) || stages[0];
+    const StageIcon = currentStage.icon;
 
     return (
         <View style={styles.animationOverlay}>
             <View style={styles.animationContainer}>
+                <View style={styles.stageIconContainer}>
+                    <StageIcon size={32} color={styles.iconColor} />
+                </View>
                 <Text style={styles.animationTitle}>{title}</Text>
-                <Progress value={progress} />
+                <Text style={styles.stageText}>{t(currentStage.nameKey)}</Text>
+                <Progress value={progress} style={styles.progressBar} />
                 <Text style={styles.animationPercentage}>{Math.round(progress)}%</Text>
             </View>
         </View>
     );
 };
+
+interface ExpertFeedbackData {
+    aiAnalysisApproved: boolean | null;
+    expertIsValidSharia?: boolean;
+    expertComment: string;
+    expertCorrectedShariaIssue?: string;
+    expertCorrectedReference?: string;
+    expertCorrectedSuggestion?: string;
+}
 
 
 const ContractTermsList: React.FC = () => {
@@ -51,7 +74,8 @@ const ContractTermsList: React.FC = () => {
     analysisTerms, isFetchingSession, isTermProcessing, isReviewingModification,
     askQuestionAboutTerm, reviewUserModification, confirmTermModification, isAskingQuestion,
     generateModifiedContract, generateMarkedContract, isGeneratingContract, isGeneratingMarkedContract,
-    sessionId, sessionDetails, updateTermLocally, clearSession
+    sessionId, sessionDetails, updateTermLocally, clearSession, currentUserRole, toggleUserRole,
+    askGeneralContractQuestion, isProcessingGeneralQuestion, submitExpertFeedback
   } = useSession();
 
   const [activeFilter, setActiveFilter] = useState<string>('all');
@@ -66,6 +90,14 @@ const ContractTermsList: React.FC = () => {
 
   const [isPreviewModalVisible, setIsPreviewModalVisible] = useState(false);
   const [previewFileType, setPreviewFileType] = useState<'modified' | 'marked' | null>(null);
+
+  const [isGeneralQuestionModalVisible, setIsGeneralQuestionModalVisible] = useState(false);
+  const [generalQuestionText, setGeneralQuestionText] = useState("");
+  const [generalQuestionAnswer, setGeneralQuestionAnswer] = useState<string | null>(null);
+
+  const [expertFeedbackTermId, setExpertFeedbackTermId] = useState<string | null>(null);
+  const [currentExpertFeedback, setCurrentExpertFeedback] = useState<Partial<ExpertFeedbackData>>({});
+  const [isSubmittingExpertFeedback, setIsSubmittingExpertFeedback] = useState<Record<string, boolean>>({});
   
   const isDark = theme === 'dark';
   const styles = getStyles(isDark, isRTL);
@@ -138,6 +170,80 @@ const ContractTermsList: React.FC = () => {
     setPreviewFileType(type);
     setIsPreviewModalVisible(true);
   };
+
+  const handleSendGeneralQuestion = useCallback(async () => {
+    if (!generalQuestionText.trim()) return;
+    setGeneralQuestionAnswer(null);
+    const answer = await askGeneralContractQuestion(generalQuestionText.trim());
+    if (answer) {
+      setGeneralQuestionAnswer(answer);
+    } else {
+      Alert.alert(t('error.interactionFailed'));
+    }
+  }, [generalQuestionText, askGeneralContractQuestion, t]);
+
+  const handleUseAnswerAsSuggestion = useCallback(async (term: FrontendAnalysisTerm) => {
+    if (term.currentQaAnswer && term.term_text) {
+      const success = await reviewUserModification(term.term_id, term.currentQaAnswer, term.term_text);
+      if (success) {
+        Alert.alert(t('review.suggestionReviewed'), t('review.suggestionReviewedDesc'));
+        if (editingTermId === term.term_id) {
+          const updatedTerm = analysisTerms?.find(t_ => t_.term_id === term.term_id);
+          setCurrentEditText(updatedTerm?.userModifiedText || updatedTerm?.reviewedSuggestion || "");
+        }
+      } else {
+        Alert.alert(t('review.reviewFailed'), t('review.reviewFailedDesc'));
+      }
+    }
+  }, [reviewUserModification, t, editingTermId, analysisTerms]);
+
+  const openExpertFeedbackForm = useCallback((term: FrontendAnalysisTerm) => {
+    setExpertFeedbackTermId(term.term_id);
+    setCurrentExpertFeedback({
+      aiAnalysisApproved: null,
+      expertComment: "",
+      expertIsValidSharia: term.expert_override_is_valid_sharia ?? term.isReviewedSuggestionValid ?? term.is_valid_sharia,
+      expertCorrectedShariaIssue: term.sharia_issue || "",
+      expertCorrectedReference: term.reference_number || "",
+      expertCorrectedSuggestion: term.userModifiedText || term.reviewedSuggestion || term.modified_term || "",
+    });
+  }, []);
+
+  const handleExpertFeedbackChange = useCallback((field: keyof ExpertFeedbackData, value: any) => {
+    setCurrentExpertFeedback(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  const submitExpertFeedbackHandler = useCallback(async () => {
+    if (!expertFeedbackTermId || !sessionId) return;
+    if (currentExpertFeedback.aiAnalysisApproved === null) {
+      Alert.alert(t('expert.validation.assessmentMissing'), t('expert.validation.assessmentMissingDesc'));
+      return;
+    }
+
+    setIsSubmittingExpertFeedback(prev => ({...prev, [expertFeedbackTermId]: true}));
+    try {
+      const payload = {
+        session_id: sessionId,
+        term_id: expertFeedbackTermId,
+        feedback_data: currentExpertFeedback as ExpertFeedbackData
+      };
+      await submitExpertFeedback(payload);
+
+      updateTermLocally({
+        term_id: expertFeedbackTermId,
+        has_expert_feedback: true,
+        expert_override_is_valid_sharia: currentExpertFeedback.expertIsValidSharia
+      });
+
+      Alert.alert(t('expert.feedbackSubmitted'), t('expert.feedbackSubmittedDesc'));
+      setExpertFeedbackTermId(null);
+      setCurrentExpertFeedback({});
+    } catch (error: any) {
+      Alert.alert(t('expert.submissionFailed'), error.message || t('expert.submissionFailedDesc'));
+    } finally {
+      setIsSubmittingExpertFeedback(prev => ({...prev, [expertFeedbackTermId]: false}));
+    }
+  }, [expertFeedbackTermId, sessionId, currentExpertFeedback, t, updateTermLocally, submitExpertFeedback]);
 
   const filteredTerms = useMemo(() => {
     if (!analysisTerms) return [];
@@ -223,8 +329,99 @@ const ContractTermsList: React.FC = () => {
                 {isTermProcessing[term.term_id] ? <ActivityIndicator color="#fff" /> : <Send size={16} color="#fff" />}
                 <Text style={styles.buttonTextPrimary}>{t('button.send')}</Text>
               </Button>
-              {term.currentQaAnswer && <Text style={styles.answerText}>{term.currentQaAnswer}</Text>}
+              {term.currentQaAnswer && (
+                <View style={styles.answerContainer}>
+                  <Text style={styles.answerText}>{term.currentQaAnswer}</Text>
+                  {!term.isUserConfirmed && (!term.is_valid_sharia || term.isReviewedSuggestionValid === false) && (
+                    <Button 
+                      variant="ghost" 
+                      style={{ marginTop: 8 }}
+                      onPress={() => handleUseAnswerAsSuggestion(term)}
+                      disabled={isReviewingModification[term.term_id]}
+                    >
+                      {isReviewingModification[term.term_id] ? 
+                        <ActivityIndicator color={isDark ? '#10b981' : '#059669'} /> : 
+                        <Sparkles size={14} color={isDark ? '#10b981' : '#059669'} />
+                      }
+                      <Text style={{ color: isDark ? '#10b981' : '#059669', marginLeft: 8 }}>{t('button.useAndReview')}</Text>
+                    </Button>
+                  )}
+                </View>
+              )}
             </View>
+
+            {currentUserRole === 'shariah_expert' && (
+              <View style={styles.expertFeedbackSection}>
+                <Text style={styles.expertFeedbackTitle}>
+                  {t('expert.feedbackTitle')}
+                </Text>
+                {expertFeedbackTermId === term.term_id ? (
+                  <View style={styles.expertFeedbackForm}>
+                    <Text style={styles.feedbackLabel}>{t('expert.aiAssessmentCorrect')}</Text>
+                    <RadioGroup 
+                      options={[
+                        { label: t('expert.yes'), value: 'true' },
+                        { label: t('expert.no'), value: 'false' }
+                      ]}
+                      selectedValue={currentExpertFeedback.aiAnalysisApproved === null ? "" : String(currentExpertFeedback.aiAnalysisApproved)}
+                      onValueChange={(val) => handleExpertFeedbackChange('aiAnalysisApproved', val === 'true')}
+                      isRTL={isRTL}
+                      styles={styles}
+                    />
+                    
+                    {currentExpertFeedback.aiAnalysisApproved === false && (
+                      <View style={{ marginTop: 16 }}>
+                        <Text style={styles.feedbackLabel}>{t('expert.correctedCompliance')}</Text>
+                        <RadioGroup 
+                          options={[
+                            { label: t('term.compliant'), value: 'true' },
+                            { label: t('term.non-compliant'), value: 'false' }
+                          ]}
+                          selectedValue={currentExpertFeedback.expertIsValidSharia === undefined ? "" : String(currentExpertFeedback.expertIsValidSharia)}
+                          onValueChange={(val) => handleExpertFeedbackChange('expertIsValidSharia', val === 'true')}
+                          isRTL={isRTL}
+                          styles={styles}
+                        />
+                      </View>
+                    )}
+                    
+                    <View style={{ marginTop: 16 }}>
+                      <Text style={styles.feedbackLabel}>{t('expert.comments')}</Text>
+                      <Textarea 
+                        value={currentExpertFeedback.expertComment || ""}
+                        onChangeText={(val) => handleExpertFeedbackChange('expertComment', val)}
+                        placeholder={t('expert.commentsPlaceholder')}
+                      />
+                    </View>
+                    
+                    <View style={styles.buttonGroup}>
+                      <Button variant="ghost" onPress={() => setExpertFeedbackTermId(null)}>
+                        <Text style={styles.buttonText}>{t('term.cancel')}</Text>
+                      </Button>
+                      <Button 
+                        onPress={submitExpertFeedbackHandler}
+                        disabled={isSubmittingExpertFeedback[term.term_id] || currentExpertFeedback.aiAnalysisApproved === null}
+                      >
+                        {isSubmittingExpertFeedback[term.term_id] ? 
+                          <ActivityIndicator color="#fff" /> : 
+                          <Send size={16} color="#fff" />
+                        }
+                        <Text style={styles.buttonTextPrimary}>{t('expert.submitFeedback')}</Text>
+                      </Button>
+                    </View>
+                  </View>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    onPress={() => openExpertFeedbackForm(term)}
+                    style={{ borderColor: '#f59e0b' }}
+                  >
+                    <Edit3 size={16} color="#f59e0b" />
+                    <Text style={{ color: '#f59e0b', marginLeft: 8 }}>{t('expert.provideFeedback')}</Text>
+                  </Button>
+                )}
+              </View>
+            )}
           </View>
         )}
       </View>
@@ -234,9 +431,34 @@ const ContractTermsList: React.FC = () => {
   return (
     <View style={styles.container}>
       {isAskingQuestion && <QuestionAnimation isVisible={isAskingQuestion} />}
+      {isProcessingGeneralQuestion && <QuestionAnimation isVisible={isProcessingGeneralQuestion} />}
       {generationType && <GeneratingContractAnimation progress={generationVisualProgress} type={generationType} styles={styles} />}
       
-      <Text style={styles.title}>{t('contract.terms')}</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>{t('contract.terms')}</Text>
+        <View style={styles.headerActions}>
+          <TouchableOpacity 
+            style={[styles.userRoleButton, { backgroundColor: currentUserRole === 'shariah_expert' ? '#f59e0b' : '#10b981' }]}
+            onPress={toggleUserRole}
+          >
+            {currentUserRole === 'shariah_expert' ? 
+              <ExpertIcon size={16} color="#fff" /> : 
+              <User size={16} color="#fff" />
+            }
+            <Text style={styles.userRoleText}>
+              {currentUserRole === 'shariah_expert' ? t('user.expert') : t('user.regular')}
+            </Text>
+          </TouchableOpacity>
+          {sessionId && analysisTerms && analysisTerms.length > 0 && (
+            <TouchableOpacity 
+              style={styles.generalQuestionButton}
+              onPress={() => setIsGeneralQuestionModalVisible(true)}
+            >
+              <HelpCircle size={16} color={isDark ? '#10b981' : '#059669'} />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
       <Tabs
         tabs={[
           { value: 'all', label: t('filter.all') },
@@ -286,13 +508,71 @@ const ContractTermsList: React.FC = () => {
         onClose={() => setIsPreviewModalVisible(false)}
         fileType={previewFileType}
       />
+
+      <Modal
+        visible={isGeneralQuestionModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsGeneralQuestionModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>{t('term.askGeneralQuestion')}</Text>
+            <Textarea
+              placeholder={t('term.generalQuestionPlaceholder')}
+              value={generalQuestionText}
+              onChangeText={setGeneralQuestionText}
+              style={styles.modalTextarea}
+            />
+            {isProcessingGeneralQuestion && (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator color={isDark ? '#10b981' : '#059669'} />
+                <Text style={styles.loadingText}>{t('processing')}</Text>
+              </View>
+            )}
+            {generalQuestionAnswer && !isProcessingGeneralQuestion && (
+              <ScrollView style={styles.answerScrollView}>
+                <Text style={styles.answerTitle}>{t('term.answer')}</Text>
+                <Text style={styles.generalAnswerText}>{generalQuestionAnswer}</Text>
+              </ScrollView>
+            )}
+            <View style={styles.modalButtonGroup}>
+              <Button 
+                variant="ghost" 
+                onPress={() => {
+                  setIsGeneralQuestionModalVisible(false);
+                  setGeneralQuestionText("");
+                  setGeneralQuestionAnswer(null);
+                }}
+              >
+                <Text style={styles.buttonText}>{t('term.cancel')}</Text>
+              </Button>
+              <Button 
+                onPress={handleSendGeneralQuestion}
+                disabled={isProcessingGeneralQuestion || !generalQuestionText.trim()}
+              >
+                {isProcessingGeneralQuestion ? 
+                  <ActivityIndicator color="#fff" /> : 
+                  <Send size={16} color="#fff" />
+                }
+                <Text style={styles.buttonTextPrimary}>{t('button.send')}</Text>
+              </Button>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
 
 const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
     container: { padding: 16, flex: 1 },
-    title: { fontSize: 22, fontWeight: 'bold', color: isDark ? '#f9fafb' : '#111827', marginBottom: 16, textAlign: isRTL ? 'right' : 'left' },
+    header: { flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+    title: { fontSize: 22, fontWeight: 'bold', color: isDark ? '#f9fafb' : '#111827', textAlign: isRTL ? 'right' : 'left', flex: 1 },
+    headerActions: { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 12 },
+    userRoleButton: { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, gap: 6 },
+    userRoleText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
+    generalQuestionButton: { padding: 8, borderRadius: 20, backgroundColor: isDark ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.1)' },
     termCard: { backgroundColor: isDark ? '#1f2937' : '#ffffff', borderRadius: 12, marginBottom: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 2, borderWidth: 1, borderColor: isDark ? '#374151' : '#e5e7eb' },
     termHeader: { padding: 16, flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-between', alignItems: 'center' },
     termHeaderText: { flex: 1, fontSize: 15, fontWeight: '600', color: isDark ? '#f9fafb' : '#374151', lineHeight: 22, textAlign: isRTL ? 'right' : 'left' },
@@ -319,9 +599,28 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
     radioInner: { height: 10, width: 10, borderRadius: 5, backgroundColor: '#10b981', },
     radioLabel: { color: isDark ? '#f9fafb' : '#111827', fontSize: 14 },
     animationOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', zIndex: 1001, },
-    animationContainer: { backgroundColor: isDark ? '#1f2937' : '#ffffff', borderRadius: 12, padding: 24, width: '80%', },
-    animationTitle: { fontSize: 18, fontWeight: 'bold', color: isDark ? '#f9fafb' : '#111827', textAlign: 'center', marginBottom: 16, },
-    animationPercentage: { fontSize: 14, fontWeight: '600', color: isDark ? '#9ca3af' : '#6b7280', textAlign: 'center', marginTop: 8, },
+    animationContainer: { backgroundColor: isDark ? '#1f2937' : '#ffffff', borderRadius: 12, padding: 24, width: '80%', alignItems: 'center' },
+    stageIconContainer: { width: 60, height: 60, borderRadius: 30, backgroundColor: isDark ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.1)', justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
+    iconColor: isDark ? '#6ee7b7' : '#10b981',
+    animationTitle: { fontSize: 18, fontWeight: 'bold', color: isDark ? '#f9fafb' : '#111827', textAlign: 'center', marginBottom: 8, },
+    stageText: { fontSize: 14, color: isDark ? '#d1d5db' : '#6b7280', textAlign: 'center', marginBottom: 16 },
+    progressBar: { width: '100%', marginBottom: 8 },
+    animationPercentage: { fontSize: 14, fontWeight: '600', color: isDark ? '#9ca3af' : '#6b7280', textAlign: 'center' },
+    expertFeedbackSection: { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#f59e0b', backgroundColor: isDark ? 'rgba(245, 158, 11, 0.1)' : 'rgba(245, 158, 11, 0.05)', padding: 12, borderRadius: 8 },
+    expertFeedbackTitle: { fontSize: 14, fontWeight: 'bold', color: '#f59e0b', marginBottom: 12, textAlign: isRTL ? 'right' : 'left' },
+    expertFeedbackForm: { gap: 12 },
+    feedbackLabel: { fontSize: 12, fontWeight: '600', color: isDark ? '#d1d5db' : '#374151', marginBottom: 4, textAlign: isRTL ? 'right' : 'left' },
+    answerContainer: { marginTop: 12 },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+    modalContainer: { backgroundColor: isDark ? '#1f2937' : '#ffffff', borderRadius: 12, padding: 20, width: '100%', maxHeight: '80%' },
+    modalTitle: { fontSize: 18, fontWeight: 'bold', color: isDark ? '#f9fafb' : '#111827', marginBottom: 16, textAlign: isRTL ? 'right' : 'left' },
+    modalTextarea: { minHeight: 100, marginBottom: 16 },
+    modalButtonGroup: { flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'flex-end', gap: 12, marginTop: 16 },
+    answerScrollView: { maxHeight: 200, marginBottom: 16, backgroundColor: isDark ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)', padding: 12, borderRadius: 8 },
+    answerTitle: { fontSize: 12, fontWeight: 'bold', color: isDark ? '#93c5fd' : '#2563eb', marginBottom: 8, textAlign: isRTL ? 'right' : 'left' },
+    generalAnswerText: { fontSize: 14, color: isDark ? '#dbeafe' : '#1e40af', lineHeight: 20, textAlign: isRTL ? 'right' : 'left' },
+    loadingContainer: { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', justifyContent: 'center', padding: 12 },
+    loadingText: { marginLeft: isRTL ? 0 : 8, marginRight: isRTL ? 8 : 0, color: isDark ? '#9ca3af' : '#6b7280' },
 });
 
 export default ContractTermsList;

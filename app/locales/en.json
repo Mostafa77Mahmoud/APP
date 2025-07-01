@@ -1,4 +1,3 @@
-
 {
   "app": {
     "title": "Shar'AI",
@@ -247,14 +246,14 @@
       "ready": "Preview Ready",
       "readyDescMobile": "Open the document in your browser to view, share, or print.",
       "close": "Close",
-      "openInBrowser": "Open in Browser"
+    "openInBrowser": "Open in Browser"
     }
   },
   "term": {
+    "noTermsExtracted": "No terms were extracted from the contract.",
+    "noTermsForFilter": "No terms match the current filter.",
     "compliant": "Compliant",
     "non-compliant": "Non-Compliant",
-    "noTermsExtracted": "No contract terms were extracted from this document.",
-    "noTermsForFilter": "No terms match the current filter.",
     "fullText": "Full Clause Text",
     "why": "Why is this non-compliant?",
     "suggestion": "AI Suggestion",

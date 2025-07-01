@@ -18,12 +18,12 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({ isAnalyzing, is
   const styles = getStyles(isDark);
 
   const analysisSteps = [
-    { nameKey: 'analyze.step.initial', icon: Search, durationFactor: 3.5 },
-    { nameKey: 'analyze.step.extractText', icon: FileText, durationFactor: 5.2 },
-    { nameKey: 'analyze.step.identifyTerms', icon: ListChecks, durationFactor: 6.8 },
-    { nameKey: 'analyze.step.shariaComplianceCheck', icon: Scale, durationFactor: 8.5 },
-    { nameKey: 'analyze.step.generateSuggestions', icon: BrainCircuit, durationFactor: 7.3 },
-    { nameKey: 'analyze.step.compileResults', icon: FileSignature, durationFactor: 4.7 }
+    { nameKey: 'analyze.step.initial', icon: Search, durationFactor: 3.5, shouldSpin: true },
+    { nameKey: 'analyze.step.extractText', icon: FileText, durationFactor: 5.2, shouldSpin: false },
+    { nameKey: 'analyze.step.identifyTerms', icon: ListChecks, durationFactor: 6.8, shouldSpin: true },
+    { nameKey: 'analyze.step.shariaComplianceCheck', icon: Scale, durationFactor: 8.5, shouldSpin: true },
+    { nameKey: 'analyze.step.generateSuggestions', icon: BrainCircuit, durationFactor: 7.3, shouldSpin: true },
+    { nameKey: 'analyze.step.compileResults', icon: FileSignature, durationFactor: 4.7, shouldSpin: false }
   ];
 
   const [currentVisualStepIndex, setCurrentVisualStepIndex] = useState(0);
@@ -35,6 +35,7 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({ isAnalyzing, is
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const sparkleAnim = useRef(new Animated.Value(0)).current;
+  const spinAnim = useRef(new Animated.Value(0)).current;
 
   const subMessages = [
     t('analyze.submessage.processing'),
@@ -88,6 +89,16 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({ isAnalyzing, is
           Animated.timing(sparkleAnim, { toValue: 1, duration: 2000, useNativeDriver: true }),
           Animated.timing(sparkleAnim, { toValue: 0, duration: 2000, useNativeDriver: true }),
         ])
+      ).start();
+
+      // Spinning animation for active step icons
+      Animated.loop(
+        Animated.timing(spinAnim, {
+          toValue: 1,
+          duration: 2000,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        })
       ).start();
 
       // Calculate timing for 26-38 seconds
@@ -246,6 +257,11 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({ isAnalyzing, is
             const isStepCompleted = index < currentVisualStepIndex || (!isAnalyzing && showCompletionMessage);
             const isStepActive = index === currentVisualStepIndex && isAnalyzing;
             
+            const spin = spinAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: ['0deg', '360deg'],
+            });
+            
             return (
               <Animated.View 
                 key={step.nameKey} 
@@ -267,16 +283,21 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({ isAnalyzing, is
                   isStepCompleted ? styles.completedStepIcon : 
                   isStepActive ? styles.activeStepIcon : {},
                   isStepActive && {
-                    transform: [{ scale: pulseAnim }]
+                    transform: [
+                      { scale: pulseAnim },
+                      ...(step.shouldSpin ? [{ rotate: spin }] : [])
+                    ]
                   }
                 ]}>
                   {isStepCompleted ? (
                     <CheckCircle size={20} color={isDark ? '#6ee7b7' : '#10b981'} />
                   ) : (
-                    <StepIcon 
-                      size={20} 
-                      color={isStepActive ? (isDark ? '#6ee7b7' : '#10b981') : (isDark ? '#9ca3af' : '#6b7280')} 
-                    />
+                    <Animated.View style={isStepActive && step.shouldSpin ? { transform: [{ rotate: spin }] } : {}}>
+                      <StepIcon 
+                        size={20} 
+                        color={isStepActive ? (isDark ? '#6ee7b7' : '#10b981') : (isDark ? '#9ca3af' : '#6b7280')} 
+                      />
+                    </Animated.View>
                   )}
                 </Animated.View>
                 <Text style={[

@@ -1,4 +1,3 @@
-
 {
   "app": {
     "title": "شرعي",
@@ -266,13 +265,35 @@
     "saveAndReview": "حفظ ومراجعة",
     "expertFeedback": "تعليقات الخبير",
     "lastModified": "آخر تعديل",
-    "interactionCount": "التفاعلات"
+    "interactionCount": "التفاعلات",
+    "askGeneralQuestion": "اطرح سؤالاً عاماً",
+    "generalQuestionPlaceholder": "اطرح سؤالاً عاماً عن العقد...",
+    "askQuestion": "اطرح سؤالاً",
+    "reference": "المرجع",
+    "newShariaIssue": "مشكلة شرعية جديدة",
+    "alreadyCompliant": "هذا البند متوافق مع الشريعة بالفعل.",
+    "noSession": "لا توجد جلسة متاحة. يرجى رفع عقد أولاً.",
+    "noResults": "لا توجد نتائج تحليل متاحة.",
+    "editConfirmed": "تعديل مؤكد",
+    "initialSuggestion": "الاقتراح الأولي",
+    "reviewedSuggestion": "الاقتراح المراجع",
+    "yourEdit": "تعديلك"
   },
   "review": {
     "editSentForReview": "تم إرسال المراجعة",
     "editSentForReviewDesc": "تم إرسال اقتراحك المعدل لمراجعة الذكاء الاصطناعي.",
     "reviewFailed": "فشلت المراجعة",
-    "couldNotReviewEdit": "لم نتمكن من مراجعة تعديلك في هذا الوقت."
+    "couldNotReviewEdit": "لم نتمكن من مراجعة تعديلك في هذا الوقت.",
+    "suggestionReviewed": "تمت مراجعة الاقتراح",
+    "suggestionReviewedDesc": "تمت مراجعة الإجابة ومعالجتها.",
+    "reviewFailed": "فشلت المراجعة",
+    "reviewFailedDesc": "لم يتمكن من مراجعة الاقتراح.",
+    "editSentForReview": "تم إرسال التعديل للمراجعة",
+    "editSentForReviewDesc": "تم إرسال تعديلك لمراجعة الذكي الاصطناعي.",
+    "couldNotReviewEdit": "لم يتمكن من مراجعة تعديلك.",
+    "looksGood": "يبدو جيداً!",
+    "concern": "قلق",
+    "complianceIssue": "مشكلة توافق محتملة"
   },
   "filter": {
     "all": "الكل",
@@ -287,6 +308,38 @@
     "upload": "رفع",
     "download": "تحميل",
     "share": "مشاركة",
-    "save": "حفظ"
+    "save": "حفظ",
+    "useAndReview": "استخدام ومراجعة"
+  },
+  "user": {
+    "regular": "عادي",
+    "expert": "خبير"
+  },
+  "expert": {
+    "feedbackTitle": "تقييم الخبير",
+    "aiAssessmentCorrect": "هل تقييم الذكي الاصطناعي صحيح؟",
+    "yes": "نعم",
+    "no": "لا",
+    "correctedCompliance": "حالة التوافق المصححة:",
+    "comments": "التعليقات",
+    "commentsPlaceholder": "أضف تعليقاتك كخبير...",
+    "provideFeedback": "تقديم تقييم",
+    "submitFeedback": "إرسال التقييم",
+    "feedbackSubmitted": "تم إرسال التقييم",
+    "feedbackSubmittedDesc": "تم تسجيل تقييمك كخبير.",
+    "submissionFailed": "فشل الإرسال",
+    "submissionFailedDesc": "لم يتمكن من إرسال تقييم الخبير.",
+    "validation": {
+      "assessmentMissing": "التقييم مطلوب",
+      "assessmentMissingDesc": "يرجى الإشارة إلى ما إذا كان تقييم الذكي الاصطناعي صحيحاً.",
+      "statusMissing": "الحالة مطلوبة",
+      "statusMissingDesc": "يرجى تقديم حالة التوافق المصححة."
+    }
+  },
+  "generate": {
+    "stage1": "تحضير الوثيقة...",
+    "stage2": "تطبيق التعديلات...",
+    "stage3": "إنهاء العقد...",
+    "stage4": "إكمال الإنشاء..."
   }
 }
