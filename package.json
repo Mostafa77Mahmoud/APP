@@ -14,7 +14,12 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.1.2",
+    "@replit/vite-plugin-cartographer": "^0.2.7",
+    "@replit/vite-plugin-runtime-error-modal": "^0.0.3",
+    "@tailwindcss/typography": "^0.5.16",
+    "@vitejs/plugin-react": "^4.6.0",
     "clsx": "^2.1.1",
+    "drizzle-kit": "^0.31.4",
     "drizzle-zod": "^0.8.2",
     "expo": "53.0.13",
     "expo-camera": "~16.1.9",
@@ -42,15 +47,18 @@
     "react-native-screens": "4.11.1",
     "react-native-svg": "15.11.2",
     "react-native-web": "~0.20.0",
+    "tailwindcss": "^4.1.11",
+    "tailwindcss-animate": "^1.0.7",
+    "vite": "^6.3.5",
     "zod": "^3.25.67"
   },
   "devDependencies": {
     "@babel/core": "^7.27.7",
+    "@react-native-community/cli": "latest",
     "@types/express": "^5.0.3",
     "@types/react": "~19.0.10",
     "babel-plugin-module-resolver": "^5.0.2",
     "babel-preset-expo": "~13.0.0",
-    "@react-native-community/cli": "latest",
     "typescript": "~5.8.3"
   }
 }
