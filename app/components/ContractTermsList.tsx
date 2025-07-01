@@ -391,10 +391,10 @@ const ContractTermsList: React.FC = () => {
   }, [expertFeedbackTermId, sessionId, currentExpertFeedback, t, updateTermLocally, submitExpertFeedback]);
 
   const filteredTerms = useMemo(() => {
-    if (!analysisTerms) return [];
+    if (!analysisTerms || !Array.isArray(analysisTerms)) return [];
     return analysisTerms.filter(term => {
       if (activeFilter === 'all') return true;
-      let isEffectivelyCompliant = term.expert_override_is_valid_sharia ?? (term.isUserConfirmed ? (term.isReviewedSuggestionValid ?? true) : term.is_valid_sharia) ?? false;
+      const isEffectivelyCompliant = term.expert_override_is_valid_sharia ?? (term.isUserConfirmed ? (term.isReviewedSuggestionValid ?? true) : term.is_valid_sharia) ?? false;
       if (activeFilter === 'compliant') return isEffectivelyCompliant;
       if (activeFilter === 'non-compliant') return !isEffectivelyCompliant;
       return true;
@@ -410,14 +410,23 @@ const ContractTermsList: React.FC = () => {
     );
   }
 
-  if (!analysisTerms || analysisTerms.length === 0) {
+  if (!analysisTerms || !Array.isArray(analysisTerms) || analysisTerms.length === 0) {
+    console.log('ContractTermsList: No analysis terms available', { analysisTerms, sessionId });
     return (
       <View style={styles.emptyContainer}>
         <FileText size={48} color={isDark ? '#6b7280' : '#9ca3af'} />
-        <Text style={styles.emptyText}>{t('term.noTermsExtracted')}</Text>
+        <Text style={styles.emptyText}>
+          {!sessionId ? t('term.noSession') : t('term.noTermsExtracted')}
+        </Text>
       </View>
     );
   }
+
+  console.log('ContractTermsList: Rendering terms', { 
+    analysisTermsCount: analysisTerms?.length, 
+    filteredTermsCount: filteredTerms?.length,
+    activeFilter 
+  });
 
   const renderTerm = (term: FrontendAnalysisTerm, index: number) => {
     const isExpanded = expandedTermId === term.term_id;
@@ -738,12 +747,14 @@ const ContractTermsList: React.FC = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {filteredTerms.length > 0 ? (
+        {Array.isArray(filteredTerms) && filteredTerms.length > 0 ? (
           filteredTerms.map((term, index) => renderTerm(term, index))
         ) : (
           <View style={styles.emptyContainer}>
             <FileText size={48} color={isDark ? '#6b7280' : '#9ca3af'} />
-            <Text style={styles.emptyText}>{t('term.noTermsForFilter')}</Text>
+            <Text style={styles.emptyText}>
+              {!analysisTerms || analysisTerms.length === 0 ? t('term.noTermsExtracted') : t('term.noTermsForFilter')}
+            </Text>
           </View>
         )}
       </ScrollView>
@@ -777,7 +788,8 @@ const ContractTermsList: React.FC = () => {
 
         <View style={styles.buttonContainer}>
           <Button 
-            onPress={() => handleGenerateContract('marked')} disabled={isGeneratingContract || isGeneratingMarkedContract} 
+            onPress={() => handleGenerateContract('marked')} 
+            disabled={isGeneratingContract || isGeneratingMarkedContract} 
             variant="secondary" 
             style={styles.generateButton}
           >
