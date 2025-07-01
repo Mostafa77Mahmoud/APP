@@ -1,3 +1,4 @@
+javascript
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Alert, Modal, Animated, Dimensions } from 'react-native';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -230,12 +231,12 @@ const ContractTermsList: React.FC = () => {
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 500,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
         Animated.timing(slideAnim, {
           toValue: 0,
           duration: 500,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
       ]).start();
     }
@@ -777,7 +778,8 @@ const ContractTermsList: React.FC = () => {
 
         <View style={styles.buttonContainer}>
           <Button 
-            onPress={() => handleGenerateContract('marked')} disabled={isGeneratingContract || isGeneratingMarkedContract} 
+            onPress={() =>```javascript
+ handleGenerateContract('marked')} disabled={isGeneratingContract || isGeneratingMarkedContract} 
             variant="secondary" 
             style={styles.generateButton}
           >
@@ -942,10 +944,7 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
       backgroundColor: isDark ? '#1f2937' : '#ffffff', 
       borderRadius: 16, 
       marginBottom: 16, 
-      shadowColor: '#000', 
-      shadowOffset: { width: 0, height: 4 }, 
-      shadowOpacity: isDark ? 0.3 : 0.1, 
-      shadowRadius: 8, 
+      boxShadow: isDark ? '0 4px 8px rgba(0, 0, 0, 0.3)' : '0 4px 8px rgba(0, 0, 0, 0.1)',
       elevation: 5, 
       borderWidth: 1, 
       borderColor: isDark ? '#374151' : '#e5e7eb' 
@@ -1110,11 +1109,8 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
       backgroundColor: isDark ? '#1f2937' : '#ffffff',
       borderRadius: 16,
       padding: 20,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: isDark ? 0.3 : 0.1,
-      shadowRadius: 4,
-      elevation: 3,
+      boxShadow: isDark ? '0 4px 8px rgba(0, 0, 0, 0.3)' : '0 4px 8px rgba(0, 0, 0, 0.1)',
+      elevation: 5,
     },
     sectionDescription: { 
       fontSize: 14, 
@@ -1187,10 +1183,7 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
       padding: 32, 
       width: screenWidth * 0.85, 
       alignItems: 'center',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 10 },
-      shadowOpacity: 0.3,
-      shadowRadius: 20,
+      boxShadow: '0 10px 20px rgba(0, 0, 0, 0.3)',
       elevation: 10,
     },
     stageIconContainer: { 
@@ -1289,10 +1282,7 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
       padding: 24, 
       width: '100%', 
       maxHeight: '85%',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 10 },
-      shadowOpacity: 0.3,
-      shadowRadius: 20,
+      boxShadow: '0 10px 20px rgba(0, 0, 0, 0.3)',
       elevation: 10,
     },
     modalTitle: { 

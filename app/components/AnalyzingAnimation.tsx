@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -28,10 +28,50 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
-  const progressAnim = useRef(new Animated.Value(0)).current;
   const orbitAnim = useRef(new Animated.Value(0)).current;
 
+  const [currentStep, setCurrentStep] = useState(1);
+  const [stepProgress, setStepProgress] = useState(0);
+
   const isDark = theme === 'dark';
+
+  const stages = [
+    { 
+      key: 'stage1', 
+      icon: FileText, 
+      color: '#3b82f6',
+      title: t('analyzing.stage1') || 'Reading Document',
+      desc: t('analyzing.stage1.desc') || 'Extracting and parsing document content'
+    },
+    { 
+      key: 'stage2', 
+      icon: Search, 
+      color: '#8b5cf6',
+      title: t('analyzing.stage2') || 'Analyzing Terms',
+      desc: t('analyzing.stage2.desc') || 'Identifying contractual clauses and terms'
+    },
+    { 
+      key: 'stage3', 
+      icon: Brain, 
+      color: '#10b981',
+      title: t('analyzing.stage3') || 'AI Processing',
+      desc: t('analyzing.stage3.desc') || 'Applying Sharia compliance analysis'
+    },
+    { 
+      key: 'stage4', 
+      icon: Shield, 
+      color: '#059669',
+      title: t('analyzing.stage4') || 'Compliance Check',
+      desc: t('analyzing.stage4.desc') || 'Evaluating Islamic law compliance'
+    },
+    { 
+      key: 'stage5', 
+      icon: CheckCircle, 
+      color: '#f59e0b',
+      title: t('analyzing.stage5') || 'Finalizing Results',
+      desc: t('analyzing.stage5.desc') || 'Preparing analysis report'
+    },
+  ];
 
   useEffect(() => {
     if (isVisible) {
@@ -91,10 +131,50 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
       pulseAnimation.start();
       orbitAnimation.start();
 
+      // Step progression logic - each step takes 6-7 seconds
+      let stepTimer: NodeJS.Timeout;
+      let progressTimer: NodeJS.Timeout;
+      
+      const startStepProgression = () => {
+        setCurrentStep(1);
+        setStepProgress(0);
+        
+        const runStep = (stepNumber: number) => {
+          if (stepNumber > stages.length) return;
+          
+          setCurrentStep(stepNumber);
+          setStepProgress(0);
+          
+          // Progress within each step (smooth progression over 6-7 seconds)
+          const stepDuration = 6000 + Math.random() * 1000; // 6-7 seconds
+          const progressInterval = 100; // Update every 100ms
+          const progressIncrement = 100 / (stepDuration / progressInterval);
+          
+          progressTimer = setInterval(() => {
+            setStepProgress(prev => {
+              const newProgress = prev + progressIncrement;
+              if (newProgress >= 100) {
+                clearInterval(progressTimer);
+                // Move to next step after a brief pause
+                stepTimer = setTimeout(() => runStep(stepNumber + 1), 500);
+                return 100;
+              }
+              return newProgress;
+            });
+          }, progressInterval);
+        };
+        
+        runStep(1);
+      };
+
+      startStepProgression();
+
       return () => {
         rotateAnimation.stop();
         pulseAnimation.stop();
         orbitAnimation.stop();
+        if (stepTimer) clearTimeout(stepTimer);
+        if (progressTimer) clearInterval(progressTimer);
       };
     } else {
       Animated.parallel([
@@ -112,15 +192,6 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
     }
   }, [isVisible]);
 
-  // Animate progress
-  useEffect(() => {
-    Animated.timing(progressAnim, {
-      toValue: progress / 100,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-  }, [progress]);
-
   const spin = rotateAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
@@ -131,45 +202,7 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
     outputRange: ['0deg', '360deg'],
   });
 
-  const stages = [
-    { 
-      key: 'stage1', 
-      icon: FileText, 
-      color: '#3b82f6',
-      title: t('analyzing.stage1') || 'Reading Document',
-      desc: t('analyzing.stage1.desc') || 'Extracting and parsing document content'
-    },
-    { 
-      key: 'stage2', 
-      icon: Search, 
-      color: '#8b5cf6',
-      title: t('analyzing.stage2') || 'Analyzing Terms',
-      desc: t('analyzing.stage2.desc') || 'Identifying contractual clauses and terms'
-    },
-    { 
-      key: 'stage3', 
-      icon: Brain, 
-      color: '#10b981',
-      title: t('analyzing.stage3') || 'AI Processing',
-      desc: t('analyzing.stage3.desc') || 'Applying Sharia compliance analysis'
-    },
-    { 
-      key: 'stage4', 
-      icon: Shield, 
-      color: '#059669',
-      title: t('analyzing.stage4') || 'Compliance Check',
-      desc: t('analyzing.stage4.desc') || 'Evaluating Islamic law compliance'
-    },
-    { 
-      key: 'stage5', 
-      icon: CheckCircle, 
-      color: '#f59e0b',
-      title: t('analyzing.stage5') || 'Finalizing Results',
-      desc: t('analyzing.stage5.desc') || 'Preparing analysis report'
-    },
-  ];
-
-  const currentStageData = stages[Math.min(stage - 1, stages.length - 1)];
+  const currentStageData = stages[Math.min(currentStep - 1, stages.length - 1)];
   const StageIcon = currentStageData.icon;
 
   if (!isVisible) return null;
@@ -300,40 +333,26 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
           {currentStageData.desc}
         </Text>
 
-        {/* Enhanced Progress Bar */}
-        {progress > 0 && (
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBar}>
-              <Animated.View 
-                style={[
-                  styles.progressFill, 
-                  { 
-                    width: progressAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: ['0%', '100%'],
-                    }),
-                    backgroundColor: currentStageData.color,
-                    shadowColor: currentStageData.color,
-                  }
-                ]} 
-              >
-                <Animated.View style={[
-                  styles.progressGlow,
-                  {
-                    backgroundColor: currentStageData.color,
-                    opacity: pulseAnim.interpolate({
-                      inputRange: [1, 1.2],
-                      outputRange: [0.3, 0.6],
-                    })
-                  }
-                ]} />
-              </Animated.View>
-            </View>
-            <Text style={[styles.progressText, { color: currentStageData.color }]}>
-              {Math.round(progress)}%
-            </Text>
+        {/* Step Progress */}
+        <View style={styles.progressContainer}>
+          <Text style={[styles.stepText, { color: currentStageData.color }]}>
+            Step {currentStep} of {stages.length}
+          </Text>
+          <View style={styles.progressBar}>
+            <View 
+              style={[
+                styles.progressFill, 
+                { 
+                  width: `${stepProgress}%`,
+                  backgroundColor: currentStageData.color,
+                }
+              ]} 
+            />
           </View>
-        )}
+          <Text style={[styles.progressText, { color: currentStageData.color }]}>
+            {Math.round(stepProgress)}%
+          </Text>
+        </View>
 
         {/* Stage Indicators */}
         <View style={styles.stageIndicators}>
@@ -343,9 +362,9 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
               style={[
                 styles.stageIndicator,
                 { 
-                  backgroundColor: index < stage ? stageItem.color : (isDark ? '#374151' : '#e5e7eb'),
+                  backgroundColor: index < currentStep ? stageItem.color : (isDark ? '#374151' : '#e5e7eb'),
                   transform: [{ 
-                    scale: index === stage - 1 ? pulseAnim.interpolate({
+                    scale: index === currentStep - 1 ? pulseAnim.interpolate({
                       inputRange: [1, 1.2],
                       outputRange: [1, 1.3],
                     }) : 1 
@@ -520,6 +539,11 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
   },
+  stepText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
   progressBar: {
     width: '100%',
     height: 12,
@@ -535,18 +559,9 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 3,
-    position: 'relative',
-  },
-  progressGlow: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 6,
   },
   progressText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   stageIndicators: {
