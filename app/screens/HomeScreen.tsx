@@ -5,7 +5,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
-import { getStats, getSessionHistory, getLocalSessions, SessionDetailsApiResponse } from '../services/api'; // Corrected import
+import { getStats, getSessionHistory, getLocalSessions, SessionDetailsApiResponse } from '../services/api';
+import { useContract } from '../contexts/ContractContext';
 import { Camera, Upload, BarChart2, CheckSquare, FileText } from 'lucide-react-native';
 import { ScreenType } from '../MobileApp';
 
@@ -17,6 +18,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
   const { t, isRTL } = useLanguage();
   const { theme } = useTheme();
   const { user, isGuestMode } = useAuth();
+  const { contracts, isLoading: contractsLoading } = useContract();
   
   const [timeOfDay, setTimeOfDay] = useState('');
   const [userStats, setUserStats] = useState<any>(null);
@@ -30,10 +32,39 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
   const loadDashboardData = useCallback(async () => {
     setLoading(true);
     try {
-      if (isGuestMode) {
-        const localHistory = await getLocalSessions();
-        setRecentAnalyses(localHistory.slice(0, 3));
-        setUserStats({ total_analyses: localHistory.length, compliance_rate: 0, analyses_this_month: 0 });
+      if (isGuestMode || contractsLoading) {
+        // Use contracts from context for guest mode or while loading
+        const totalAnalyses = contracts.length;
+        const avgCompliance = contracts.length > 0 
+          ? contracts.reduce((sum, contract) => sum + contract.complianceScore, 0) / contracts.length
+          : 0;
+        
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        const analysesThisMonth = contracts.filter(contract => {
+          const contractDate = new Date(contract.analysisDate);
+          return contractDate.getMonth() === currentMonth && contractDate.getFullYear() === currentYear;
+        }).length;
+
+        setUserStats({ 
+          total_analyses: totalAnalyses, 
+          compliance_rate: Math.round(avgCompliance), 
+          analyses_this_month: analysesThisMonth 
+        });
+
+        // Convert contracts to session format for recent analyses
+        const recentContractAnalyses = contracts
+          .sort((a, b) => new Date(b.analysisDate).getTime() - new Date(a.analysisDate).getTime())
+          .slice(0, 3)
+          .map(contract => ({
+            session_id: contract.sessionId,
+            original_filename: contract.name,
+            analysis_timestamp: contract.analysisDate,
+            compliance_percentage: contract.complianceScore,
+            analysis_results: []
+          }));
+
+        setRecentAnalyses(recentContractAnalyses);
       } else {
         const [stats, history] = await Promise.all([
           getStats().catch(() => ({ total_analyses: 0, compliance_rate: 0, analyses_this_month: 0 })),
@@ -44,10 +75,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
       }
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
+      // Fallback to contracts data
+      const totalAnalyses = contracts.length;
+      const avgCompliance = contracts.length > 0 
+        ? contracts.reduce((sum, contract) => sum + contract.complianceScore, 0) / contracts.length
+        : 0;
+      setUserStats({ 
+        total_analyses: totalAnalyses, 
+        compliance_rate: Math.round(avgCompliance), 
+        analyses_this_month: 0 
+      });
     } finally {
       setLoading(false);
     }
-  }, [isGuestMode]);
+  }, [isGuestMode, contracts, contractsLoading]);
 
   useEffect(() => {
     const hour = new Date().getHours();

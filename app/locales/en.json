@@ -64,13 +64,18 @@
   },
   "upload": {
     "title": "Upload Contract",
-    "description": "Begin by uploading your contract document for a comprehensive Sharia compliance check.",
-    "dragDrop": "Tap to select a document",
-    "formats": "PDF, DOCX, TXT supported",
+    "description": "Select a contract document to analyze for Sharia compliance",
+    "dragDrop": "Click to select a document",
+    "formats": "Supports PDF, DOCX, and TXT files",
     "uploading": "Uploading...",
-    "analyzing": "Analyzing contract...",
+    "analyzing": "Analyzing Document...",
+    "analyzingDesc": "Please wait while we process your contract",
     "fileSelected": "File ready for analysis",
-    "analyze": "Analyze Contract"
+    "analyze": "Analyze Contract",
+    "complete": "Upload Complete!",
+    "redirecting": "Redirecting to results...",
+    "error": "Upload Error",
+    "unknownSize": "Size unknown"
   },
   "analyze": {
     "step": {

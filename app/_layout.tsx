@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { AuthProvider } from './contexts/AuthContext';
-import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { LanguageProvider } from './contexts/LanguageContext';
+import { AuthProvider } from './contexts/AuthContext';
 import { SessionProvider } from './contexts/SessionContext';
+import { ContractProvider } from './contexts/ContractContext';
 import MobileApp from './MobileApp';
 
 // This component is the root of your application.
@@ -18,9 +19,11 @@ export default function RootLayout() {
       <LanguageProvider>
         <AuthProvider>
           <SessionProvider>
-            <View style={styles.container}>
-              <MobileApp />
-            </View>
+            <ContractProvider>
+              <View style={styles.container}>
+                <MobileApp />
+              </View>
+            </ContractProvider>
           </SessionProvider>
         </AuthProvider>
       </LanguageProvider>

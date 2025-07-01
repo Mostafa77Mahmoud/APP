@@ -1,8 +1,9 @@
+
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { FileText, Search, CheckCircle, Sparkles, Loader, Eye, Brain } from 'lucide-react-native';
+import { FileText, Search, CheckCircle, Sparkles, Loader, Eye, Brain, Shield, Zap } from 'lucide-react-native';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -10,12 +11,14 @@ interface AnalyzingAnimationProps {
   isVisible: boolean;
   stage?: number;
   progress?: number;
+  currentStage?: string;
 }
 
 const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({ 
   isVisible, 
   stage = 1, 
-  progress = 0 
+  progress = 0,
+  currentStage
 }) => {
   const { t } = useLanguage();
   const { theme } = useTheme();
@@ -25,6 +28,8 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
+  const progressAnim = useRef(new Animated.Value(0)).current;
+  const orbitAnim = useRef(new Animated.Value(0)).current;
 
   const isDark = theme === 'dark';
 
@@ -74,12 +79,22 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
         ])
       );
 
+      const orbitAnimation = Animated.loop(
+        Animated.timing(orbitAnim, {
+          toValue: 1,
+          duration: 4000,
+          useNativeDriver: true,
+        })
+      );
+
       rotateAnimation.start();
       pulseAnimation.start();
+      orbitAnimation.start();
 
       return () => {
         rotateAnimation.stop();
         pulseAnimation.stop();
+        orbitAnimation.stop();
       };
     } else {
       Animated.parallel([
@@ -97,7 +112,21 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
     }
   }, [isVisible]);
 
+  // Animate progress
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: progress / 100,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [progress]);
+
   const spin = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  const orbit = orbitAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
   });
@@ -107,41 +136,41 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
       key: 'stage1', 
       icon: FileText, 
       color: '#3b82f6',
-      title: t('analyzing.stage1'),
-      desc: t('analyzing.stage1.desc')
+      title: t('analyzing.stage1') || 'Reading Document',
+      desc: t('analyzing.stage1.desc') || 'Extracting and parsing document content'
     },
     { 
       key: 'stage2', 
       icon: Search, 
       color: '#8b5cf6',
-      title: t('analyzing.stage2'),
-      desc: t('analyzing.stage2.desc')
+      title: t('analyzing.stage2') || 'Analyzing Terms',
+      desc: t('analyzing.stage2.desc') || 'Identifying contractual clauses and terms'
     },
     { 
       key: 'stage3', 
       icon: Brain, 
       color: '#10b981',
-      title: t('analyzing.stage3'),
-      desc: t('analyzing.stage3.desc')
+      title: t('analyzing.stage3') || 'AI Processing',
+      desc: t('analyzing.stage3.desc') || 'Applying Sharia compliance analysis'
     },
     { 
       key: 'stage4', 
-      icon: CheckCircle, 
+      icon: Shield, 
       color: '#059669',
-      title: t('analyzing.stage4'),
-      desc: t('analyzing.stage4.desc')
+      title: t('analyzing.stage4') || 'Compliance Check',
+      desc: t('analyzing.stage4.desc') || 'Evaluating Islamic law compliance'
     },
     { 
       key: 'stage5', 
-      icon: Sparkles, 
+      icon: CheckCircle, 
       color: '#f59e0b',
-      title: t('analyzing.stage5'),
-      desc: t('analyzing.stage5.desc')
+      title: t('analyzing.stage5') || 'Finalizing Results',
+      desc: t('analyzing.stage5.desc') || 'Preparing analysis report'
     },
   ];
 
-  const currentStage = stages[Math.min(stage - 1, stages.length - 1)];
-  const StageIcon = currentStage.icon;
+  const currentStageData = stages[Math.min(stage - 1, stages.length - 1)];
+  const StageIcon = currentStageData.icon;
 
   if (!isVisible) return null;
 
@@ -162,52 +191,113 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
         ]}
       >
         {/* Main Icon with Enhanced Animation */}
-        <Animated.View 
-          style={[
-            styles.iconContainer,
-            { 
-              backgroundColor: `${currentStage.color}20`,
-              borderColor: `${currentStage.color}40`,
-              transform: [
-                { rotate: spin },
-                { scale: pulseAnim }
-              ]
-            }
-          ]}
-        >
-          <StageIcon size={36} color={currentStage.color} />
+        <View style={styles.iconWrapper}>
+          <Animated.View 
+            style={[
+              styles.iconContainer,
+              { 
+                backgroundColor: `${currentStageData.color}20`,
+                borderColor: `${currentStageData.color}40`,
+                transform: [{ rotate: spin }]
+              }
+            ]}
+          >
+            <StageIcon size={36} color={currentStageData.color} />
 
-          {/* Orbiting dots */}
-          <Animated.View style={[styles.orbitingDot, { transform: [{ rotate: spin }] }]}>
-            <View style={[styles.dot, { backgroundColor: currentStage.color }]} />
+            {/* Orbiting elements */}
+            <Animated.View style={[
+              styles.orbitingElement,
+              { 
+                transform: [
+                  { rotate: orbit },
+                  { translateX: 45 },
+                  { rotate: orbitAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '-360deg'],
+                  }) }
+                ]
+              }
+            ]}>
+              <View style={[styles.orbitDot, { backgroundColor: currentStageData.color }]} />
+            </Animated.View>
+
+            <Animated.View style={[
+              styles.orbitingElement,
+              { 
+                transform: [
+                  { rotate: orbitAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['180deg', '540deg'],
+                  }) },
+                  { translateX: 55 },
+                  { rotate: orbitAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '-540deg'],
+                  }) }
+                ]
+              }
+            ]}>
+              <View style={[styles.orbitDot, { backgroundColor: currentStageData.color, opacity: 0.7 }]} />
+            </Animated.View>
           </Animated.View>
-          <Animated.View style={[styles.orbitingDot2, { transform: [{ rotate: spin }] }]}>
-            <View style={[styles.dot, { backgroundColor: currentStage.color }]} />
-          </Animated.View>
-        </Animated.View>
+
+          {/* Pulse rings */}
+          <Animated.View style={[
+            styles.pulseRing,
+            {
+              borderColor: currentStageData.color,
+              transform: [{ scale: pulseAnim }],
+              opacity: pulseAnim.interpolate({
+                inputRange: [1, 1.2],
+                outputRange: [0.5, 0],
+                extrapolate: 'clamp',
+              })
+            }
+          ]} />
+          <Animated.View style={[
+            styles.pulseRing,
+            styles.pulseRingDelayed,
+            {
+              borderColor: currentStageData.color,
+              transform: [{ scale: pulseAnim.interpolate({
+                inputRange: [1, 1.2],
+                outputRange: [1.1, 1.3],
+              }) }],
+              opacity: pulseAnim.interpolate({
+                inputRange: [1, 1.2],
+                outputRange: [0.3, 0],
+                extrapolate: 'clamp',
+              })
+            }
+          ]} />
+        </View>
 
         {/* Live Indicator */}
         <View style={styles.liveContainer}>
-          <Animated.View style={[styles.liveDot, { transform: [{ scale: pulseAnim }] }]} />
-          <Text style={styles.liveText}>{t('analyzing.live')}</Text>
+          <Animated.View style={[
+            styles.liveDot, 
+            { transform: [{ scale: pulseAnim }] }
+          ]} />
+          <Text style={styles.liveText}>{t('analyzing.live') || 'LIVE'}</Text>
+          <Zap size={12} color="#ffffff" />
         </View>
 
-        <Text style={styles.title}>{t('analyzing.title')}</Text>
+        <Text style={styles.title}>{t('analyzing.title') || 'Analyzing Contract'}</Text>
 
         <Animated.Text 
           style={[
             styles.stageTitle, 
             { 
-              color: currentStage.color,
+              color: currentStageData.color,
               transform: [{ translateY: slideAnim }]
             }
           ]}
         >
-          {currentStage.title}
+          {currentStage || currentStageData.title}
         </Animated.Text>
 
         <Text style={styles.stageDesc}>
-          {currentStage.desc}
+          {currentStageData.desc}
         </Text>
 
         {/* Enhanced Progress Bar */}
@@ -218,14 +308,28 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
                 style={[
                   styles.progressFill, 
                   { 
-                    width: `${progress}%`, 
-                    backgroundColor: currentStage.color,
-                    shadowColor: currentStage.color,
+                    width: progressAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0%', '100%'],
+                    }),
+                    backgroundColor: currentStageData.color,
+                    shadowColor: currentStageData.color,
                   }
                 ]} 
-              />
+              >
+                <Animated.View style={[
+                  styles.progressGlow,
+                  {
+                    backgroundColor: currentStageData.color,
+                    opacity: pulseAnim.interpolate({
+                      inputRange: [1, 1.2],
+                      outputRange: [0.3, 0.6],
+                    })
+                  }
+                ]} />
+              </Animated.View>
             </View>
-            <Text style={[styles.progressText, { color: currentStage.color }]}>
+            <Text style={[styles.progressText, { color: currentStageData.color }]}>
               {Math.round(progress)}%
             </Text>
           </View>
@@ -240,7 +344,12 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
                 styles.stageIndicator,
                 { 
                   backgroundColor: index < stage ? stageItem.color : (isDark ? '#374151' : '#e5e7eb'),
-                  transform: [{ scale: index === stage - 1 ? pulseAnim : 1 }]
+                  transform: [{ 
+                    scale: index === stage - 1 ? pulseAnim.interpolate({
+                      inputRange: [1, 1.2],
+                      outputRange: [1, 1.3],
+                    }) : 1 
+                  }]
                 }
               ]} 
             />
@@ -249,18 +358,49 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
 
         {/* Enhanced Badges */}
         <View style={styles.badgeContainer}>
-          <Animated.View style={[styles.badge, { transform: [{ scale: pulseAnim }] }]}>
+          <Animated.View style={[
+            styles.badge, 
+            { transform: [{ scale: pulseAnim.interpolate({
+              inputRange: [1, 1.2],
+              outputRange: [1, 1.05],
+            }) }] }
+          ]}>
             <CheckCircle size={12} color="#ffffff" />
-            <Text style={styles.badgeText}>{t('analyzing.shariaCompliant')}</Text>
+            <Text style={styles.badgeText}>{t('analyzing.shariaCompliant') || 'Sharia Compliant'}</Text>
           </Animated.View>
           <View style={styles.badge}>
             <Brain size={12} color="#ffffff" />
-            <Text style={styles.badgeText}>{t('analyzing.aiPowered')}</Text>
+            <Text style={styles.badgeText}>{t('analyzing.aiPowered') || 'AI Powered'}</Text>
           </View>
           <View style={styles.badge}>
             <Eye size={12} color="#ffffff" />
-            <Text style={styles.badgeText}>{t('analyzing.expertReviewed')}</Text>
+            <Text style={styles.badgeText}>{t('analyzing.expertReviewed') || 'Expert Reviewed'}</Text>
           </View>
+        </View>
+
+        {/* Processing indicators */}
+        <View style={styles.processingIndicators}>
+          {[...Array(3)].map((_, index) => (
+            <Animated.View
+              key={index}
+              style={[
+                styles.processingDot,
+                {
+                  backgroundColor: currentStageData.color,
+                  transform: [{
+                    scale: pulseAnim.interpolate({
+                      inputRange: [1, 1.2],
+                      outputRange: [0.8, 1],
+                    })
+                  }],
+                  opacity: pulseAnim.interpolate({
+                    inputRange: [1, 1.2],
+                    outputRange: [0.4, 0.8],
+                  })
+                }
+              ]}
+            />
+          ))}
         </View>
       </Animated.View>
     </View>
@@ -274,7 +414,7 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1000,
@@ -287,12 +427,16 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     maxWidth: 400,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 15 },
-    shadowOpacity: 0.4,
-    shadowRadius: 25,
-    elevation: 15,
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.5,
+    shadowRadius: 30,
+    elevation: 20,
     borderWidth: 1,
     borderColor: isDark ? '#374151' : '#e5e7eb',
+  },
+  iconWrapper: {
+    position: 'relative',
+    marginBottom: 20,
   },
   iconContainer: {
     width: 100,
@@ -300,30 +444,34 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
     borderWidth: 2,
     position: 'relative',
   },
-  orbitingDot: {
+  orbitingElement: {
     position: 'absolute',
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    width: 10,
+    height: 10,
   },
-  orbitingDot2: {
+  orbitDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  pulseRing: {
     position: 'absolute',
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    top: -10,
+    left: -10,
+    right: -10,
+    bottom: -10,
+    borderRadius: 60,
+    borderWidth: 2,
   },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+  pulseRingDelayed: {
+    top: -20,
+    left: -20,
+    right: -20,
+    bottom: -20,
+    borderRadius: 70,
   },
   liveContainer: {
     flexDirection: 'row',
@@ -333,13 +481,13 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     paddingVertical: 6,
     backgroundColor: '#ef4444',
     borderRadius: 15,
+    gap: 6,
   },
   liveDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: '#ffffff',
-    marginRight: 6,
   },
   liveText: {
     color: '#ffffff',
@@ -374,19 +522,28 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
   },
   progressBar: {
     width: '100%',
-    height: 10,
+    height: 12,
     backgroundColor: isDark ? '#374151' : '#e5e7eb',
-    borderRadius: 5,
+    borderRadius: 6,
     overflow: 'hidden',
     marginBottom: 8,
   },
   progressFill: {
     height: '100%',
-    borderRadius: 5,
+    borderRadius: 6,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 3,
+    position: 'relative',
+  },
+  progressGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 6,
   },
   progressText: {
     fontSize: 16,
@@ -398,15 +555,16 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     marginBottom: 24,
   },
   stageIndicator: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
   },
   badgeContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
     gap: 8,
+    marginBottom: 16,
   },
   badge: {
     backgroundColor: isDark ? '#10b981' : '#059669',
@@ -426,6 +584,16 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     color: '#ffffff',
     fontSize: 11,
     fontWeight: '600',
+  },
+  processingIndicators: {
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'center',
+  },
+  processingDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
 });
 

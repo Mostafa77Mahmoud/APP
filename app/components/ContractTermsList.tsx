@@ -777,8 +777,7 @@ const ContractTermsList: React.FC = () => {
 
         <View style={styles.buttonContainer}>
           <Button 
-            onPress={() => handleGenerateContract('marked')} 
-            disabled={isGeneratingContract || isGeneratingMarkedContract} 
+            onPress={() => handleGenerateContract('marked')} disabled={isGeneratingContract || isGeneratingMarkedContract} 
             variant="secondary" 
             style={styles.generateButton}
           >
