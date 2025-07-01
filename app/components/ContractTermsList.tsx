@@ -622,6 +622,8 @@ const ContractTermsList: React.FC = () => {
   });
 
   const renderTerm = (term: FrontendAnalysisTerm, index: number) => {
+    console.log('ContractTermsList: renderTerm called', { termId: term.term_id, index, termText: term.term_text.substring(0, 50) });
+    
     const isExpanded = expandedTerms[term.term_id] || false;
     const isEditing = editingTermId === term.term_id;
     const isEffectivelyCompliant = term.expert_override_is_valid_sharia ?? (term.isUserConfirmed ? (term.isReviewedSuggestionValid ?? true) : term.is_valid_sharia) ?? false;
@@ -971,9 +973,14 @@ const ContractTermsList: React.FC = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {filteredTerms && filteredTerms.length > 0 ? (
-          filteredTerms.map((term, index) => renderTerm(term, index))
-        ) : analysisTerms && analysisTerms.length > 0 ? (
+        {Array.isArray(filteredTerms) && filteredTerms.length > 0 ? (
+          <>
+            {filteredTerms.map((term, index) => {
+              console.log('ContractTermsList: Rendering term', { termId: term.term_id, index });
+              return renderTerm(term, index);
+            })}
+          </>
+        ) : Array.isArray(analysisTerms) && analysisTerms.length > 0 ? (
           <View style={styles.emptyContainer}>
             <FileText size={48} color={isDark ? '#6b7280' : '#9ca3af'} />
             <Text style={styles.emptyText}>{t('term.noTermsForFilter')}</Text>
@@ -985,7 +992,12 @@ const ContractTermsList: React.FC = () => {
               <Text style={styles.buttonText}>{t('filter.showAll') || 'Show All Terms'}</Text>
             </Button>
           </View>
-        ) : null}
+        ) : (
+          <View style={styles.emptyContainer}>
+            <FileText size={48} color={isDark ? '#6b7280' : '#9ca3af'} />
+            <Text style={styles.emptyText}>{t('term.noResults')}</Text>
+          </View>
+        )}
       </ScrollView>
 
       {Array.isArray(analysisTerms) && analysisTerms.length > 0 && (
@@ -1204,7 +1216,8 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
       backgroundColor: isDark ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.1)' 
     },
     scrollContent: { 
-      paddingBottom: 20 
+      paddingBottom: 20,
+      flexGrow: 1 
     },
     termCard: { 
       backgroundColor: isDark ? '#1f2937' : '#ffffff', 
