@@ -1,7 +1,6 @@
-
-import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
-import { Alert } from 'react-native';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
 import * as api from '../services/api';
 import type { SessionDetailsApiResponse, GenerateModifiedContractApiResponse, GenerateMarkedContractApiResponse, ApiAnalysisTerm, ExpertFeedbackPayload, CloudinaryFileInfo } from '../services/api';
 
@@ -97,7 +96,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   const [sessionDetails, setSessionDetails] = useState<SessionDetails | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<UserRole>('regular_user');
   const [sessionInteractions, setSessionInteractions] = useState<SessionInteraction[]>([]);
-  
+
   // Loading states
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -109,14 +108,14 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   const [isAskingQuestion, setIsAskingQuestion] = useState(false);
   const [isReviewingModification, setIsReviewingModification] = useState<Record<string, boolean>>({});
   const [isProcessingGeneralQuestion, setIsProcessingGeneralQuestion] = useState(false);
-  
+
   // Error states
   const [error, setError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   // Initialize user role from storage
-  React.useEffect(() => {
+  useEffect(() => {
     const loadUserRole = async () => {
       try {
         const storedRole = await AsyncStorage.getItem(USER_ROLE_STORAGE_KEY);
@@ -127,7 +126,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         console.error('Failed to load user role:', error);
       }
     };
-    
+
     const loadInteractions = async () => {
       try {
         const storedInteractions = await AsyncStorage.getItem(SESSION_INTERACTIONS_KEY);
@@ -159,16 +158,16 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
   const addInteraction = useCallback(async (interaction: Omit<SessionInteraction, 'sessionId' | 'timestamp'>) => {
     if (!sessionId) return;
-    
+
     const newInteraction: SessionInteraction = {
       ...interaction,
       sessionId,
       timestamp: new Date().toISOString(),
     };
-    
+
     const updatedInteractions = [newInteraction, ...sessionInteractions];
     setSessionInteractions(updatedInteractions);
-    
+
     try {
       await AsyncStorage.setItem(SESSION_INTERACTIONS_KEY, JSON.stringify(updatedInteractions));
     } catch (error) {
@@ -194,7 +193,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     try {
       const sessions = await getLocalSessions();
       const existingIndex = sessions.findIndex(s => s.session_id === sessionData.session_id);
-      
+
       let updatedSessions;
       if (existingIndex >= 0) {
         // Update existing session
@@ -209,7 +208,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         // Add new session
         updatedSessions = [sessionData, ...sessions];
       }
-      
+
       // Keep only the latest 50 sessions
       updatedSessions = updatedSessions.slice(0, 50);
       await AsyncStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(updatedSessions));
@@ -223,7 +222,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
       const sessions = await getLocalSessions();
       const updatedSessions = sessions.filter(s => s.session_id !== sessionIdToDelete);
       await AsyncStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(updatedSessions));
-      
+
       // Also remove interactions for this session
       const updatedInteractions = sessionInteractions.filter(i => i.sessionId !== sessionIdToDelete);
       setSessionInteractions(updatedInteractions);
@@ -247,7 +246,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const clearSession = useCallback(() => {
+  const clearSession = useCallback(async () => {
     setSessionId(null);
     setAnalysisTerms(null);
     setSessionDetails(null);
@@ -264,6 +263,17 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     setUploadError(null);
     setAnalysisError(null);
+
+    // Clear persisted session data
+    try {
+      await AsyncStorage.multiRemove([
+        'current_session_id',
+        'current_analysis_terms', 
+        'current_session_details'
+      ]);
+    } catch (error) {
+      console.error('Failed to clear persisted session data:', error);
+    }
   }, []);
 
   const loadSessionData = useCallback(async (sid: string) => {
@@ -274,7 +284,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         api.getSessionDetails(sid), 
         api.getSessionTerms(sid)
       ]);
-      
+
       // Enrich terms with interaction data
       const enrichedTerms = termsData.map(term => ({
         ...term,
@@ -283,7 +293,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
           .filter(i => i.termId === term.term_id && i.type === 'term_modified')
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0]?.timestamp,
       }));
-      
+
       setSessionId(sessionData.session_id);
       setSessionDetails({
         ...sessionData,
@@ -309,17 +319,17 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     setUploadError(null);
     setAnalysisError(null);
-    
+
     try {
       const response = await api.uploadContract(file, setUploadProgress);
       await loadSessionData(response.session_id);
-      
+
       // Add upload interaction
       await addInteraction({
         type: 'question_asked',
         data: { action: 'contract_uploaded', filename: file.name }
       });
-      
+
       return response.session_id;
     } catch (err: any) {
       const message = err.message || "Failed to upload or analyze contract.";
@@ -333,7 +343,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
       setUploadProgress(0);
     }
   };
-  
+
   const updateTermLocally = useCallback((params: Partial<FrontendAnalysisTerm> & { term_id: string }) => {
     setAnalysisTerms(prev => prev ? prev.map(t => 
       t.term_id === params.term_id 
@@ -364,21 +374,21 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     if (!sessionId || !analysisTerms) return null;
     const term = analysisTerms.find(t => t.term_id === termId);
     if (!term) return null;
-    
+
     setIsAskingQuestion(true);
     setIsTermProcessing(prev => ({ ...prev, [termId]: true }));
-    
+
     try {
       const answer = await api.askQuestion(sessionId, question, termId, term.term_text);
       updateTermLocally({ term_id: termId, currentQaAnswer: answer });
-      
+
       // Add interaction
       await addInteraction({
         type: 'question_asked',
         termId,
         data: { question, answer }
       });
-      
+
       return answer;
     } catch (err: any) {
       Alert.alert("Interaction Error", err.message);
@@ -388,21 +398,21 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
       setIsTermProcessing(prev => ({ ...prev, [termId]: false }));
     }
   };
-  
+
   const askGeneralContractQuestion = async (question: string): Promise<string | null> => {
     if (!sessionId) return null;
     setIsProcessingGeneralQuestion(true);
     setIsAskingQuestion(true);
-    
+
     try {
       const answer = await api.askQuestion(sessionId, question);
-      
+
       // Add interaction
       await addInteraction({
         type: 'question_asked',
         data: { question, answer, type: 'general' }
       });
-      
+
       return answer;
     } catch (err: any) {
       Alert.alert("Interaction Error", err.message);
@@ -416,7 +426,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   const reviewUserModification = async (termId: string, userTextToReview: string, originalTermText: string): Promise<boolean> => {
     if (!sessionId) return false;
     setIsReviewingModification(prev => ({ ...prev, [termId]: true }));
-    
+
     try {
       const reviewResponse = await api.reviewUserModification(sessionId, termId, userTextToReview, originalTermText);
       updateTermLocally({
@@ -427,7 +437,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         reviewedSuggestionIssue: reviewResponse.new_sharia_issue || null,
         isUserConfirmed: false,
       });
-      
+
       // Add interaction
       await addInteraction({
         type: 'term_modified',
@@ -438,7 +448,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
           isValid: reviewResponse.is_still_valid_sharia
         }
       });
-      
+
       return true;
     } catch (err: any) {
       Alert.alert("Review Error", err.message);
@@ -451,7 +461,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   const confirmTermModification = async (termId: string, textToConfirm: string): Promise<boolean> => {
     if (!sessionId) return false;
     setIsTermProcessing(prev => ({ ...prev, [termId]: true }));
-    
+
     try {
       await api.confirmTermModification(sessionId, termId, textToConfirm);
       updateTermLocally({ 
@@ -459,14 +469,14 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         isUserConfirmed: true, 
         userModifiedText: textToConfirm 
       });
-      
+
       // Add interaction
       await addInteraction({
         type: 'term_modified',
         termId,
         data: { confirmedText: textToConfirm, action: 'confirmed' }
       });
-      
+
       return true;
     } catch (err: any) {
       Alert.alert("Confirmation Error", err.message);
@@ -479,7 +489,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   const generateModifiedContract = async (): Promise<GenerateModifiedContractApiResponse | null> => {
     if (!sessionId) return null;
     setIsGeneratingContract(true);
-    
+
     try {
       const response = await api.generateModifiedContract(sessionId);
       if (response.success) {
@@ -493,7 +503,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
             } 
           }
         }) : null);
-        
+
         // Add interaction
         await addInteraction({
           type: 'contract_generated',
@@ -512,7 +522,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   const generateMarkedContract = async (): Promise<GenerateMarkedContractApiResponse | null> => {
     if (!sessionId) return null;
     setIsGeneratingMarkedContract(true);
-    
+
     try {
       const response = await api.generateMarkedContract(sessionId);
       if (response.success) {
@@ -526,7 +536,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
             } 
           }
         }) : null);
-        
+
         // Add interaction
         await addInteraction({
           type: 'contract_generated',
@@ -544,7 +554,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
   const submitExpertFeedback = async (payload: ExpertFeedbackPayload): Promise<boolean> => {
     if (!sessionId) return false;
-    
+
     try {
       await api.submitExpertFeedback(payload);
       updateTermLocally({
@@ -556,14 +566,14 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
           payload
         ]
       });
-      
+
       // Add interaction
       await addInteraction({
         type: 'expert_feedback',
         termId: payload.term_id,
         data: payload.feedback_data
       });
-      
+
       return true;
     } catch (err: any) {
       Alert.alert("Feedback Error", err.message);
@@ -577,12 +587,12 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
       ...sessionToLoad,
       totalInteractions: getSessionInteractions(sessionToLoad.session_id).length,
     });
-    
+
     const enrichedTerms = sessionToLoad.analysis_results.map(term => ({
       ...term,
       interactionCount: getSessionInteractions(sessionToLoad.session_id).filter(i => i.termId === term.term_id).length,
     }));
-    
+
     setAnalysisTerms(enrichedTerms);
   };
 
@@ -597,7 +607,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
   const complianceStats: ComplianceStats | null = useMemo(() => {
     if (!analysisTerms) return null;
-    
+
     const totalTerms = analysisTerms.length;
     if (totalTerms === 0) {
       return { 
@@ -609,15 +619,15 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         userModifiedTerms: 0,
       };
     }
-    
+
     const compliantCount = analysisTerms.filter(t => 
       t.expert_override_is_valid_sharia ?? 
       (t.isUserConfirmed ? (t.isReviewedSuggestionValid ?? true) : t.is_valid_sharia)
     ).length;
-    
+
     const expertReviewedTerms = analysisTerms.filter(t => t.has_expert_feedback).length;
     const userModifiedTerms = analysisTerms.filter(t => t.isUserConfirmed).length;
-    
+
     return { 
       totalTerms, 
       currentUserEffectiveCompliantCount: compliantCount, 
@@ -627,6 +637,48 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
       userModifiedTerms,
     };
   }, [analysisTerms]);
+
+  // Persist session data
+  useEffect(() => {
+    const saveSessionData = async () => {
+      if (sessionId && analysisTerms) {
+        try {
+          await AsyncStorage.setItem('current_session_id', sessionId);
+          await AsyncStorage.setItem('current_analysis_terms', JSON.stringify(analysisTerms));
+          if (sessionDetails) {
+            await AsyncStorage.setItem('current_session_details', JSON.stringify(sessionDetails));
+          }
+        } catch (error) {
+          console.error('Failed to save session data:', error);
+        }
+      }
+    };
+
+    saveSessionData();
+  }, [sessionId, analysisTerms, sessionDetails]);
+
+  // Restore session data on app start
+  useEffect(() => {
+    const restoreSessionData = async () => {
+      try {
+        const savedSessionId = await AsyncStorage.getItem('current_session_id');
+        const savedAnalysisTerms = await AsyncStorage.getItem('current_analysis_terms');
+        const savedSessionDetails = await AsyncStorage.getItem('current_session_details');
+
+        if (savedSessionId && savedAnalysisTerms) {
+          setSessionId(savedSessionId);
+          setAnalysisTerms(JSON.parse(savedAnalysisTerms));
+          if (savedSessionDetails) {
+            setSessionDetails(JSON.parse(savedSessionDetails));
+          }
+        }
+      } catch (error) {
+        console.error('Failed to restore session data:', error);
+      }
+    };
+
+    restoreSessionData();
+  }, []);
 
   return (
     <SessionContext.Provider value={{
