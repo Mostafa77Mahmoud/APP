@@ -197,13 +197,53 @@
     "patience": "يرجى الانتظار لحظة بينما نعالج سؤالك."
   },
   "expert": {
-    "mode": "وضع الخبير",
-    "provideFeedback": "تقديم تعليقات الخبير",
-    "feedbackSubmitted": "تم إرسال التعليقات",
-    "validateAnalysis": "التحقق من تحليل الذكاء الاصطناعي",
-    "overrideCompliance": "تجاوز حالة الامتثال",
-    "expertNotes": "ملاحظات الخبير",
-    "qualityAssurance": "مراجعة ضمان الجودة"
+    "feedbackTitle": "تقييم الخبير",
+    "aiAssessmentCorrect": "هل تقييم الذكاء الاصطناعي صحيح؟",
+    "yes": "نعم",
+    "no": "لا",
+    "correctedCompliance": "حالة الامتثال المصححة:",
+    "comments": "تعليقات إضافية:",
+    "commentsPlaceholder": "قدم رأيك الخبير...",
+    "provideFeedback": "تقديم ملاحظات الخبير",
+    "submitFeedback": "إرسال الملاحظات",
+    "feedbackSubmitted": "تم إرسال الملاحظات",
+    "feedbackSubmittedDesc": "تم تسجيل ملاحظاتك الخبيرة بنجاح.",
+    "submissionFailed": "فشل الإرسال",
+    "submissionFailedDesc": "لا يمكن إرسال ملاحظاتك. حاول مرة أخرى.",
+    "validation": {
+      "assessmentMissing": "التقييم مطلوب",
+      "assessmentMissingDesc": "يرجى تحديد ما إذا كان تقييم الذكاء الاصطناعي صحيحاً."
+    }
+  },
+  "user": {
+    "expert": "خبير",
+    "regular": "عادي"
+  },
+  "analyzing": {
+    "title": "تحليل العقد",
+    "live": "مباشر",
+    "stage1": "معالجة الوثيقة",
+    "stage1.desc": "قراءة وتحليل وثيقة العقد",
+    "stage2": "استخراج البنود",
+    "stage2.desc": "تحديد بنود وشروط العقد",
+    "stage3": "التحليل الشرعي",
+    "stage3.desc": "تحليل الامتثال للشريعة الإسلامية",
+    "stage4": "التحقق",
+    "stage4.desc": "المقارنة مع معايير الشريعة",
+    "stage5": "الإنهاء",
+    "stage5.desc": "إعداد نتائج التحليل",
+    "shariaCompliant": "متوافق مع الشريعة",
+    "aiPowered": "مدعوم بالذكاء الاصطناعي",
+    "expertReviewed": "مراجعة من خبير"
+  },
+  "generate": {
+    "stage1": "إعداد الوثيقة",
+    "stage2": "معالجة البنود",
+    "stage3": "تطبيق التغييرات",
+    "stage4": "الإنهاء"
+  },
+  "term": {
+    "reference": "المرجع"
   },
   "common": {
     "loading": "جارٍ التحميل...",
@@ -269,7 +309,6 @@
     "askGeneralQuestion": "اطرح سؤالاً عاماً",
     "generalQuestionPlaceholder": "اطرح سؤالاً عاماً عن العقد...",
     "askQuestion": "اطرح سؤالاً",
-    "reference": "المرجع",
     "newShariaIssue": "مشكلة شرعية جديدة",
     "alreadyCompliant": "هذا البند متوافق مع الشريعة بالفعل.",
     "noSession": "لا توجد جلسة متاحة. يرجى رفع عقد أولاً.",
@@ -311,32 +350,7 @@
     "save": "حفظ",
     "useAndReview": "استخدام ومراجعة"
   },
-  "user": {
-    "regular": "عادي",
-    "expert": "خبير"
-  },
-  "expert": {
-    "feedbackTitle": "تقييم الخبير",
-    "aiAssessmentCorrect": "هل تقييم الذكي الاصطناعي صحيح؟",
-    "yes": "نعم",
-    "no": "لا",
-    "correctedCompliance": "حالة التوافق المصححة:",
-    "comments": "التعليقات",
-    "commentsPlaceholder": "أضف تعليقاتك كخبير...",
-    "provideFeedback": "تقديم تقييم",
-    "submitFeedback": "إرسال التقييم",
-    "feedbackSubmitted": "تم إرسال التقييم",
-    "feedbackSubmittedDesc": "تم تسجيل تقييمك كخبير.",
-    "submissionFailed": "فشل الإرسال",
-    "submissionFailedDesc": "لم يتمكن من إرسال تقييم الخبير.",
-    "validation": {
-      "assessmentMissing": "التقييم مطلوب",
-      "assessmentMissingDesc": "يرجى الإشارة إلى ما إذا كان تقييم الذكي الاصطناعي صحيحاً.",
-      "statusMissing": "الحالة مطلوبة",
-      "statusMissingDesc": "يرجى تقديم حالة التوافق المصححة."
-    }
-  },
-  "generate": {
+   "generate": {
     "stage1": "تحضير الوثيقة...",
     "stage2": "تطبيق التعديلات...",
     "stage3": "إنهاء العقد...",

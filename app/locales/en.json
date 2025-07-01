@@ -197,13 +197,53 @@
     "patience": "Please wait a moment while we process your question."
   },
   "expert": {
-    "mode": "Expert Mode",
+    "feedbackTitle": "Expert Feedback",
+    "aiAssessmentCorrect": "Is the AI assessment correct?",
+    "yes": "Yes",
+    "no": "No",
+    "correctedCompliance": "Corrected compliance status:",
+    "comments": "Additional comments:",
+    "commentsPlaceholder": "Provide your expert opinion...",
     "provideFeedback": "Provide Expert Feedback",
+    "submitFeedback": "Submit Feedback",
     "feedbackSubmitted": "Feedback Submitted",
-    "validateAnalysis": "Validate AI Analysis",
-    "overrideCompliance": "Override Compliance Status",
-    "expertNotes": "Expert Notes",
-    "qualityAssurance": "Quality Assurance Review"
+    "feedbackSubmittedDesc": "Your expert feedback has been recorded successfully.",
+    "submissionFailed": "Submission Failed",
+    "submissionFailedDesc": "Could not submit your feedback. Please try again.",
+    "validation": {
+      "assessmentMissing": "Assessment Required",
+      "assessmentMissingDesc": "Please indicate whether the AI assessment is correct."
+    }
+  },
+  "user": {
+    "expert": "Expert",
+    "regular": "Regular"
+  },
+  "analyzing": {
+    "title": "Analyzing Contract",
+    "live": "LIVE",
+    "stage1": "Document Processing",
+    "stage1.desc": "Reading and parsing contract document",
+    "stage2": "Term Extraction",
+    "stage2.desc": "Identifying contractual terms and clauses",
+    "stage3": "Sharia Analysis",
+    "stage3.desc": "Analyzing compliance with Islamic law",
+    "stage4": "Validation",
+    "stage4.desc": "Cross-referencing with Sharia standards",
+    "stage5": "Finalizing",
+    "stage5.desc": "Preparing analysis results",
+    "shariaCompliant": "Sharia Compliant",
+    "aiPowered": "AI Powered",
+    "expertReviewed": "Expert Reviewed"
+  },
+  "generate": {
+    "stage1": "Preparing Document",
+    "stage2": "Processing Terms",
+    "stage3": "Applying Changes",
+    "stage4": "Finalizing"
+  },
+  "term": {
+    "reference": "Reference"
   },
   "common": {
     "loading": "Loading...",
