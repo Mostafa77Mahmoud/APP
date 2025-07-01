@@ -186,11 +186,6 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
   const isProcessing = isUploading || isAnalyzingContract;
   const hasError = uploadError || analysisError;
 
-  // Hide upload area completely when analysis is complete and we have a session
-  if (sessionId && !isUploading && !isAnalyzingContract) {
-    return null;
-  }
-
   return (
     <Animated.View style={[{ transform: [{ scale: scaleAnim }] }]}>
       <Card style={styles.card}>

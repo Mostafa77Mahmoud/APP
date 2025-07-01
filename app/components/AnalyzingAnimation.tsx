@@ -209,8 +209,6 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
 
   const styles = getStyles(isDark);
 
-  if (!isVisible) return null;
-
   return (
     <View style={styles.overlay}>
       <Animated.View 
