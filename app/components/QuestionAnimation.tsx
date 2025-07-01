@@ -1,5 +1,6 @@
+
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Animated, Dimensions, Modal } from 'react-native';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { MessageSquare, Brain, Sparkles, Search, Zap } from 'lucide-react-native';
@@ -107,7 +108,7 @@ const QuestionAnimation: React.FC<QuestionAnimationProps> = ({ isVisible }) => {
         }),
       ]).start();
     }
-  }, [isVisible]);
+  }, [isVisible, fadeAnim, scaleAnim, slideAnim, rotateAnim, pulseAnim, bounceAnim]);
 
   const spin = rotateAnim.interpolate({
     inputRange: [0, 1],
@@ -119,142 +120,144 @@ const QuestionAnimation: React.FC<QuestionAnimationProps> = ({ isVisible }) => {
   const styles = getStyles(isDark);
 
   return (
-    <View style={styles.overlay}>
-      <Animated.View 
-        style={[
-          styles.container,
-          {
-            opacity: fadeAnim,
-            transform: [
-              { scale: scaleAnim },
-              { translateY: slideAnim }
-            ],
-          }
-        ]}
-      >
-        {/* Main Brain Icon with Enhanced Animation */}
+    <Modal
+      visible={isVisible}
+      transparent={true}
+      animationType="none"
+    >
+      <View style={styles.overlay}>
         <Animated.View 
           style={[
-            styles.iconContainer,
-            { 
-              transform: [
-                { rotate: spin },
-                { scale: pulseAnim },
-                { translateY: bounceAnim }
-              ]
-            }
-          ]}
-        >
-          <Brain size={36} color="#10b981" />
-
-          {/* Orbiting thinking dots */}
-          <Animated.View style={[styles.orbitingIcon, { transform: [{ rotate: spin }] }]}>
-            <MessageSquare size={16} color="#8b5cf6" />
-          </Animated.View>
-          <Animated.View style={[styles.orbitingIcon2, { transform: [{ rotate: spin }] }]}>
-            <Search size={14} color="#3b82f6" />
-          </Animated.View>
-          <Animated.View style={[styles.orbitingIcon3, { transform: [{ rotate: spin }] }]}>
-            <Sparkles size={12} color="#f59e0b" />
-          </Animated.View>
-        </Animated.View>
-
-        {/* Thinking dots animation */}
-        <View style={styles.thinkingDots}>
-          <Animated.View style={[styles.dot, { transform: [{ scale: pulseAnim }] }]} />
-          <Animated.View 
-            style={[
-              styles.dot, 
-              { 
-                transform: [{ 
-                  scale: pulseAnim.interpolate({
-                    inputRange: [1, 1.3],
-                    outputRange: [1.2, 1],
-                  })
-                }] 
-              }
-            ]} 
-          />
-          <Animated.View 
-            style={[
-              styles.dot, 
-              { 
-                transform: [{ 
-                  scale: pulseAnim.interpolate({
-                    inputRange: [1, 1.3],
-                    outputRange: [1.4, 1.1],
-                  })
-                }] 
-              }
-            ]} 
-          />
-        </View>
-
-        <Animated.Text 
-          style={[
-            styles.title,
+            styles.container,
             {
-              transform: [{ translateY: slideAnim }]
+              opacity: fadeAnim,
+              transform: [
+                { scale: scaleAnim },
+                { translateY: slideAnim }
+              ],
             }
           ]}
         >
-          {t('questionAnimation.thinking')}
-        </Animated.Text>
-
-        <Text style={styles.subtitle}>
-          {t('questionAnimation.processing')}
-        </Text>
-
-        <Text style={styles.patience}>
-          {t('questionAnimation.patience')}
-        </Text>
-
-        {/* Processing stages indicator */}
-        <View style={styles.stagesContainer}>
-          <Animated.View style={[styles.stage, { transform: [{ scale: pulseAnim }] }]}>
-            <Search size={16} color="#3b82f6" />
-            <Text style={styles.stageText}>{t('questionAnimation.analyzing')}</Text>
-          </Animated.View>
+          {/* Main Brain Icon with Enhanced Animation */}
           <Animated.View 
             style={[
-              styles.stage, 
+              styles.iconContainer,
               { 
-                transform: [{ 
-                  scale: pulseAnim.interpolate({
-                    inputRange: [1, 1.3],
-                    outputRange: [1.1, 1],
-                  })
-                }] 
+                transform: [
+                  { rotate: spin },
+                  { scale: pulseAnim },
+                  { translateY: bounceAnim }
+                ]
               }
             ]}
           >
-            <Brain size={16} color="#10b981" />
-            <Text style={styles.stageText}>{t('questionAnimation.formulating')}</Text>
-          </Animated.View>
-        </View>
+            <Brain size={36} color="#10b981" />
 
-        {/* Energy indicator */}
-        <Animated.View 
-          style={[
-            styles.energyIndicator,
-            { transform: [{ scale: pulseAnim }] }
-          ]}
-        >
-          <Zap size={12} color="#ffffff" />
-          <Text style={styles.energyText}>AI Active</Text>
+            {/* Orbiting thinking dots */}
+            <Animated.View style={[styles.orbitingIcon, { transform: [{ rotate: spin }] }]}>
+              <MessageSquare size={16} color="#8b5cf6" />
+            </Animated.View>
+            <Animated.View style={[styles.orbitingIcon2, { transform: [{ rotate: spin }] }]}>
+              <Search size={14} color="#3b82f6" />
+            </Animated.View>
+            <Animated.View style={[styles.orbitingIcon3, { transform: [{ rotate: spin }] }]}>
+              <Sparkles size={12} color="#f59e0b" />
+            </Animated.View>
+          </Animated.View>
+
+          {/* Thinking dots animation */}
+          <View style={styles.thinkingDots}>
+            <Animated.View style={[styles.dot, { transform: [{ scale: pulseAnim }] }]} />
+            <Animated.View 
+              style={[
+                styles.dot, 
+                { 
+                  transform: [{ 
+                    scale: pulseAnim.interpolate({
+                      inputRange: [1, 1.3],
+                      outputRange: [1.2, 1],
+                    })
+                  }] 
+                }
+              ]} 
+            />
+            <Animated.View 
+              style={[
+                styles.dot, 
+                { 
+                  transform: [{ 
+                    scale: pulseAnim.interpolate({
+                      inputRange: [1, 1.3],
+                      outputRange: [1.4, 1.1],
+                    })
+                  }] 
+                }
+              ]} 
+            />
+          </View>
+
+          <Animated.Text 
+            style={[
+              styles.title,
+              {
+                transform: [{ translateY: slideAnim }]
+              }
+            ]}
+          >
+            {t('questionAnimation.thinking') || 'AI is thinking...'}
+          </Animated.Text>
+
+          <Text style={styles.subtitle}>
+            {t('questionAnimation.processing') || 'Processing your request'}
+          </Text>
+
+          <Text style={styles.patience}>
+            {t('questionAnimation.patience') || 'Please wait while we analyze your question'}
+          </Text>
+
+          {/* Processing stages indicator */}
+          <View style={styles.stagesContainer}>
+            <Animated.View style={[styles.stage, { transform: [{ scale: pulseAnim }] }]}>
+              <Search size={16} color="#3b82f6" />
+              <Text style={styles.stageText}>{t('questionAnimation.analyzing') || 'Analyzing'}</Text>
+            </Animated.View>
+            <Animated.View 
+              style={[
+                styles.stage, 
+                { 
+                  transform: [{ 
+                    scale: pulseAnim.interpolate({
+                      inputRange: [1, 1.3],
+                      outputRange: [1.1, 1],
+                    })
+                  }] 
+                }
+              ]}
+            >
+              <Brain size={16} color="#10b981" />
+              <Text style={styles.stageText}>{t('questionAnimation.formulating') || 'Formulating'}</Text>
+            </Animated.View>
+          </View>
+
+          {/* Energy indicator */}
+          <Animated.View 
+            style={[
+              styles.energyIndicator,
+              { transform: [{ scale: pulseAnim }] }
+            ]}
+          >
+            <Zap size={12} color="#ffffff" />
+            <Text style={styles.energyText}>AI Active</Text>
+          </Animated.View>
         </Animated.View>
-      </Animated.View>
-    </View>
+      </View>
+    </Modal>
   );
 };
 
 const getStyles = (isDark: boolean) => StyleSheet.create({
   overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
     justifyContent: 'center',
     alignItems: 'center',

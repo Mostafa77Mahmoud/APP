@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Alert, Linking, ScrollView, Animated } from 'react-native';
+import { Modal, View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Alert, Linking, ScrollView, Animated, Share } from 'react-native';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSession } from '../contexts/SessionContext';
-import { X, Download, ExternalLink, FileText, Eye, Share, CheckCircle, Clock } from 'lucide-react-native';
+import { X, Download, ExternalLink, FileText, Eye, Share as ShareIcon, CheckCircle, Clock } from 'lucide-react-native';
 
 interface ContractPreviewModalProps {
   isVisible: boolean;
@@ -61,11 +62,11 @@ const ContractPreviewModal: React.FC<ContractPreviewModalProps> = ({
         }),
       ]).start();
     }
-  }, [isVisible]);
+  }, [isVisible, fadeAnim, scaleAnim]);
 
   const handleOpenInBrowser = async () => {
     if (!contractInfo?.pdf_cloudinary_info?.url) {
-      Alert.alert(t('contract.preview.errorTitle'), 'No PDF URL available');
+      Alert.alert(t('contract.preview.errorTitle') || 'Error', 'No PDF URL available');
       return;
     }
 
@@ -75,10 +76,10 @@ const ContractPreviewModal: React.FC<ContractPreviewModalProps> = ({
       if (supported) {
         await Linking.openURL(contractInfo.pdf_cloudinary_info.url);
       } else {
-        Alert.alert(t('contract.preview.errorTitle'), 'Cannot open this URL');
+        Alert.alert(t('contract.preview.errorTitle') || 'Error', 'Cannot open this URL');
       }
     } catch (error) {
-      Alert.alert(t('contract.preview.errorTitle'), 'Failed to open document');
+      Alert.alert(t('contract.preview.errorTitle') || 'Error', 'Failed to open document');
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +87,7 @@ const ContractPreviewModal: React.FC<ContractPreviewModalProps> = ({
 
   const handleDownload = async () => {
     if (!contractInfo?.docx_cloudinary_info?.url) {
-      Alert.alert(t('contract.preview.errorTitle'), 'No download URL available');
+      Alert.alert(t('contract.preview.errorTitle') || 'Error', 'No download URL available');
       return;
     }
 
@@ -108,11 +109,12 @@ const ContractPreviewModal: React.FC<ContractPreviewModalProps> = ({
       const supported = await Linking.canOpenURL(contractInfo.docx_cloudinary_info.url);
       if (supported) {
         await Linking.openURL(contractInfo.docx_cloudinary_info.url);
+        Alert.alert('Success', 'Download started successfully');
       } else {
-        Alert.alert(t('contract.preview.errorTitle'), 'Cannot open this URL');
+        Alert.alert(t('contract.preview.errorTitle') || 'Error', 'Cannot open this URL');
       }
     } catch (error) {
-      Alert.alert(t('contract.preview.errorTitle'), 'Failed to download document');
+      Alert.alert(t('contract.preview.errorTitle') || 'Error', 'Failed to download document');
     } finally {
       clearInterval(progressInterval);
       setIsLoading(false);
@@ -122,23 +124,22 @@ const ContractPreviewModal: React.FC<ContractPreviewModalProps> = ({
 
   const handleShare = async () => {
     if (!contractInfo?.pdf_cloudinary_info?.url) {
-      Alert.alert(t('contract.preview.errorTitle'), 'No PDF URL available');
+      Alert.alert(t('contract.preview.errorTitle') || 'Error', 'No PDF URL available');
       return;
     }
 
     try {
-      // On web, we can copy to clipboard or use Web Share API
-      if (navigator.share) {
-        await navigator.share({
-          title: fileType === 'modified' ? t('contract.preview.modifiedTitle') : t('contract.preview.markedTitle'),
-          url: contractInfo.pdf_cloudinary_info.url,
-        });
-      } else if (navigator.clipboard) {
-        await navigator.clipboard.writeText(contractInfo.pdf_cloudinary_info.url);
-        Alert.alert('Success', 'URL copied to clipboard');
-      }
+      const title = fileType === 'modified' 
+        ? (t('contract.preview.modifiedTitle') || 'Modified Contract')
+        : (t('contract.preview.markedTitle') || 'Marked Contract');
+
+      await Share.share({
+        message: `${title}: ${contractInfo.pdf_cloudinary_info.url}`,
+        url: contractInfo.pdf_cloudinary_info.url,
+        title: title,
+      });
     } catch (error) {
-      Alert.alert(t('contract.preview.errorTitle'), 'Failed to share document');
+      Alert.alert(t('contract.preview.errorTitle') || 'Error', 'Failed to share document');
     }
   };
 
@@ -194,13 +195,13 @@ const ContractPreviewModal: React.FC<ContractPreviewModalProps> = ({
 
               <Text style={styles.title}>
                 {fileType === 'modified' 
-                  ? t('contract.preview.modifiedTitle') 
-                  : t('contract.preview.markedTitle')
+                  ? (t('contract.preview.modifiedTitle') || 'Modified Contract')
+                  : (t('contract.preview.markedTitle') || 'Marked Contract')
                 }
               </Text>
 
               <Text style={styles.description}>
-                {t('contract.preview.readyDescMobile')}
+                {t('contract.preview.readyDescMobile') || 'Your contract is ready for download and review.'}
               </Text>
 
               {/* File Information */}
@@ -209,7 +210,7 @@ const ContractPreviewModal: React.FC<ContractPreviewModalProps> = ({
                   <Text style={styles.fileInfoLabel}>File Size</Text>
                   <Text style={styles.fileInfoValue}>{fileSize}</Text>
                 </View>
-                <View style={styles.fileInfoItem}>
+                <View style={[styles.fileInfoItem, { borderBottomWidth: 1, borderBottomColor: isDark ? '#4b5563' : '#e2e8f0' }]}>
                   <Text style={styles.fileInfoLabel}>Created</Text>
                   <Text style={styles.fileInfoValue}>{createdDate}</Text>
                 </View>
@@ -231,7 +232,7 @@ const ContractPreviewModal: React.FC<ContractPreviewModalProps> = ({
 
               <View style={styles.buttonContainer}>
                 <TouchableOpacity 
-                  style={styles.primaryButton} 
+                  style={[styles.primaryButton, isLoading && styles.buttonDisabled]} 
                   onPress={handleOpenInBrowser}
                   disabled={isLoading}
                   activeOpacity={0.8}
@@ -242,32 +243,32 @@ const ContractPreviewModal: React.FC<ContractPreviewModalProps> = ({
                     <Eye size={20} color="#ffffff" />
                   )}
                   <Text style={styles.primaryButtonText}>
-                    {t('contract.preview.openInBrowser')}
+                    {t('contract.preview.openInBrowser') || 'Open in Browser'}
                   </Text>
                 </TouchableOpacity>
 
                 <View style={styles.secondaryButtonsRow}>
                   <TouchableOpacity 
-                    style={[styles.secondaryButton, { flex: 1 }]} 
+                    style={[styles.secondaryButton, { flex: 1 }, isLoading && styles.buttonDisabled]} 
                     onPress={handleDownload}
                     disabled={isLoading}
                     activeOpacity={0.8}
                   >
                     <Download size={18} color={isDark ? '#10b981' : '#059669'} />
                     <Text style={styles.secondaryButtonText}>
-                      {t('common.download')}
+                      {t('common.download') || 'Download'}
                     </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity 
-                    style={[styles.secondaryButton, { flex: 1, marginLeft: 8 }]} 
+                    style={[styles.secondaryButton, { flex: 1, marginLeft: 8 }, isLoading && styles.buttonDisabled]} 
                     onPress={handleShare}
                     disabled={isLoading}
                     activeOpacity={0.8}
                   >
-                    <Share size={18} color={isDark ? '#10b981' : '#059669'} />
+                    <ShareIcon size={18} color={isDark ? '#10b981' : '#059669'} />
                     <Text style={styles.secondaryButtonText}>
-                      {t('common.share')}
+                      {t('common.share') || 'Share'}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -400,8 +401,6 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: isDark ? '#4b5563' : '#e2e8f0',
   },
   fileInfoLabel: {
     fontSize: 14,
@@ -477,6 +476,9 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
     color: isDark ? '#10b981' : '#059669',
     fontSize: 14,
     fontWeight: '600',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   infoBox: {
     flexDirection: 'row',
