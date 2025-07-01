@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Alert, Modal, Animated, Dimensions } from 'react-native';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -6,7 +7,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { 
   CheckCircle, AlertCircle, ChevronDown, MessageSquare, ThumbsUp, Edit3, Send, 
   Sparkles, XCircle, FileCheck2, FileSearch, Eye, HelpCircle, RefreshCw, 
-  UserCheck as ExpertIcon, FileText, Users, User, Loader2, Play, Pause 
+  UserCheck as ExpertIcon, FileText, Users, User, Loader2, Play, Pause, Info 
 } from 'lucide-react-native';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
@@ -14,6 +15,7 @@ import { Tabs } from './ui/tabs';
 import QuestionAnimation from './QuestionAnimation';
 import ContractPreviewModal from './ContractPreviewModal';
 import { Progress } from './ui/progress';
+import * as apiService from '../services/api';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -190,14 +192,15 @@ const ContractTermsList: React.FC = () => {
   const { theme } = useTheme();
   const {
     analysisTerms, isFetchingSession, isTermProcessing, isReviewingModification,
-    askQuestionAboutTerm, reviewUserModification, confirmTermModification, isAskingQuestion,
+    askQuestionAboutTerm, reviewUserModification, confirmTermModification,
     generateModifiedContract, generateMarkedContract, isGeneratingContract, isGeneratingMarkedContract,
-    sessionId, sessionDetails, updateTermLocally, clearSession, currentUserRole, toggleUserRole,
-    askGeneralContractQuestion, isProcessingGeneralQuestion, submitExpertFeedback
+    sessionId, sessionDetails, updateTermLocally, clearSession, currentUserRole,
+    askGeneralContractQuestion, isProcessingGeneralQuestion, error: sessionError,
+    isAnalyzingContract, setPreviewLoading, updatePdfPreviewInfo
   } = useSession();
 
   const [activeFilter, setActiveFilter] = useState<string>('all');
-  const [expandedTermId, setExpandedTermId] = useState<string | null>(null);
+  const [expandedTerms, setExpandedTerms] = useState<Record<string, boolean>>({});
   const [termQuestions, setTermQuestions] = useState<Record<string, string>>({});
 
   const [generationVisualProgress, setGenerationVisualProgress] = useState(0);
@@ -205,9 +208,12 @@ const ContractTermsList: React.FC = () => {
 
   const [editingTermId, setEditingTermId] = useState<string | null>(null);
   const [currentEditText, setCurrentEditText] = useState<string>("");
+  const [askingQuestionForTermId, setAskingQuestionForTermId] = useState<string | null>(null);
 
   const [isPreviewModalVisible, setIsPreviewModalVisible] = useState(false);
   const [previewFileType, setPreviewFileType] = useState<'modified' | 'marked' | null>(null);
+  const [previewFileUrl, setPreviewFileUrl] = useState<string | null>(null);
+  const [previewPdfDownloadFilename, setPreviewPdfDownloadFilename] = useState<string | undefined>(undefined);
 
   const [isGeneralQuestionModalVisible, setIsGeneralQuestionModalVisible] = useState(false);
   const [generalQuestionText, setGeneralQuestionText] = useState("");
@@ -223,6 +229,12 @@ const ContractTermsList: React.FC = () => {
   // Animation refs
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
+
+  useEffect(() => {
+    if (sessionError) {
+      Alert.alert(t('error.generic'), sessionError);
+    }
+  }, [sessionError, t]);
 
   useEffect(() => {
     if (analysisTerms && analysisTerms.length > 0) {
@@ -242,79 +254,31 @@ const ContractTermsList: React.FC = () => {
   }, [analysisTerms]);
 
   const toggleTerm = useCallback((termId: string) => {
-    setExpandedTermId(prevId => (prevId === termId ? null : termId));
+    setExpandedTerms(prev => {
+      const isOpen = !!prev[termId];
+      const newState: Record<string, boolean> = {};
+      if (!isOpen) { newState[termId] = true; }
+      return newState;
+    });
+  }, []);
+
+  const handleQuestionChange = useCallback((termId: string, value: string) => {
+    setTermQuestions(prev => ({ ...prev, [termId]: value }));
   }, []);
 
   const handleSendQuestion = useCallback(async (termId: string) => {
     const questionText = termQuestions[termId]?.trim();
     if (!questionText || (isTermProcessing && isTermProcessing[termId])) return;
-    await askQuestionAboutTerm(termId, questionText);
+    setAskingQuestionForTermId(termId);
+    const answer = await askQuestionAboutTerm(termId, questionText);
+    setAskingQuestionForTermId(null);
+    if (answer) {
+      Alert.alert(t('term.answerReceived'), t('term.answerReceivedMessage'));
+    } else {
+      Alert.alert(t('error.interactionFailed'));
+    }
     setTermQuestions(prev => ({ ...prev, [termId]: '' }));
-  }, [termQuestions, isTermProcessing, askQuestionAboutTerm]);
-
-  const handleConfirmChanges = useCallback(async (term: FrontendAnalysisTerm) => {
-    if ((isTermProcessing && isTermProcessing[term.term_id]) || (isReviewingModification && isReviewingModification[term.term_id])) return;
-    const textToConfirm = term.userModifiedText ?? term.reviewedSuggestion ?? term.modified_term ?? term.term_text;
-    const success = await confirmTermModification(term.term_id, textToConfirm);
-    if (success) {
-      Alert.alert(t('term.confirmed'), t('term.confirmedMessage'));
-      setEditingTermId(null);
-    } else {
-      Alert.alert(t('error.confirmationFailed'));
-    }
-  }, [isTermProcessing, isReviewingModification, confirmTermModification, t]);
-
-  const handleEditSuggestion = useCallback((term: FrontendAnalysisTerm) => {
-    setEditingTermId(term.term_id);
-    setCurrentEditText(term.userModifiedText ?? term.reviewedSuggestion ?? term.modified_term ?? term.term_text);
-  }, []);
-
-  const handleSaveAndReview = useCallback(async (termId: string) => {
-    const term = analysisTerms?.find(t => t.term_id === termId);
-    if (!term || !currentEditText.trim()) return;
-    const success = await reviewUserModification(termId, currentEditText, term.term_text);
-    if (success) {
-      setEditingTermId(null);
-      Alert.alert(t('review.editSentForReview'), t('review.editSentForReviewDesc'));
-    } else {
-      Alert.alert(t('review.reviewFailed'), t('review.couldNotReviewEdit'));
-    }
-  }, [analysisTerms, currentEditText, reviewUserModification, t]);
-
-  const handleGenerateContract = async (type: 'modified' | 'marked') => {
-    const generatorFn = type === 'modified' ? generateModifiedContract : generateMarkedContract;
-    setGenerationType(type);
-    setGenerationVisualProgress(0);
-
-    // Enhanced progress simulation with more realistic timing
-    const progressInterval = setInterval(() => {
-      setGenerationVisualProgress(p => {
-        if (p < 25) return p + 1.5;
-        if (p < 60) return p + 1;
-        if (p < 90) return p + 0.8;
-        return Math.min(p + 0.3, 99);
-      });
-    }, 150);
-
-    const response = await generatorFn();
-    clearInterval(progressInterval);
-    setGenerationVisualProgress(100);
-
-    if (response?.success) {
-      Alert.alert(
-        t(type === 'modified' ? 'contract.generated' : 'contract.markedGenerated'),
-        t(type === 'modified' ? 'contract.generatedMessage' : 'contract.markedGeneratedMessage')
-      );
-    } else {
-      Alert.alert(t('error.generationFailed'), response?.message || 'Could not generate the contract.');
-    }
-    setTimeout(() => setGenerationType(null), 1500);
-  };
-
-  const openPreview = (type: 'modified' | 'marked') => {
-    setPreviewFileType(type);
-    setIsPreviewModalVisible(true);
-  };
+  }, [termQuestions, isTermProcessing, askQuestionAboutTerm, t]);
 
   const handleSendGeneralQuestion = useCallback(async () => {
     if (!generalQuestionText.trim()) return;
@@ -341,6 +305,154 @@ const ContractTermsList: React.FC = () => {
       }
     }
   }, [reviewUserModification, t, editingTermId, analysisTerms]);
+
+  const handleConfirmChanges = useCallback(async (term: FrontendAnalysisTerm) => {
+    if ((isTermProcessing && isTermProcessing[term.term_id]) || (isReviewingModification && isReviewingModification[term.term_id])) return;
+    const textToConfirm = term.userModifiedText ?? term.reviewedSuggestion ?? term.modified_term ?? term.term_text;
+    const success = await confirmTermModification(term.term_id, textToConfirm);
+    if (success) {
+      Alert.alert(t('term.confirmed'), t('term.confirmedMessage'));
+      setEditingTermId(null);
+    } else {
+      Alert.alert(t('error.confirmationFailed'));
+    }
+  }, [isTermProcessing, isReviewingModification, confirmTermModification, t]);
+
+  const handleEditSuggestion = useCallback((term: FrontendAnalysisTerm) => {
+    setEditingTermId(term.term_id);
+    setCurrentEditText(
+      (term.isUserConfirmed && term.userModifiedText) ? term.userModifiedText :
+      term.userModifiedText ??
+      term.reviewedSuggestion ??
+      term.modified_term ??
+      term.term_text
+    );
+  }, []);
+
+  const handleSaveAndReview = useCallback(async (termId: string) => {
+    const term = analysisTerms?.find(t => t.term_id === termId);
+    if (!term || !currentEditText.trim()) return;
+    const success = await reviewUserModification(termId, currentEditText, term.term_text);
+    if (success) {
+      setEditingTermId(null);
+      Alert.alert(t('review.editSentForReview'), t('review.editSentForReviewDesc'));
+    } else {
+      Alert.alert(t('review.reviewFailed'), t('review.couldNotReviewEdit'));
+    }
+  }, [analysisTerms, currentEditText, reviewUserModification, t]);
+
+  const runGenerationProcess = async (
+    generatorFn: () => Promise<any>,
+    type: 'modified' | 'marked'
+  ) => {
+    setGenerationVisualProgress(0);
+    setGenerationType(type);
+
+    const totalVisualDuration = 15 * 1000;
+    let currentProgress = 0;
+    const progressInterval = setInterval(() => {
+      currentProgress += (100 / (totalVisualDuration / 100));
+      if (currentProgress >= 99) {
+        setGenerationVisualProgress(99);
+        clearInterval(progressInterval);
+      } else {
+        setGenerationVisualProgress(currentProgress);
+      }
+    }, 100);
+
+    const response = await generatorFn();
+    clearInterval(progressInterval);
+    setGenerationVisualProgress(100);
+
+    if (response && response.success) {
+      Alert.alert(
+        t(type === 'modified' ? 'contract.generated' : 'contract.markedGenerated'),
+        t(type === 'modified' ? 'contract.generatedMessage' : 'contract.markedGeneratedMessage')
+      );
+    } else {
+      Alert.alert(
+        t('error.generationFailed'),
+        response?.message || (type === 'modified' ? "Could not generate the contract." : "Could not generate marked contract.")
+      );
+      setGenerationVisualProgress(0);
+    }
+    setTimeout(() => setGenerationType(null), 1500);
+  };
+
+  const handleGenerateContract = useCallback(() => {
+    if (isGeneratingContract || isGeneratingMarkedContract) return;
+    runGenerationProcess(generateModifiedContract, 'modified');
+  }, [isGeneratingContract, isGeneratingMarkedContract, generateModifiedContract]);
+
+  const handleGenerateMarkedContract = useCallback(() => {
+    if (isGeneratingContract || isGeneratingMarkedContract) return;
+    runGenerationProcess(generateMarkedContract, 'marked');
+  }, [isGeneratingContract, isGeneratingMarkedContract, generateMarkedContract]);
+
+  const openPreviewModalWithType = async (type: 'modified' | 'marked') => {
+    if (!sessionId || !sessionDetails) return;
+    const previewKey = `${sessionId}-${type}-preview`;
+    setPreviewLoading(previewKey, true);
+    setIsPreviewModalVisible(true);
+    setPreviewFileType(type);
+
+    const originalBaseName = sessionDetails.original_filename?.replace(/\.[^/.]+$/, "") || "contract";
+    let pdfFileNameForDownload = `${type === 'modified' ? 'Modified' : 'Marked'}_${originalBaseName}.pdf`;
+
+    if (type === 'modified' && sessionDetails.pdf_preview_info?.modified?.user_facing_filename) {
+        pdfFileNameForDownload = sessionDetails.pdf_preview_info.modified.user_facing_filename;
+    } else if (type === 'marked' && sessionDetails.pdf_preview_info?.marked?.user_facing_filename) {
+        pdfFileNameForDownload = sessionDetails.pdf_preview_info.marked.user_facing_filename;
+    }
+    setPreviewPdfDownloadFilename(pdfFileNameForDownload);
+
+    const existingCloudinaryPdfInfo = sessionDetails.pdf_preview_info?.[type];
+    if (existingCloudinaryPdfInfo?.url) {
+        setPreviewFileUrl(existingCloudinaryPdfInfo.url);
+        setPreviewLoading(previewKey, false);
+        return;
+    }
+
+    try {
+        const backendUrl = apiService.getContractPreviewUrl(sessionId, type);
+        const response = await fetch(backendUrl, {
+            method: 'GET',
+            headers: {
+                'ngrok-skip-browser-warning': 'true'
+            }
+        });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: "Failed to fetch preview PDF URL."}));
+            throw new Error(errorData.error || `Failed to load preview URL (${response.status})`);
+        }
+        const data: { pdf_url?: string; error?: string } = await response.json();
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        if (data.pdf_url) {
+            setPreviewFileUrl(data.pdf_url);
+            const pdfCloudinaryInfo = {
+                url: data.pdf_url,
+                public_id: '',
+                format: 'pdf',
+                user_facing_filename: pdfFileNameForDownload
+            };
+            updatePdfPreviewInfo(type, pdfCloudinaryInfo);
+        } else {
+            throw new Error("PDF URL not found in server response.");
+        }
+    } catch (error: any) {
+        console.error("Error fetching preview:", error);
+        Alert.alert("Preview Error", error.message || "Could not load contract preview.");
+        setPreviewFileUrl(null);
+    } finally {
+        setPreviewLoading(previewKey, false);
+    }
+  };
+
+  const handleStartNewAnalysis = useCallback(() => { 
+    clearSession(); 
+  }, [clearSession]);
 
   const openExpertFeedbackForm = useCallback((term: FrontendAnalysisTerm) => {
     setExpertFeedbackTermId(term.term_id);
@@ -372,7 +484,7 @@ const ContractTermsList: React.FC = () => {
         term_id: expertFeedbackTermId,
         feedback_data: currentExpertFeedback as ExpertFeedbackData
       };
-      await submitExpertFeedback(payload);
+      await apiService.submitExpertFeedbackApi(payload);
 
       updateTermLocally({
         term_id: expertFeedbackTermId,
@@ -388,7 +500,7 @@ const ContractTermsList: React.FC = () => {
     } finally {
       setIsSubmittingExpertFeedback(prev => ({...prev, [expertFeedbackTermId]: false}));
     }
-  }, [expertFeedbackTermId, sessionId, currentExpertFeedback, t, updateTermLocally, submitExpertFeedback]);
+  }, [expertFeedbackTermId, sessionId, currentExpertFeedback, t, updateTermLocally]);
 
   const filteredTerms = useMemo(() => {
     console.log('ContractTermsList: Filtering terms', { 
@@ -426,12 +538,30 @@ const ContractTermsList: React.FC = () => {
     sessionDetails: sessionDetails ? 'has session details' : 'no session details'
   });
 
-  if (isFetchingSession && !analysisTerms) {
+  if ((isFetchingSession || isAnalyzingContract) && (!analysisTerms || analysisTerms.length === 0)) {
     console.log('ContractTermsList: Showing loading state');
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={isDark ? '#10b981' : '#059669'} />
         <Text style={styles.loadingText}>{t('loading')}</Text>
+      </View>
+    );
+  }
+
+  if (!sessionId && !isAnalyzingContract) {
+    return (
+      <View style={styles.emptyContainer}>
+        <FileText size={48} color={isDark ? '#6b7280' : '#9ca3af'} />
+        <Text style={styles.emptyText}>{t('term.noSession')}</Text>
+      </View>
+    );
+  }
+
+  if (sessionId && analysisTerms === null && !isAnalyzingContract && !isFetchingSession) {
+    return (
+      <View style={styles.emptyContainer}>
+        <FileText size={48} color={isDark ? '#6b7280' : '#9ca3af'} />
+        <Text style={styles.emptyText}>{sessionError || t('term.noResults')}</Text>
       </View>
     );
   }
@@ -446,8 +576,21 @@ const ContractTermsList: React.FC = () => {
       <View style={styles.emptyContainer}>
         <FileText size={48} color={isDark ? '#6b7280' : '#9ca3af'} />
         <Text style={styles.emptyText}>
-          {!sessionId ? t('term.noSession') : t('term.noTermsExtracted')}
+          {!analysisTerms || analysisTerms.length === 0 ? t('term.noTermsExtracted') : t('term.noTermsForFilter')}
         </Text>
+        {sessionId && (!analysisTerms || analysisTerms.length === 0) && (
+          <Button 
+            variant="outline" 
+            style={{ marginTop: 16 }}
+            onPress={() => {
+              console.log('ContractTermsList: Refreshing session data');
+              clearSession();
+            }}
+          >
+            <RefreshCw size={16} color={isDark ? '#10b981' : '#059669'} />
+            <Text style={styles.buttonText}>{t('refresh')}</Text>
+          </Button>
+        )}
       </View>
     );
   }
@@ -460,10 +603,17 @@ const ContractTermsList: React.FC = () => {
   });
 
   const renderTerm = (term: FrontendAnalysisTerm, index: number) => {
-    const isExpanded = expandedTermId === term.term_id;
+    const isExpanded = expandedTerms[term.term_id] || false;
     const isEditing = editingTermId === term.term_id;
     const isEffectivelyCompliant = term.expert_override_is_valid_sharia ?? (term.isUserConfirmed ? (term.isReviewedSuggestionValid ?? true) : term.is_valid_sharia) ?? false;
+    
     const textInSuggestionOrEditBox = isEditing ? currentEditText : (term.userModifiedText ?? term.reviewedSuggestion ?? term.modified_term ?? "");
+
+    let suggestionBoxLabelKey = 'term.initialSuggestion';
+    if (term.isUserConfirmed && term.userModifiedText) { suggestionBoxLabelKey = 'term.confirmed'; }
+    else if (isEditing) { suggestionBoxLabelKey = 'term.editSuggestion';}
+    else if (term.reviewedSuggestion && (term.userModifiedText === term.reviewedSuggestion || textInSuggestionOrEditBox === term.reviewedSuggestion) ) { suggestionBoxLabelKey = 'term.reviewedSuggestion'; }
+    else if (term.userModifiedText) { suggestionBoxLabelKey = 'term.yourEdit'; }
 
     return (
       <Animated.View 
@@ -509,21 +659,11 @@ const ContractTermsList: React.FC = () => {
         </TouchableOpacity>
 
         {isExpanded && (
-          <Animated.View 
-            style={styles.termContent}
-            entering={() => ({
-              transform: [{ scale: 0.95 }],
-              opacity: 0,
-            })}
-            animate={{
-              transform: [{ scale: 1 }],
-              opacity: 1,
-            }}
-          >
+          <View style={styles.termContent}>
             <Text style={styles.sectionTitle}>{t('term.fullText')}</Text>
             <Text style={styles.sectionText}>{term.term_text}</Text>
 
-            {!isEffectivelyCompliant && term.sharia_issue && (
+            {!isEffectivelyCompliant && term.sharia_issue && !(term.reviewedSuggestionIssue && term.isReviewedSuggestionValid === false) && (
               <View style={styles.issueBox}>
                 <AlertCircle size={16} color="#ef4444" />
                 <View style={{ flex: 1 }}>
@@ -533,11 +673,27 @@ const ContractTermsList: React.FC = () => {
               </View>
             )}
 
-            {/* Reference number display */}
+            {term.reviewedSuggestionIssue && term.isReviewedSuggestionValid === false && (
+              <View style={[styles.issueBox, { marginTop: 8 }]}>
+                <AlertCircle size={16} color="#ef4444" />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.issueTitle}>{t('term.newShariaIssue')}</Text>
+                  <Text style={styles.issueText}>{term.reviewedSuggestionIssue}</Text>
+                </View>
+              </View>
+            )}
+
             {term.reference_number && (
-              <View style={styles.referenceBox}>
-                <Text style={styles.referenceTitle}>{t('term.reference')}</Text>
-                <Text style={styles.referenceText}>{term.reference_number}</Text>
+              <View style={[styles.referenceBox, { backgroundColor: isEffectivelyCompliant ? '#dbeafe' : '#fef3c7' }]}>
+                <Info size={16} color={isEffectivelyCompliant ? '#3b82f6' : '#f59e0b'} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.referenceTitle, { color: isEffectivelyCompliant ? '#1e40af' : '#92400e' }]}>
+                    {t('term.reference')}
+                  </Text>
+                  <Text style={[styles.referenceText, { color: isEffectivelyCompliant ? '#1e40af' : '#92400e' }]}>
+                    {term.reference_number}
+                  </Text>
+                </View>
               </View>
             )}
 
@@ -566,14 +722,39 @@ const ContractTermsList: React.FC = () => {
                   </Button>
                 </View>
               </View>
-            ) : textInSuggestionOrEditBox ? (
+            ) : term.isUserConfirmed && term.userModifiedText ? (
               <View style={{ marginTop: 16 }}>
-                <Text style={styles.sectionTitle}>{t('term.suggestion')}</Text>
+                <Text style={styles.sectionTitle}>{t(suggestionBoxLabelKey)}</Text>
+                <View style={styles.confirmedSuggestionBox}>
+                  <Text style={styles.confirmedSuggestionText}>{term.userModifiedText}</Text>
+                </View>
+                <Button variant="outline" onPress={() => handleEditSuggestion(term)} style={{ marginTop: 8 }}>
+                  <Edit3 size={14} color={isDark ? '#d1d5db' : '#374151'} />
+                  <Text style={styles.buttonText}>{t('term.editConfirmed')}</Text>
+                </Button>
+              </View>
+            ) : textInSuggestionOrEditBox && (!term.is_valid_sharia || term.userModifiedText || term.reviewedSuggestion) ? (
+              <View style={{ marginTop: 16 }}>
+                <Text style={styles.sectionTitle}>{t(suggestionBoxLabelKey)}</Text>
                 <Text style={styles.suggestionText}>{textInSuggestionOrEditBox}</Text>
+                {term.reviewedSuggestion && (term.userModifiedText === term.reviewedSuggestion || textInSuggestionOrEditBox === term.reviewedSuggestion) && (
+                  <View style={[
+                    styles.reviewStatusBox,
+                    { backgroundColor: term.isReviewedSuggestionValid ? '#dcfce7' : '#fee2e2' }
+                  ]}>
+                    <Text style={[
+                      styles.reviewStatusText,
+                      { color: term.isReviewedSuggestionValid ? '#166534' : '#991b1b' }
+                    ]}>
+                      AI Review: {term.isReviewedSuggestionValid ? t('review.looksGood') : `${t('review.concern')}: ${term.reviewedSuggestionIssue || t('review.complianceIssue')}`}
+                    </Text>
+                  </View>
+                )}
                 <View style={styles.buttonGroup}>
                   <Button 
                     onPress={() => handleConfirmChanges(term)} 
                     disabled={isTermProcessing && isTermProcessing[term.term_id]}
+                    style={{ flex: 1 }}
                   >
                     {isTermProcessing && isTermProcessing[term.term_id] ? 
                       <ActivityIndicator color="#fff" size="small" /> : 
@@ -581,53 +762,60 @@ const ContractTermsList: React.FC = () => {
                     }
                     <Text style={styles.buttonTextPrimary}>{t('button.confirm')}</Text>
                   </Button>
-                  <Button variant="outline" onPress={() => handleEditSuggestion(term)}>
+                  <Button variant="outline" onPress={() => handleEditSuggestion(term)} style={{ flex: 1, marginLeft: 8 }}>
                     <Edit3 size={16} color={isDark ? '#d1d5db' : '#374151'} />
                     <Text style={styles.buttonText}>{t('term.editSuggestion')}</Text>
                   </Button>
                 </View>
               </View>
+            ) : term.is_valid_sharia ? (
+              <View style={styles.compliantBox}>
+                <Text style={styles.compliantText}>{t('term.alreadyCompliant')}</Text>
+              </View>
             ) : null}
 
-            <View style={styles.questionSection}>
-              <Textarea 
-                placeholder={t('term.questionPlaceholder')} 
-                value={termQuestions[term.term_id] || ''} 
-                onChangeText={(val) => setTermQuestions(p => ({...p, [term.term_id]: val}))}
-                style={styles.textareaStyle}
-              />
-              <Button 
-                style={{ marginTop: 8 }} 
-                onPress={() => handleSendQuestion(term.term_id)} 
-                disabled={isTermProcessing && isTermProcessing[term.term_id] || !termQuestions[term.term_id]}
-              >
-                {isTermProcessing && isTermProcessing[term.term_id] ? 
-                  <ActivityIndicator color="#fff" size="small" /> : 
-                  <Send size={16} color="#fff" />
-                }
-                <Text style={styles.buttonTextPrimary}>{t('button.send')}</Text>
-              </Button>
+            {term.currentQaAnswer && (
+              <View style={styles.answerContainer}>
+                <Text style={styles.answerTitle}>{t('term.answer')}</Text>
+                <Text style={styles.answerText}>{term.currentQaAnswer}</Text>
+                {!term.isUserConfirmed && (!term.is_valid_sharia || term.isReviewedSuggestionValid === false) && (
+                  <Button 
+                    variant="ghost" 
+                    style={{ marginTop: 8 }}
+                    onPress={() => handleUseAnswerAsSuggestion(term)}
+                    disabled={isReviewingModification && isReviewingModification[term.term_id]}
+                  >
+                    {isReviewingModification && isReviewingModification[term.term_id] ? 
+                      <ActivityIndicator color={isDark ? '#10b981' : '#059669'} size="small" /> : 
+                      <Sparkles size={14} color={isDark ? '#10b981' : '#059669'} />
+                    }
+                    <Text style={styles.useAnswerButtonText}>{t('button.useAndReview')}</Text>
+                  </Button>
+                )}
+              </View>
+            )}
 
-              {term.currentQaAnswer && (
-                <View style={styles.answerContainer}>
-                  <Text style={styles.answerText}>{term.currentQaAnswer}</Text>
-                  {!term.isUserConfirmed && (!term.is_valid_sharia || term.isReviewedSuggestionValid === false) && (
-                    <Button 
-                      variant="ghost" 
-                      style={{ marginTop: 8 }}
-                      onPress={() => handleUseAnswerAsSuggestion(term)}
-                      disabled={isReviewingModification && isReviewingModification[term.term_id]}
-                    >
-                      {isReviewingModification && isReviewingModification[term.term_id] ? 
-                        <ActivityIndicator color={isDark ? '#10b981' : '#059669'} size="small" /> : 
-                        <Sparkles size={14} color={isDark ? '#10b981' : '#059669'} />
-                      }
-                      <Text style={styles.useAnswerButtonText}>{t('button.useAndReview')}</Text>
-                    </Button>
-                  )}
-                </View>
-              )}
-            </View>
+            {!term.isUserConfirmed && (
+              <View style={styles.questionSection}>
+                <Textarea 
+                  placeholder={t('term.questionPlaceholder')} 
+                  value={termQuestions[term.term_id] || ''} 
+                  onChangeText={(val) => handleQuestionChange(term.term_id, val)}
+                  style={styles.textareaStyle}
+                />
+                <Button 
+                  style={{ marginTop: 8 }} 
+                  onPress={() => handleSendQuestion(term.term_id)} 
+                  disabled={isTermProcessing && isTermProcessing[term.term_id] || !termQuestions[term.term_id]?.trim()}
+                >
+                  {isTermProcessing && isTermProcessing[term.term_id] ? 
+                    <ActivityIndicator color="#fff" size="small" /> : 
+                    <Send size={16} color="#fff" />
+                  }
+                  <Text style={styles.buttonTextPrimary}>{t('button.send')}</Text>
+                </Button>
+              </View>
+            )}
 
             {currentUserRole === 'shariah_expert' && (
               <View style={styles.expertFeedbackSection}>
@@ -674,6 +862,15 @@ const ContractTermsList: React.FC = () => {
                       />
                     </View>
 
+                    <View style={{ marginTop: 16 }}>
+                      <Text style={styles.feedbackLabel}>{t('expert.correctedSuggestion')}</Text>
+                      <Textarea 
+                        value={currentExpertFeedback.expertCorrectedSuggestion || ""}
+                        onChangeText={(val) => handleExpertFeedbackChange('expertCorrectedSuggestion', val)}
+                        style={styles.textareaStyle}
+                      />
+                    </View>
+
                     <View style={styles.buttonGroup}>
                       <Button variant="ghost" onPress={() => setExpertFeedbackTermId(null)}>
                         <Text style={styles.buttonText}>{t('term.cancel')}</Text>
@@ -702,7 +899,7 @@ const ContractTermsList: React.FC = () => {
                 )}
               </View>
             )}
-          </Animated.View>
+          </View>
         )}
       </Animated.View>
     );
@@ -710,7 +907,7 @@ const ContractTermsList: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <QuestionAnimation isVisible={isAskingQuestion || isProcessingGeneralQuestion} />
+      <QuestionAnimation isVisible={askingQuestionForTermId !== null || isProcessingGeneralQuestion} />
       {generationType && (
         <GeneratingContractAnimation 
           progress={generationVisualProgress} 
@@ -729,29 +926,6 @@ const ContractTermsList: React.FC = () => {
       ]}>
         <Text style={styles.title}>{t('contract.terms')}</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity 
-            style={[
-              styles.userRoleButton, 
-              { 
-                backgroundColor: currentUserRole === 'shariah_expert' ? '#f59e0b' : '#10b981',
-                shadowColor: currentUserRole === 'shariah_expert' ? '#f59e0b' : '#10b981',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.3,
-                shadowRadius: 4,
-                elevation: 3,
-              }
-            ]}
-            onPress={toggleUserRole}
-            activeOpacity={0.8}
-          >
-            {currentUserRole === 'shariah_expert' ? 
-              <ExpertIcon size={16} color="#fff" /> : 
-              <User size={16} color="#fff" />
-            }
-            <Text style={styles.userRoleText}>
-              {currentUserRole === 'shariah_expert' ? t('user.expert') : t('user.regular')}
-            </Text>
-          </TouchableOpacity>
           {sessionId && analysisTerms && analysisTerms.length > 0 && (
             <TouchableOpacity 
               style={styles.generalQuestionButton}
@@ -786,80 +960,106 @@ const ContractTermsList: React.FC = () => {
             <Text style={styles.emptyText}>
               {!analysisTerms || analysisTerms.length === 0 ? t('term.noTermsExtracted') : t('term.noTermsForFilter')}
             </Text>
-            {sessionId && (!analysisTerms || analysisTerms.length === 0) && (
-              <Button 
-                variant="outline" 
-                style={{ marginTop: 16 }}
-                onPress={() => {
-                  console.log('ContractTermsList: Refreshing session data');
-                  // This will trigger a re-fetch of session data
-                  clearSession();
-                }}
-              >
-                <RefreshCw size={16} color={isDark ? '#10b981' : '#059669'} />
-                <Text style={styles.buttonText}>{t('refresh')}</Text>
-              </Button>
-            )}
           </View>
         )}
       </ScrollView>
 
-      <View style={styles.generationSection}>
-        <Text style={styles.sectionTitle}>{t('contract.reviewContract')}</Text>
-        <Text style={styles.sectionDescription}>{t('contract.generateInfo')}</Text>
+      {Array.isArray(analysisTerms) && analysisTerms.length > 0 && (
+        <View style={styles.generationSection}>
+          <Text style={styles.sectionTitle}>{t('contract.reviewContract')}</Text>
+          <Text style={styles.sectionDescription}>{t('contract.generateInfo')}</Text>
 
-        <View style={styles.buttonContainer}>
-          <Button 
-            onPress={() => handleGenerateContract('modified')} 
-            disabled={isGeneratingContract || isGeneratingMarkedContract} 
-            style={styles.generateButton}
-          >
-            {isGeneratingContract ? 
-              <ActivityIndicator color="#fff" size="small" /> : 
-              <FileCheck2 size={16} color="#fff" />
-            }
-            <Text style={styles.buttonTextPrimary}>{t('contract.generateButton')}</Text>
-          </Button>
-          {sessionDetails?.modified_contract_info && (
+          <View style={styles.buttonContainer}>
             <Button 
-              onPress={() => openPreview('modified')} 
-              variant="outline" 
-              style={styles.previewButton}
+              onPress={handleGenerateContract} 
+              disabled={isGeneratingContract || isGeneratingMarkedContract} 
+              style={styles.generateButton}
             >
-              <Eye size={16} color={isDark ? '#fff' : '#000'} />
+              {isGeneratingContract ? 
+                <ActivityIndicator color="#fff" size="small" /> : 
+                <FileCheck2 size={16} color="#fff" />
+              }
+              <Text style={styles.buttonTextPrimary}>{t('contract.generateButton')}</Text>
+            </Button>
+            {sessionDetails?.modified_contract_info && (
+              <Button 
+                onPress={() => openPreviewModalWithType('modified')} 
+                variant="outline" 
+                style={styles.previewButton}
+              >
+                <Eye size={16} color={isDark ? '#fff' : '#000'} />
+              </Button>
+            )}
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <Button 
+              onPress={handleGenerateMarkedContract} 
+              disabled={isGeneratingContract || isGeneratingMarkedContract} 
+              variant="secondary" 
+              style={styles.generateButton}
+            >
+              {isGeneratingMarkedContract ? 
+                <ActivityIndicator color={isDark ? '#fff' : '#000'} size="small" /> : 
+                <FileSearch size={16} color={isDark ? '#fff' : '#000'} />
+              }
+              <Text style={styles.buttonText}>{t('contract.generateMarkedButton')}</Text>
+            </Button>
+            {sessionDetails?.marked_contract_info && (
+              <Button 
+                onPress={() => openPreviewModalWithType('marked')} 
+                variant="outline" 
+                style={styles.previewButton}
+              >
+                <Eye size={16} color={isDark ? '#fff' : '#000'} />
+              </Button>
+            )}
+          </View>
+
+          {sessionId && (
+            <Button 
+              variant="outline" 
+              onPress={handleStartNewAnalysis} 
+              style={styles.newAnalysisButton}
+            >
+              <RefreshCw size={16} color={isDark ? '#ef4444' : '#dc2626'} />
+              <Text style={styles.newAnalysisButtonText}>{t('upload.newAnalysis') || "Start New Analysis"}</Text>
             </Button>
           )}
         </View>
-
-        <View style={styles.buttonContainer}>
-          <Button 
-            onPress={() => handleGenerateContract('marked')} 
-            disabled={isGeneratingContract || isGeneratingMarkedContract} 
-            variant="secondary" 
-            style={styles.generateButton}
-          >
-            {isGeneratingMarkedContract ? 
-              <ActivityIndicator color={isDark ? '#fff' : '#000'} size="small" /> : 
-              <FileSearch size={16} color={isDark ? '#fff' : '#000'} />
-            }
-            <Text style={styles.buttonText}>{t('contract.generateMarkedButton')}</Text>
-          </Button>
-          {sessionDetails?.marked_contract_info && (
-            <Button 
-              onPress={() => openPreview('marked')} 
-              variant="outline" 
-              style={styles.previewButton}
-            >
-              <Eye size={16} color={isDark ? '#fff' : '#000'} />
-            </Button>
-          )}
-        </View>
-      </View>
+      )}
 
       <ContractPreviewModal 
         isVisible={isPreviewModalVisible}
-        onClose={() => setIsPreviewModalVisible(false)}
+        onClose={() => {
+          if (previewFileUrl && previewFileUrl.startsWith('blob:')) {
+            URL.revokeObjectURL(previewFileUrl);
+          }
+          setIsPreviewModalVisible(false);
+          setPreviewFileUrl(null);
+          const currentPreviewType = previewFileType;
+          setPreviewFileType(null);
+          const currentPreviewKey = sessionId && currentPreviewType ? `${sessionId}-${currentPreviewType}-preview` : null;
+          if (currentPreviewKey) {
+            setPreviewLoading(currentPreviewKey, false);
+          }
+        }}
         fileType={previewFileType}
+        fileUrl={previewFileUrl}
+        pdfDownloadFilename={previewPdfDownloadFilename}
+        docxDownloadUrl={
+          previewFileType === 'modified' ? sessionDetails?.modified_contract_info?.docx_cloudinary_info?.url :
+          previewFileType === 'marked' ? sessionDetails?.marked_contract_info?.docx_cloudinary_info?.url :
+          null
+        }
+        userFacingDocxFilename={
+          previewFileType === 'modified' ? sessionDetails?.modified_contract_info?.docx_cloudinary_info?.user_facing_filename :
+          previewFileType === 'marked' ? sessionDetails?.marked_contract_info?.docx_cloudinary_info?.user_facing_filename :
+          "contract.docx"
+        }
+        onRetryPreview={() => {
+          if (previewFileType) openPreviewModalWithType(previewFileType);
+        }}
       />
 
       <Modal
@@ -974,19 +1174,6 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
       alignItems: 'center', 
       gap: 12 
     },
-    userRoleButton: { 
-      flexDirection: isRTL ? 'row-reverse' : 'row', 
-      alignItems: 'center', 
-      paddingHorizontal: 16, 
-      paddingVertical: 10, 
-      borderRadius: 25, 
-      gap: 8 
-    },
-    userRoleText: { 
-      color: '#fff', 
-      fontSize: 13, 
-      fontWeight: 'bold' 
-    },
     generalQuestionButton: { 
       padding: 12, 
       borderRadius: 25, 
@@ -999,7 +1186,10 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
       backgroundColor: isDark ? '#1f2937' : '#ffffff', 
       borderRadius: 16, 
       marginBottom: 16, 
-      boxShadow: isDark ? '0 4px 8px rgba(0, 0, 0, 0.3)' : '0 4px 8px rgba(0, 0, 0, 0.1)',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: isDark ? 0.3 : 0.1,
+      shadowRadius: 8,
       elevation: 5, 
       borderWidth: 1, 
       borderColor: isDark ? '#374151' : '#e5e7eb' 
@@ -1055,6 +1245,13 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
       textAlign: isRTL ? 'right' : 'left',
       marginBottom: 16 
     },
+    sectionDescription: { 
+      fontSize: 14, 
+      color: isDark ? '#9ca3af' : '#6b7280', 
+      marginBottom: 20, 
+      textAlign: isRTL ? 'right' : 'left',
+      lineHeight: 20
+    },
     issueBox: { 
       flexDirection: isRTL ? 'row-reverse' : 'row', 
       gap: 12, 
@@ -1079,7 +1276,8 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
       textAlign: isRTL ? 'right' : 'left' 
     },
     referenceBox: { 
-      backgroundColor: isDark ? '#1e3a8a' : '#dbeafe', 
+      flexDirection: isRTL ? 'row-reverse' : 'row', 
+      gap: 12, 
       padding: 16, 
       borderRadius: 12, 
       marginTop: 16,
@@ -1089,13 +1287,11 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
     referenceTitle: { 
       fontSize: 12, 
       fontWeight: 'bold', 
-      color: isDark ? '#93c5fd' : '#1e40af', 
       marginBottom: 6, 
       textAlign: isRTL ? 'right' : 'left' 
     },
     referenceText: { 
       fontSize: 14, 
-      color: isDark ? '#bfdbfe' : '#1e40af', 
       lineHeight: 22, 
       textAlign: isRTL ? 'right' : 'left' 
     },
@@ -1108,6 +1304,45 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
       borderRadius: 12, 
       textAlign: isRTL ? 'right' : 'left',
       marginBottom: 16
+    },
+    confirmedSuggestionBox: {
+      backgroundColor: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7',
+      padding: 16,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: isDark ? 'rgba(34, 197, 94, 0.4)' : '#bbf7d0',
+      marginBottom: 16
+    },
+    confirmedSuggestionText: {
+      fontSize: 16,
+      color: isDark ? '#86efac' : '#166534',
+      lineHeight: 26,
+      fontWeight: '500',
+      textAlign: isRTL ? 'right' : 'left'
+    },
+    compliantBox: {
+      backgroundColor: isDark ? 'rgba(34, 197, 94, 0.1)' : '#f0fdf4',
+      padding: 16,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: isDark ? 'rgba(34, 197, 94, 0.3)' : '#bbf7d0',
+      marginTop: 16
+    },
+    compliantText: {
+      fontSize: 16,
+      color: isDark ? '#86efac' : '#166534',
+      textAlign: isRTL ? 'right' : 'left'
+    },
+    reviewStatusBox: {
+      padding: 8,
+      borderRadius: 8,
+      marginTop: 8,
+      marginBottom: 16
+    },
+    reviewStatusText: {
+      fontSize: 12,
+      fontWeight: '500',
+      textAlign: isRTL ? 'right' : 'left'
     },
     textareaStyle: {
       minHeight: 80,
@@ -1145,7 +1380,18 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
       fontWeight: '500'
     },
     answerContainer: { 
-      marginTop: 16 
+      marginTop: 16,
+      borderTopWidth: 1,
+      borderTopColor: isDark ? '#374151' : '#e5e7eb',
+      paddingTop: 16
+    },
+    answerTitle: {
+      fontSize: 12,
+      fontWeight: 'bold',
+      color: isDark ? '#93c5fd' : '#2563eb',
+      marginBottom: 8,
+      textAlign: isRTL ? 'right' : 'left',
+      textTransform: 'uppercase'
     },
     answerText: { 
       padding: 16, 
@@ -1164,15 +1410,11 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
       backgroundColor: isDark ? '#1f2937' : '#ffffff',
       borderRadius: 16,
       padding: 20,
-      boxShadow: isDark ? '0 4px 8px rgba(0, 0, 0, 0.3)' : '0 4px 8px rgba(0, 0, 0, 0.1)',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: isDark ? 0.3 : 0.1,
+      shadowRadius: 8,
       elevation: 5,
-    },
-    sectionDescription: { 
-      fontSize: 14, 
-      color: isDark ? '#9ca3af' : '#6b7280', 
-      marginBottom: 20, 
-      textAlign: isRTL ? 'right' : 'left',
-      lineHeight: 20
     },
     buttonContainer: { 
       flexDirection: 'row', 
@@ -1188,6 +1430,16 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
       marginLeft: 12,
       borderRadius: 12,
       paddingHorizontal: 16
+    },
+    newAnalysisButton: {
+      marginTop: 16,
+      borderRadius: 12,
+      borderColor: isDark ? '#ef4444' : '#dc2626'
+    },
+    newAnalysisButtonText: {
+      color: isDark ? '#ef4444' : '#dc2626',
+      marginLeft: 8,
+      fontWeight: '500'
     },
     radioContainer: { 
       gap: 20, 
@@ -1226,7 +1478,11 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
       fontWeight: '600'
     },
     animationOverlay: { 
-      ...StyleSheet.absoluteFillObject, 
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
       backgroundColor: 'rgba(0,0,0,0.8)', 
       justifyContent: 'center', 
       alignItems: 'center', 
@@ -1238,7 +1494,10 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
       padding: 32, 
       width: screenWidth * 0.85, 
       alignItems: 'center',
-      boxShadow: '0 10px 20px rgba(0, 0, 0, 0.3)',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.3,
+      shadowRadius: 20,
       elevation: 10,
     },
     stageIconContainer: { 
@@ -1337,7 +1596,10 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
       padding: 24, 
       width: '100%', 
       maxHeight: '85%',
-      boxShadow: '0 10px 20px rgba(0, 0, 0, 0.3)',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.3,
+      shadowRadius: 20,
       elevation: 10,
     },
     modalTitle: { 
@@ -1364,13 +1626,6 @@ const getStyles = (isDark: boolean, isRTL: boolean) => {
       backgroundColor: isDark ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)', 
       padding: 16, 
       borderRadius: 12 
-    },
-    answerTitle: { 
-      fontSize: 14, 
-      fontWeight: 'bold', 
-      color: isDark ? '#93c5fd' : '#2563eb', 
-      marginBottom: 12, 
-      textAlign: isRTL ? 'right' : 'left' 
     },
     generalAnswerText: { 
       fontSize: 15, 
