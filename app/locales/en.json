@@ -1,3 +1,4 @@
+
 {
   "app": {
     "title": "Shar'AI",
@@ -7,22 +8,35 @@
   "onboarding": {
     "skip": "Skip",
     "next": "Next",
+    "previous": "Previous",
     "done": "Done",
     "step1": {
       "title": "Upload Contracts",
-      "desc": "Upload your legal documents in Arabic or English for AI-powered analysis."
+      "desc": "Upload your legal documents in Arabic or English for AI-powered analysis.",
+      "feature1": "Support for PDF, DOCX, and TXT files",
+      "feature2": "Advanced text extraction technology",
+      "feature3": "Multi-language contract processing"
     },
     "step2": {
       "title": "Instant Analysis",
-      "desc": "Our advanced AI analyzes every term for Sharia compliance with expert precision."
+      "desc": "Our advanced AI analyzes every term for Sharia compliance with expert precision.",
+      "feature1": "Real-time compliance checking",
+      "feature2": "Expert-level Islamic law analysis",
+      "feature3": "Detailed term-by-term evaluation"
     },
     "step3": {
       "title": "Get Results & Suggestions",
-      "desc": "Receive detailed compliance reports with suggestions for improvements."
+      "desc": "Receive detailed compliance reports with suggestions for improvements.",
+      "feature1": "Comprehensive compliance reports",
+      "feature2": "AI-powered improvement suggestions",
+      "feature3": "Interactive term modification"
     },
     "step4": {
       "title": "Collaborate with Experts",
-      "desc": "Connect with certified Islamic law experts for complex cases and review."
+      "desc": "Connect with certified Islamic law experts for complex cases and review.",
+      "feature1": "Expert feedback and validation",
+      "feature2": "Professional consultation access",
+      "feature3": "Quality assurance reviews"
     }
   },
   "navigation": {
@@ -69,7 +83,14 @@
       "compileResults": "Compiling results..."
     },
     "complete": "Analysis Complete!",
-    "viewResults": "Redirecting to your results..."
+    "viewResults": "Redirecting to your results...",
+    "live": "LIVE",
+    "submessage": {
+      "processing": "Processing document structure...",
+      "examining": "Examining legal clauses...",
+      "validating": "Validating against Sharia principles...",
+      "optimizing": "Optimizing suggestions..."
+    }
   },
   "results": {
     "title": "Analysis Results",
@@ -96,7 +117,36 @@
     "title": "Analysis History",
     "searchPlaceholder": "Search by filename...",
     "empty": "No analyses found.",
-    "delete": "Delete"
+    "emptyDesc": "Start analyzing contracts to see your history here",
+    "delete": "Delete",
+    "deleteConfirmation": "Are you sure you want to delete this analysis? This action cannot be undone.",
+    "results": "results",
+    "interactions": "interactions",
+    "views": "views",
+    "hasContract": "Generated",
+    "modifications": "modifications",
+    "sessionDetails": "Session Details",
+    "filename": "Filename",
+    "compliance": "Compliance",
+    "analysisDate": "Analysis Date",
+    "termsAnalyzed": "Terms Analyzed",
+    "sort": {
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "compliance": "Compliance",
+      "interactions": "Interactions"
+    },
+    "filter": {
+      "all": "All",
+      "high": "High Compliance",
+      "medium": "Medium Compliance",
+      "low": "Low Compliance"
+    },
+    "compliance": {
+      "high": "High Compliance",
+      "medium": "Medium Compliance",
+      "low": "Low Compliance"
+    }
   },
   "profile": {
     "profile": "Profile",
@@ -109,7 +159,12 @@
     "help": "Help & FAQ",
     "share": "Share Shar'AI",
     "rate": "Rate Us",
-    "temporaryAccount": "Temporary Guest Account"
+    "temporaryAccount": "Temporary Guest Account",
+    "userRole": "User Role",
+    "regularUser": "Regular User",
+    "shariahExpert": "Shariah Expert",
+    "switchRole": "Switch to Expert Mode",
+    "expertMode": "Expert Mode Active"
   },
   "auth": {
     "login": "Login",
@@ -137,20 +192,48 @@
   },
   "questionAnimation": {
     "thinking": "AI is thinking...",
+    "processing": "Processing your question...",
+    "analyzing": "Analyzing the context...",
+    "formulating": "Formulating response...",
     "patience": "Please wait a moment while we process your question."
+  },
+  "expert": {
+    "mode": "Expert Mode",
+    "provideFeedback": "Provide Expert Feedback",
+    "feedbackSubmitted": "Feedback Submitted",
+    "validateAnalysis": "Validate AI Analysis",
+    "overrideCompliance": "Override Compliance Status",
+    "expertNotes": "Expert Notes",
+    "qualityAssurance": "Quality Assurance Review"
   },
   "common": {
     "loading": "Loading...",
     "retry": "Retry",
     "cancel": "Cancel",
-    "delete": "Delete"
+    "delete": "Delete",
+    "close": "Close",
+    "save": "Save",
+    "edit": "Edit",
+    "view": "View",
+    "download": "Download",
+    "share": "Share",
+    "bookmark": "Bookmark",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "finish": "Finish"
   },
   "error": {
     "analysisFailed": "Analysis Failed",
     "fileType": "Invalid File Type",
     "cameraFailed": "Failed to capture photo.",
     "confirmationFailed": "Confirmation Failed",
-    "generationFailed": "Generation Failed"
+    "generationFailed": "Generation Failed",
+    "deleteFailed": "Delete Failed",
+    "deleteFailedMessage": "Could not delete the session at this time.",
+    "networkError": "Network Error",
+    "networkErrorMessage": "Please check your internet connection and try again."
   },
   "contract": {
     "terms": "Contract Clauses",
@@ -180,7 +263,10 @@
     "confirmed": "Suggestion Confirmed",
     "confirmedMessage": "The modification has been saved.",
     "cancel": "Cancel",
-    "saveAndReview": "Save & Review"
+    "saveAndReview": "Save & Review",
+    "expertFeedback": "Expert Feedback",
+    "lastModified": "Last Modified",
+    "interactionCount": "Interactions"
   },
   "review": {
     "editSentForReview": "Review Submitted",
@@ -195,6 +281,12 @@
   },
   "button": {
     "confirm": "Confirm Changes",
-    "send": "Send Question"
+    "send": "Send Question",
+    "generate": "Generate",
+    "analyze": "Analyze",
+    "upload": "Upload",
+    "download": "Download",
+    "share": "Share",
+    "save": "Save"
   }
 }
