@@ -2,7 +2,9 @@
 module.exports = function(api) {
   api.cache(true);
   return {
-    presets: ['babel-preset-expo'],
+    presets: [
+      ['babel-preset-expo', { jsxImportSource: 'react' }]
+    ],
     plugins: [
       ['module-resolver', {
         root: ['./app'],
@@ -12,5 +14,13 @@ module.exports = function(api) {
       }],
       'react-native-reanimated/plugin',
     ],
+    env: {
+      production: {
+        plugins: [
+          'react-native-paper/babel',
+          'transform-remove-console'
+        ]
+      }
+    }
   };
 };
