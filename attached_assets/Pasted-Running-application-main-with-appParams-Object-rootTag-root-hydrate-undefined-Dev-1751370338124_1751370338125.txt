@@ -1,0 +1,28 @@
+Running application "main" with appParams:
+ 
+Object {rootTag: "#root", hydrate: undefined}
+ 
+Development-level warnings: ON.
+Performance optimizations: OFF.
+Route "./contexts/ContractContext.tsx" is missing the required default export. Ensure a React component is exported as default.
+"shadow*" style props are deprecated. Use "boxShadow".
+Animated: `useNativeDriver` is not supported because the native animated module is missing. Falling back to JS-based animation. To resolve this, add `RCTAnimation` module to this app, or remove `useNativeDriver`. Make sure to run `bundle exec pod install` first. Read more about autolinking: https://github.com/react-native-community/cli/blob/master/docs/autolinking.md
+props.pointerEvents is deprecated. Use style.pointerEvents
+Failed to set language and reload 
+CodedError {code: "ERR_UPDATES_DISABLED"}
+
+Failed to set language and reload 
+CodedError {code: "ERR_UPDATES_DISABLED"}
+
+Failed to set language and reload 
+CodedError {code: "ERR_UPDATES_DISABLED"}
+
+at t.value (https://5abd4508-194c-426a-adc2-33272a9955b1-00-3e32hyol0sy4s.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://5abd4508-194c-426a-adc2-33272a9955b1-00-3e32hyol0sy4s.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://5abd4508-194c-426a-adc2-33272a9955b1-00-3e32hyol0sy4s.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://5abd4508-194c-426a-adc2-33272a9955b1-00-3e32hyol0sy4s.spock.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+<div class="luna-console-preview" data-id="45"><div class="luna-console-preview-container"><div class="luna-console-preview-icon-container"><span class="luna-console-icon luna-console-icon-caret-right"></span></div><span class="luna-console-preview-content-container"><span class="luna-console-descriptor">Error</span> <span class="luna-console-object-preview">{<span class="luna-console-key">componentStack</span>: <span class="luna-console-string">&quot;↵    at HistoryScreen…&quot;</span>}</span></span></div><div class="luna-console-json luna-console-hidden"></div></div>
+
+The above error occurred in the <HistoryScreen> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, LogBoxStateSubscription.
