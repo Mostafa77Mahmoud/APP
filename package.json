@@ -21,7 +21,7 @@
     "clsx": "^2.1.1",
     "drizzle-kit": "^0.31.4",
     "drizzle-zod": "^0.8.2",
-    "expo": "^53.0.13",
+    "expo": "^53.0.15",
     "expo-camera": "~16.1.10",
     "expo-constants": "~17.1.6",
     "expo-document-picker": "~13.1.6",
