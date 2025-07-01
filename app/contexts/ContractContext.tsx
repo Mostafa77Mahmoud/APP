@@ -139,8 +139,3 @@ export const ContractProvider: React.FC<ContractProviderProps> = ({ children }) 
     </ContractContext.Provider>
   );
 };
-
-export { ContractProvider, useContract };
-
-// Default export for expo-router compatibility
-export default ContractProvider;

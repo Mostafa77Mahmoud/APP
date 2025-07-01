@@ -1,16 +1,15 @@
-
 {
   "expo": {
     "name": "Shariaa Analyzer",
-    "slug": "shariaa-analyzer",
+    "slug": "Sariah-AI",
     "version": "1.0.0",
-    "scheme": "shariaa-analyzer",
+    "scheme": "com.shariaa.analyzer",
     "description": "A Shariah-compliant contract analyzer app",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./client/public/logo-shariaa.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/logo-shariaa.png",
+      "image": "./client/public/logo-shariaa.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -19,32 +18,24 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.shariaa.analyzer",
-      "buildNumber": "1",
-      "infoPlist": {
-        "NSCameraUsageDescription": "This app uses the camera to scan contracts for analysis.",
-        "NSMicrophoneUsageDescription": "This app may use the microphone for enhanced features."
-      }
+      "bundleIdentifier": "com.shariaa.analyzer"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo-shariaa.png",
+        "foregroundImage": "./client/public/logo-shariaa.png",
         "backgroundColor": "#10b981"
       },
       "package": "com.shariaa.analyzer",
-      "versionCode": 1,
-      "compileSdkVersion": 34,
-      "targetSdkVersion": 34,
       "permissions": [
         "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE"
       ]
     },
     "web": {
-      "favicon": "./assets/logo-shariaa.png",
-      "bundler": "metro",
-      "output": "static"
+      "favicon": "./client/public/logo-shariaa.png",
+      "bundler": "metro"
     },
     "plugins": [
       "expo-camera",
@@ -54,16 +45,11 @@
         {
           "iCloudContainerEnvironment": "Production"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
-    },
-    "runtimeVersion": {
-      "policy": "sdkVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/update-placeholder"
     }
   }
 }
