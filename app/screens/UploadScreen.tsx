@@ -1,4 +1,3 @@
-
 // app/screens/UploadScreen.tsx
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
@@ -20,7 +19,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({ onAnalysisComplete, onBack 
   const { theme } = useTheme();
   const { isAnalyzingContract, isUploading, uploadProgress } = useSession();
   const [analysisStage, setAnalysisStage] = useState(1);
-  
+
   const isDark = theme === 'dark';
   const styles = getStyles(isDark, isRTL);
 
@@ -44,10 +43,11 @@ const UploadScreen: React.FC<UploadScreenProps> = ({ onAnalysisComplete, onBack 
   }, [isAnalyzingContract]);
 
   const handleAnalysisComplete = (sessionId: string) => {
-    // Add a small delay to show completion animation
-    setTimeout(() => {
+    console.log('Analysis completed for session:', sessionId);
+    // Navigate to results or update UI state immediately
+    if (onAnalysisComplete) {
       onAnalysisComplete(sessionId);
-    }, 1500);
+    }
   };
 
   return (
@@ -59,7 +59,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({ onAnalysisComplete, onBack 
         <Text style={styles.headerTitle}>{t('upload.title')}</Text>
         <View style={styles.headerButton} />
       </View>
-      
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <UploadArea onAnalysisComplete={handleAnalysisComplete} />
       </ScrollView>
