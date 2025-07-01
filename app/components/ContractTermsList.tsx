@@ -566,7 +566,8 @@ const ContractTermsList: React.FC = () => {
     );
   }
 
-  if (!analysisTerms || !Array.isArray(analysisTerms) || analysisTerms.length === 0) {
+  // Only show empty state if we truly have no terms after loading is complete
+  if (sessionId && !isFetchingSession && !isAnalyzingContract && (!analysisTerms || analysisTerms.length === 0)) {
     console.log('ContractTermsList: No analysis terms available', { 
       analysisTerms: analysisTerms ? 'not array or empty' : 'null/undefined', 
       sessionId,
@@ -578,19 +579,17 @@ const ContractTermsList: React.FC = () => {
         <Text style={styles.emptyText}>
           {!analysisTerms || analysisTerms.length === 0 ? t('term.noTermsExtracted') : t('term.noTermsForFilter')}
         </Text>
-        {sessionId && (!analysisTerms || analysisTerms.length === 0) && (
-          <Button 
-            variant="outline" 
-            style={{ marginTop: 16 }}
-            onPress={() => {
-              console.log('ContractTermsList: Refreshing session data');
-              clearSession();
-            }}
-          >
-            <RefreshCw size={16} color={isDark ? '#10b981' : '#059669'} />
-            <Text style={styles.buttonText}>{t('refresh')}</Text>
-          </Button>
-        )}
+        <Button 
+          variant="outline" 
+          style={{ marginTop: 16 }}
+          onPress={() => {
+            console.log('ContractTermsList: Refreshing session data');
+            clearSession();
+          }}
+        >
+          <RefreshCw size={16} color={isDark ? '#10b981' : '#059669'} />
+          <Text style={styles.buttonText}>{t('refresh')}</Text>
+        </Button>
       </View>
     );
   }
@@ -954,14 +953,12 @@ const ContractTermsList: React.FC = () => {
       >
         {Array.isArray(filteredTerms) && filteredTerms.length > 0 ? (
           filteredTerms.map((term, index) => renderTerm(term, index))
-        ) : (
+        ) : Array.isArray(analysisTerms) && analysisTerms.length > 0 ? (
           <View style={styles.emptyContainer}>
             <FileText size={48} color={isDark ? '#6b7280' : '#9ca3af'} />
-            <Text style={styles.emptyText}>
-              {!analysisTerms || analysisTerms.length === 0 ? t('term.noTermsExtracted') : t('term.noTermsForFilter')}
-            </Text>
+            <Text style={styles.emptyText}>{t('term.noTermsForFilter')}</Text>
           </View>
-        )}
+        ) : null}
       </ScrollView>
 
       {Array.isArray(analysisTerms) && analysisTerms.length > 0 && (
