@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Alert, Modal, Animated, Dimensions } from 'react-native';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -68,14 +67,14 @@ const GeneratingContractAnimation: React.FC<{
   const pulseValue = useRef(new Animated.Value(1)).current;
 
   const title = type === 'marked' ? t('term.generatingMarkedContract') : t('term.generatingContract');
-  
+
   const stages = [
     { nameKey: 'generate.stage1', icon: FileText, threshold: 0, color: '#3b82f6' },
     { nameKey: 'generate.stage2', icon: Edit3, threshold: 30, color: '#8b5cf6' },
     { nameKey: 'generate.stage3', icon: FileCheck2, threshold: 60, color: '#10b981' },
     { nameKey: 'generate.stage4', icon: Sparkles, threshold: 90, color: '#f59e0b' },
   ];
-  
+
   const currentStage = stages.slice().reverse().find(s => progress >= s.threshold) || stages[0];
   const StageIcon = currentStage.icon;
 
@@ -146,17 +145,17 @@ const GeneratingContractAnimation: React.FC<{
             <StageIcon size={32} color={currentStage.color} />
           </Animated.View>
         </Animated.View>
-        
+
         <Text style={styles.animationTitle}>{title}</Text>
         <Text style={[styles.stageText, { color: currentStage.color }]}>
           {t(currentStage.nameKey)}
         </Text>
-        
+
         <View style={styles.progressContainer}>
           <Progress value={progress} style={styles.progressBar} />
           <Text style={styles.animationPercentage}>{Math.round(progress)}%</Text>
         </View>
-        
+
         {/* Stage indicators */}
         <View style={styles.stageIndicators}>
           {stages.map((stage, index) => (
@@ -217,7 +216,7 @@ const ContractTermsList: React.FC = () => {
   const [expertFeedbackTermId, setExpertFeedbackTermId] = useState<string | null>(null);
   const [currentExpertFeedback, setCurrentExpertFeedback] = useState<Partial<ExpertFeedbackData>>({});
   const [isSubmittingExpertFeedback, setIsSubmittingExpertFeedback] = useState<Record<string, boolean>>({});
-  
+
   const isDark = theme === 'dark';
   const styles = useMemo(() => getStyles(isDark, isRTL), [isDark, isRTL]);
 
@@ -568,7 +567,7 @@ const ContractTermsList: React.FC = () => {
                 }
                 <Text style={styles.buttonTextPrimary}>{t('button.send')}</Text>
               </Button>
-              
+
               {term.currentQaAnswer && (
                 <View style={styles.answerContainer}>
                   <Text style={styles.answerText}>{term.currentQaAnswer}</Text>
@@ -608,7 +607,7 @@ const ContractTermsList: React.FC = () => {
                       isRTL={isRTL}
                       styles={styles}
                     />
-                    
+
                     {currentExpertFeedback.aiAnalysisApproved === false && (
                       <View style={{ marginTop: 16 }}>
                         <Text style={styles.feedbackLabel}>{t('expert.correctedCompliance')}</Text>
@@ -624,7 +623,7 @@ const ContractTermsList: React.FC = () => {
                         />
                       </View>
                     )}
-                    
+
                     <View style={{ marginTop: 16 }}>
                       <Text style={styles.feedbackLabel}>{t('expert.comments')}</Text>
                       <Textarea 
@@ -634,7 +633,7 @@ const ContractTermsList: React.FC = () => {
                         style={styles.textareaStyle}
                       />
                     </View>
-                    
+
                     <View style={styles.buttonGroup}>
                       <Button variant="ghost" onPress={() => setExpertFeedbackTermId(null)}>
                         <Text style={styles.buttonText}>{t('term.cancel')}</Text>
@@ -681,7 +680,7 @@ const ContractTermsList: React.FC = () => {
           isDark={isDark}
         />
       )}
-      
+
       <Animated.View style={[
         styles.header,
         {
@@ -753,7 +752,7 @@ const ContractTermsList: React.FC = () => {
       <View style={styles.generationSection}>
         <Text style={styles.sectionTitle}>{t('contract.reviewContract')}</Text>
         <Text style={styles.sectionDescription}>{t('contract.generateInfo')}</Text>
-        
+
         <View style={styles.buttonContainer}>
           <Button 
             onPress={() => handleGenerateContract('modified')} 
@@ -775,8 +774,10 @@ const ContractTermsList: React.FC = () => {
               <Eye size={16} color={isDark ? '#fff' : '#000'} />
             </Button>
           )}
+        </```python
+
         </View>
-        
+
         <View style={styles.buttonContainer}>
           <Button 
             onPress={() => handleGenerateContract('marked')} 
@@ -801,7 +802,7 @@ const ContractTermsList: React.FC = () => {
           )}
         </View>
       </View>
-      
+
       <ContractPreviewModal 
         isVisible={isPreviewModalVisible}
         onClose={() => setIsPreviewModalVisible(false)}

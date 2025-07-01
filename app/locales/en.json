@@ -215,13 +215,8 @@
       "assessmentMissingDesc": "Please indicate whether the AI assessment is correct."
     }
   },
-  "user": {
-    "expert": "Expert",
-    "regular": "Regular"
-  },
   "analyzing": {
     "title": "Analyzing Contract",
-    "live": "LIVE",
     "stage1": "Document Processing",
     "stage1.desc": "Reading and parsing contract document",
     "stage2": "Term Extraction",

@@ -221,7 +221,6 @@
   },
   "analyzing": {
     "title": "تحليل العقد",
-    "live": "مباشر",
     "stage1": "معالجة الوثيقة",
     "stage1.desc": "قراءة وتحليل وثيقة العقد",
     "stage2": "استخراج البنود",
@@ -355,5 +354,83 @@
     "stage2": "تطبيق التعديلات...",
     "stage3": "إنهاء العقد...",
     "stage4": "إكمال الإنشاء..."
+  },
+  "analyzing": {
+    "title": "تحليل العقد",
+    "stage1": "قراءة العقد",
+    "stage1.desc": "معالجة هيكل الوثيقة والمحتوى",
+    "stage2": "استخراج البنود",
+    "stage2.desc": "تحديد البنود والشروط الرئيسية للعقد",
+    "stage3": "فحص الامتثال",
+    "stage3.desc": "تحليل التوافق مع الشريعة باستخدام الذكاء الاصطناعي",
+    "stage4": "التحقق من التحليل",
+    "stage4.desc": "المراجعة المرجعية مع الفقه الإسلامي",
+    "stage5": "إنهاء التقرير",
+    "stage5.desc": "إعداد نتائج التحليل الشاملة",
+    "live": "تحليل مباشر",
+    "shariaCompliant": "متوافق مع الشريعة",
+    "aiPowered": "مدعوم بالذكاء الاصطناعي",
+    "expertReviewed": "مراجعة الخبراء"
+  },
+  "term": {
+    "askQuestion": "اسأل سؤالاً",
+    "questionPlaceholder": "اسأل عن هذا البند تحديداً...",
+    "editTerm": "تعديل البند",
+    "saveTerm": "حفظ التغييرات",
+    "cancelEdit": "إلغاء",
+    "submitFeedback": "إرسال الملاحظات",
+    "generatingContract": "إنشاء عقد متوافق",
+    "generatingMarkedContract": "إنشاء عقد مُعلَّم"
+  },
+  "user": {
+    "expert": "خبير",
+    "regular": "عادي"
+  },
+  "general": {
+    "askQuestion": "اسأل سؤالاً عاماً",
+    "questionPlaceholder": "اسأل عن العقد بأكمله..."
+  },
+  "generate": {
+    "stage1": "إعداد العقد",
+    "stage2": "تطبيق التعديلات",
+    "stage3": "مراجعة التغييرات",
+    "stage4": "إنهاء الوثيقة"
+  },
+   "history": {
+    "title": "سجل التحليلات",
+    "noContracts": "لا توجد تحليلات سابقة",
+    "noContractsDesc": "قم برفع وتحليل العقود لرؤيتها هنا",
+    "deleteConfirm": "حذف التحليل",
+    "deleteMessage": "هل أنت متأكد من رغبتك في حذف هذا التحليل؟",
+    "clearAll": "مسح الكل",
+    "clearAllConfirm": "مسح جميع السجلات",
+    "clearAllMessage": "هل أنت متأكد من رغبتك في حذف جميع تحليلات العقود؟",
+    "analysisDate": "تاريخ التحليل",
+    "complianceScore": "نقاط الامتثال",
+    "clear": "مسح"
+  },
+  "term": {
+    "askQuestion": "اسأل سؤالاً",
+    "questionPlaceholder": "اسأل عن هذا البند تحديداً...",
+    "editTerm": "تعديل البند",
+    "saveTerm": "حفظ التغييرات",
+    "cancelEdit": "إلغاء",
+    "submitFeedback": "إرسال الملاحظات",
+    "generatingContract": "إنشاء عقد متوافق",
+    "generatingMarkedContract": "إنشاء عقد مُعلَّم"
+  },
+  "user": {
+    "expert": "خبير",
+    "regular": "عادي"
+  },
+  "general": {
+    "askQuestion": "اسأل سؤالاً عاماً",
+    "questionPlaceholder": "اسأل عن العقد بأكمله..."
+  },
+  "generate": {
+    "stage1": "إعداد العقد",
+    "stage2": "تطبيق التعديلات",
+    "stage3": "مراجعة التغييرات",
+    "stage4": "إنهاء الوثيقة"
   }
 }

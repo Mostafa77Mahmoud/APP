@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, RefreshControl, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,6 +9,7 @@ import { AlertDialog } from '../components/ui/alert-dialog';
 import { ArrowLeft, ArrowRight, Trash2, Search, Filter, Download, FileText, Calendar, TrendingUp, Eye } from 'lucide-react-native';
 import { ScreenType } from '../MobileApp';
 import { Animated } from 'react-native';
+import { useContract } from '../contexts/ContractContext';
 
 interface HistoryScreenProps {
   onBack: () => void;
@@ -29,7 +29,8 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
   const { t, isRTL } = useLanguage();
   const { theme } = useTheme();
   const { loadSessionFromHistory } = useSession();
-  
+  const { contracts, removeContract, clearAllContracts } = useContract();
+
   const [sessions, setSessions] = useState<ExtendedSessionDetails[]>([]);
   const [filteredSessions, setFilteredSessions] = useState<ExtendedSessionDetails[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +59,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
   const loadHistory = useCallback(async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true);
     else setLoading(true);
-    
+
     try {
       const historyData = await getSessionHistory();
       const enrichedData = await enrichSessionData(historyData);
@@ -92,14 +93,14 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
 
   useEffect(() => {
     let filtered = [...sessions];
-    
+
     // Search filter
     if (searchQuery.trim()) {
       filtered = filtered.filter(s => 
         s.original_filename.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-    
+
     // Compliance filter
     if (filterBy !== 'all') {
       filtered = filtered.filter(s => {
@@ -112,7 +113,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
         }
       });
     }
-    
+
     // Sort
     filtered.sort((a, b) => {
       switch (sortBy) {
@@ -126,7 +127,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
           return new Date(b.analysis_timestamp).getTime() - new Date(a.analysis_timestamp).getTime();
       }
     });
-    
+
     setFilteredSessions(filtered);
   }, [sessions, searchQuery, sortBy, filterBy]);
 
@@ -138,7 +139,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
         : s
     );
     setSessions(updatedSessions);
-    
+
     loadSessionFromHistory(session);
     onNavigate('results');
   };
@@ -150,7 +151,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
 
   const handleDelete = async () => {
     if (!sessionToDelete) return;
-    
+
     try {
       await deleteLocalSession(sessionToDelete);
       setSessions(prev => prev.filter(s => s.session_id !== sessionToDelete));
@@ -175,7 +176,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
       minute: '2-digit'
     });
   };
-  
+
   const getComplianceColor = (percentage: number) => {
     if (percentage >= 80) return '#10b981';
     if (percentage >= 50) return '#f59e0b';
@@ -210,7 +211,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
         activeOpacity={0.7}
       >
         <View style={[styles.complianceIndicator, { backgroundColor: getComplianceColor(session.compliance_percentage || 0) }]} />
-        
+
         <View style={styles.cardContent}>
           <View style={styles.cardHeader}>
             <Text style={styles.sessionTitle} numberOfLines={1}>
@@ -220,11 +221,11 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
               {Math.round(session.compliance_percentage || 0)}%
             </Text>
           </View>
-          
+
           <Text style={styles.sessionDate}>
             {formatDate(session.analysis_timestamp)}
           </Text>
-          
+
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <TrendingUp size={14} color={isDark ? '#9ca3af' : '#6b7280'} />
@@ -232,7 +233,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
                 {session.interactions_count || 0} {t('history.interactions')}
               </Text>
             </View>
-            
+
             <View style={styles.statItem}>
               <Eye size={14} color={isDark ? '#9ca3af' : '#6b7280'} />
               <Text style={styles.statText}>
@@ -240,7 +241,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
               </Text>
             </View>
           </View>
-          
+
           <View style={styles.featuresRow}>
             {session.generated_contracts && (
               <View style={styles.featureBadge}>
@@ -248,7 +249,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
                 <Text style={styles.featureBadgeText}>{t('history.hasContract')}</Text>
               </View>
             )}
-            
+
             {(session.modifications_made || 0) > 0 && (
               <View style={styles.featureBadge}>
                 <FileText size={12} color={isDark ? '#fbbf24' : '#f59e0b'} />
@@ -260,7 +261,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
           </View>
         </View>
       </TouchableOpacity>
-      
+
       <View style={styles.cardActions}>
         <TouchableOpacity 
           onPress={() => showSessionDetails(session)} 
@@ -268,7 +269,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
         >
           <Eye size={18} color={isDark ? '#9ca3af' : '#6b7280'} />
         </TouchableOpacity>
-        
+
         <TouchableOpacity 
           onPress={() => confirmDelete(session.session_id)} 
           style={styles.actionButton}
@@ -278,6 +279,25 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
       </View>
     </Animated.View>
   );
+
+  const onRefresh = React.useCallback(() => {
+    loadHistory(true);
+  }, [loadHistory]);
+
+  const clearAllHistory = async () => {
+    Alert.alert(
+      t('history.clearAllConfirm'),
+      t('history.clearAllMessage'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.clear'),
+          style: 'destructive',
+          onPress: clearAllContracts
+        }
+      ]
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -306,7 +326,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
             onChangeText={setSearchQuery}
           />
         </View>
-        
+
         <View style={styles.filtersRow}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersScroll}>
             <TouchableOpacity 
@@ -317,7 +337,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
                 {t('history.sort.newest')}
               </Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity 
               style={[styles.filterChip, sortBy === 'compliance' && styles.activeFilterChip]}
               onPress={() => setSortBy('compliance')}
@@ -326,7 +346,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
                 {t('history.sort.compliance')}
               </Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity 
               style={[styles.filterChip, sortBy === 'interactions' && styles.activeFilterChip]}
               onPress={() => setSortBy('interactions')}
@@ -335,7 +355,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
                 {t('history.sort.interactions')}
               </Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity 
               style={[styles.filterChip, filterBy === 'high' && styles.activeFilterChip]}
               onPress={() => setFilterBy(filterBy === 'high' ? 'all' : 'high')}
@@ -371,8 +391,16 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
                 <Text style={styles.statsText}>
                   {filteredSessions.length} {t('history.results')}
                 </Text>
+                 {sessions.length > 0 && (
+                <TouchableOpacity
+                  style={styles.clearAllButton}
+                  onPress={clearAllHistory}
+                >
+                  <Text style={styles.clearAllButtonText}>{t('history.clearAll')}</Text>
+                </TouchableOpacity>
+              )}
               </View>
-              
+
               {filteredSessions.map((session, index) => renderSessionCard(session, index))}
             </>
           ) : (
@@ -407,35 +435,35 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
                 <Text style={styles.closeButton}>{t('common.close')}</Text>
               </TouchableOpacity>
             </View>
-            
+
             <ScrollView style={styles.modalBody}>
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>{t('history.filename')}</Text>
                 <Text style={styles.detailValue}>{selectedSession.original_filename}</Text>
               </View>
-              
+
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>{t('history.compliance')}</Text>
                 <Text style={[styles.detailValue, { color: getComplianceColor(selectedSession.compliance_percentage || 0) }]}>
                   {Math.round(selectedSession.compliance_percentage || 0)}% - {getComplianceLevel(selectedSession.compliance_percentage || 0)}
                 </Text>
               </View>
-              
+
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>{t('history.analysisDate')}</Text>
                 <Text style={styles.detailValue}>{formatDate(selectedSession.analysis_timestamp)}</Text>
               </View>
-              
+
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>{t('history.termsAnalyzed')}</Text>
                 <Text style={styles.detailValue}>{selectedSession.analysis_results?.length || 0}</Text>
               </View>
-              
+
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>{t('history.interactions')}</Text>
                 <Text style={styles.detailValue}>{selectedSession.interactions_count || 0}</Text>
               </View>
-              
+
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>{t('history.modifications')}</Text>
                 <Text style={styles.detailValue}>{selectedSession.modifications_made || 0}</Text>
@@ -538,6 +566,9 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
   },
   statsHeader: {
     marginBottom: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   statsText: {
     fontSize: 14,
@@ -707,6 +738,30 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
   detailValue: {
     fontSize: 16,
     color: isDark ? '#f9fafb' : '#111827',
+  },
+  contractActions: {
+    alignItems: 'center',
+    gap: 8,
+    flexDirection: 'row',
+  },
+  contractSummary: {
+    fontSize: 12,
+    color: isDark ? '#9ca3af' : '#6b7280',
+    marginTop: 2,
+  },
+  clearAllButton: {
+    backgroundColor: isDark ? '#ef4444' : '#dc2626',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  clearAllButtonText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  viewButton: {
+    padding: 4,
   },
 });
 

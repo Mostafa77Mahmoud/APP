@@ -16,6 +16,7 @@ import MobileNavigation from './components/MobileNavigation';
 import { useLanguage } from './contexts/LanguageContext';
 import { useTheme } from './contexts/ThemeContext';
 import { useAuth } from './contexts/AuthContext';
+import { ContractProvider } from './contexts/ContractContext';
 
 const { width } = Dimensions.get('window');
 
@@ -30,12 +31,12 @@ const MobileApp = () => {
   const { isRTL } = useLanguage();
   const { theme } = useTheme();
   const { isLoading: isAuthLoading } = useAuth();
-  
+
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('home');
   const [navigationData, setNavigationData] = useState<NavigationData>({});
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
   const [isAppLoading, setIsAppLoading] = useState(true);
-  
+
   const slideAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
