@@ -1,4 +1,3 @@
-
 // app/screens/UploadScreen.tsx
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
@@ -20,7 +19,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({ onAnalysisComplete, onBack 
   const { theme } = useTheme();
   const { isAnalyzingContract, isUploading, uploadProgress } = useSession();
   const [analysisStage, setAnalysisStage] = useState(1);
-  
+
   const isDark = theme === 'dark';
   const styles = getStyles(isDark, isRTL);
 
@@ -59,12 +58,12 @@ const UploadScreen: React.FC<UploadScreenProps> = ({ onAnalysisComplete, onBack 
         <Text style={styles.headerTitle}>{t('upload.title')}</Text>
         <View style={styles.headerButton} />
       </View>
-      
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <UploadArea onAnalysisComplete={handleAnalysisComplete} />
       </ScrollView>
 
-      {/* Show the AnalyzingAnimation as a full-screen overlay during analysis */}
+      {/* Analyzing Animation Overlay */}
       <AnalyzingAnimation 
         isVisible={isAnalyzingContract || isUploading} 
         stage={isUploading ? 1 : analysisStage}
@@ -77,6 +76,10 @@ const UploadScreen: React.FC<UploadScreenProps> = ({ onAnalysisComplete, onBack 
           analysisStage === 4 ? t('analyzing.stage4') :
           t('analyzing.stage5')
         }
+        onComplete={() => {
+          // Navigation to results will be handled by the session context
+          // when analysis is complete
+        }}
       />
     </SafeAreaView>
   );
