@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -12,22 +12,16 @@ interface AnalyzingAnimationProps {
   stage?: number;
   progress?: number;
   currentStage?: string;
-  onComplete?: () => void;
 }
 
 const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({ 
   isVisible, 
-  stage: externalStage, 
-  progress: externalProgress,
-  currentStage: externalCurrentStage,
-  onComplete
+  stage = 1, 
+  progress = 0,
+  currentStage
 }) => {
   const { t } = useLanguage();
   const { theme } = useTheme();
-
-  const [internalProgress, setInternalProgress] = useState(0);
-  const [internalStage, setInternalStage] = useState(1);
-  const [currentStageText, setCurrentStageText] = useState('');
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
@@ -37,121 +31,7 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
   const progressAnim = useRef(new Animated.Value(0)).current;
   const orbitAnim = useRef(new Animated.Value(0)).current;
 
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const stageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   const isDark = theme === 'dark';
-
-  const stages = [
-    { 
-      key: 'stage1', 
-      icon: FileText, 
-      color: '#3b82f6',
-      title: t('analyzing.stage1') || 'Reading Document',
-      desc: t('analyzing.stage1.desc') || 'Extracting and parsing document content',
-      duration: 6000 // 6 seconds
-    },
-    { 
-      key: 'stage2', 
-      icon: Search, 
-      color: '#8b5cf6',
-      title: t('analyzing.stage2') || 'Analyzing Terms',
-      desc: t('analyzing.stage2.desc') || 'Identifying contractual clauses and terms',
-      duration: 7000 // 7 seconds
-    },
-    { 
-      key: 'stage3', 
-      icon: Brain, 
-      color: '#10b981',
-      title: t('analyzing.stage3') || 'AI Processing',
-      desc: t('analyzing.stage3.desc') || 'Applying Sharia compliance analysis',
-      duration: 8000 // 8 seconds
-    },
-    { 
-      key: 'stage4', 
-      icon: Shield, 
-      color: '#059669',
-      title: t('analyzing.stage4') || 'Compliance Check',
-      desc: t('analyzing.stage4.desc') || 'Evaluating Islamic law compliance',
-      duration: 6000 // 6 seconds
-    },
-    { 
-      key: 'stage5', 
-      icon: CheckCircle, 
-      color: '#f59e0b',
-      title: t('analyzing.stage5') || 'Finalizing Results',
-      desc: t('analyzing.stage5.desc') || 'Preparing analysis report',
-      duration: 3000 // 3 seconds
-    },
-  ];
-
-  const totalDuration = stages.reduce((sum, stage) => sum + stage.duration, 0); // 30 seconds total
-
-  // Dynamic progress simulation
-  useEffect(() => {
-    if (isVisible && externalProgress === undefined) {
-      setInternalProgress(0);
-      setInternalStage(1);
-      setCurrentStageText(stages[0].title);
-
-      let currentProgress = 0;
-      let currentStageIndex = 0;
-      let stageStartTime = Date.now();
-
-      const simulateProgress = () => {
-        const now = Date.now();
-        const elapsedInStage = now - stageStartTime;
-        const currentStageDuration = stages[currentStageIndex].duration;
-        
-        // Calculate progress within current stage
-        const stageProgress = Math.min(elapsedInStage / currentStageDuration, 1);
-        
-        // Calculate overall progress
-        const previousStagesProgress = stages.slice(0, currentStageIndex).reduce((sum, stage) => sum + stage.duration, 0);
-        const totalProgressMs = previousStagesProgress + (stageProgress * currentStageDuration);
-        const overallProgress = Math.min((totalProgressMs / totalDuration) * 100, 100);
-        
-        setInternalProgress(overallProgress);
-        
-        // Check if we should move to next stage
-        if (stageProgress >= 1 && currentStageIndex < stages.length - 1) {
-          currentStageIndex++;
-          stageStartTime = now;
-          setInternalStage(currentStageIndex + 1);
-          setCurrentStageText(stages[currentStageIndex].title);
-        }
-        
-        // Check if animation is complete
-        if (overallProgress >= 100) {
-          if (progressIntervalRef.current) {
-            clearInterval(progressIntervalRef.current);
-            progressIntervalRef.current = null;
-          }
-          if (onComplete) {
-            setTimeout(onComplete, 1000); // Call onComplete after a brief delay
-          }
-        }
-      };
-
-      progressIntervalRef.current = setInterval(simulateProgress, 100); // Update every 100ms
-
-      return () => {
-        if (progressIntervalRef.current) {
-          clearInterval(progressIntervalRef.current);
-          progressIntervalRef.current = null;
-        }
-        if (stageTimeoutRef.current) {
-          clearTimeout(stageTimeoutRef.current);
-          stageTimeoutRef.current = null;
-        }
-      };
-    }
-  }, [isVisible, externalProgress, onComplete]);
-
-  // Use external values if provided, otherwise use internal simulation
-  const progress = externalProgress !== undefined ? externalProgress : internalProgress;
-  const stage = externalStage !== undefined ? externalStage : internalStage;
-  const currentStage = externalCurrentStage || currentStageText;
 
   useEffect(() => {
     if (isVisible) {
@@ -250,6 +130,44 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
   });
+
+  const stages = [
+    { 
+      key: 'stage1', 
+      icon: FileText, 
+      color: '#3b82f6',
+      title: t('analyzing.stage1') || 'Reading Document',
+      desc: t('analyzing.stage1.desc') || 'Extracting and parsing document content'
+    },
+    { 
+      key: 'stage2', 
+      icon: Search, 
+      color: '#8b5cf6',
+      title: t('analyzing.stage2') || 'Analyzing Terms',
+      desc: t('analyzing.stage2.desc') || 'Identifying contractual clauses and terms'
+    },
+    { 
+      key: 'stage3', 
+      icon: Brain, 
+      color: '#10b981',
+      title: t('analyzing.stage3') || 'AI Processing',
+      desc: t('analyzing.stage3.desc') || 'Applying Sharia compliance analysis'
+    },
+    { 
+      key: 'stage4', 
+      icon: Shield, 
+      color: '#059669',
+      title: t('analyzing.stage4') || 'Compliance Check',
+      desc: t('analyzing.stage4.desc') || 'Evaluating Islamic law compliance'
+    },
+    { 
+      key: 'stage5', 
+      icon: CheckCircle, 
+      color: '#f59e0b',
+      title: t('analyzing.stage5') || 'Finalizing Results',
+      desc: t('analyzing.stage5.desc') || 'Preparing analysis report'
+    },
+  ];
 
   const currentStageData = stages[Math.min(stage - 1, stages.length - 1)];
   const StageIcon = currentStageData.icon;
@@ -383,37 +301,39 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
         </Text>
 
         {/* Enhanced Progress Bar */}
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <Animated.View 
-              style={[
-                styles.progressFill, 
-                { 
-                  width: progressAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['0%', '100%'],
-                  }),
-                  backgroundColor: currentStageData.color,
-                  shadowColor: currentStageData.color,
-                }
-              ]} 
-            >
-              <Animated.View style={[
-                styles.progressGlow,
-                {
-                  backgroundColor: currentStageData.color,
-                  opacity: pulseAnim.interpolate({
-                    inputRange: [1, 1.2],
-                    outputRange: [0.3, 0.6],
-                  })
-                }
-              ]} />
-            </Animated.View>
+        {progress > 0 && (
+          <View style={styles.progressContainer}>
+            <View style={styles.progressBar}>
+              <Animated.View 
+                style={[
+                  styles.progressFill, 
+                  { 
+                    width: progressAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0%', '100%'],
+                    }),
+                    backgroundColor: currentStageData.color,
+                    shadowColor: currentStageData.color,
+                  }
+                ]} 
+              >
+                <Animated.View style={[
+                  styles.progressGlow,
+                  {
+                    backgroundColor: currentStageData.color,
+                    opacity: pulseAnim.interpolate({
+                      inputRange: [1, 1.2],
+                      outputRange: [0.3, 0.6],
+                    })
+                  }
+                ]} />
+              </Animated.View>
+            </View>
+            <Text style={[styles.progressText, { color: currentStageData.color }]}>
+              {Math.round(progress)}%
+            </Text>
           </View>
-          <Text style={[styles.progressText, { color: currentStageData.color }]}>
-            {Math.round(progress)}%
-          </Text>
-        </View>
+        )}
 
         {/* Stage Indicators */}
         <View style={styles.stageIndicators}>
@@ -424,7 +344,6 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
                 styles.stageIndicator,
                 { 
                   backgroundColor: index < stage ? stageItem.color : (isDark ? '#374151' : '#e5e7eb'),
-                  opacity: index < stage ? 1 : 0.3,
                   transform: [{ 
                     scale: index === stage - 1 ? pulseAnim.interpolate({
                       inputRange: [1, 1.2],
@@ -483,11 +402,6 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
             />
           ))}
         </View>
-
-        {/* Time indicator */}
-        <Text style={styles.timeIndicator}>
-          {t('analyzing.estimatedTime') || 'Estimated time'}: {Math.ceil((100 - progress) * 0.3)} {t('analyzing.seconds') || 'seconds'}
-        </Text>
       </Animated.View>
     </View>
   );
@@ -675,18 +589,11 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     flexDirection: 'row',
     gap: 6,
     alignItems: 'center',
-    marginBottom: 16,
   },
   processingDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-  },
-  timeIndicator: {
-    fontSize: 12,
-    color: isDark ? '#9ca3af' : '#6b7280',
-    textAlign: 'center',
-    fontStyle: 'italic',
   },
 });
 

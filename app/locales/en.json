@@ -20,6 +20,8 @@
   },
   "analyzing": {
     "title": "Analyzing Contract",
+    "live": "LIVE",
+    "uploading": "Uploading File",
     "stage1": "Reading Document",
     "stage1.desc": "Extracting and parsing document content",
     "stage2": "Analyzing Terms",
@@ -30,12 +32,9 @@
     "stage4.desc": "Evaluating Islamic law compliance",
     "stage5": "Finalizing Results",
     "stage5.desc": "Preparing analysis report",
-    "live": "LIVE",
     "shariaCompliant": "Sharia Compliant",
     "aiPowered": "AI Powered",
-    "expertReviewed": "Expert Reviewed",
-    "estimatedTime": "Estimated time",
-    "seconds": "seconds"
+    "expertReviewed": "Expert Reviewed"
   },
   "results": {
     "title": "Analysis Results",
