@@ -1,106 +1,51 @@
-
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { 
-  FileText, Search, Brain, CheckCircle, AlertTriangle, 
-  Sparkles, Zap, Eye, Shield, BookOpen, Scale 
-} from 'lucide-react-native';
+import { FileText, Search, CheckCircle, Sparkles, Loader, Eye, Brain } from 'lucide-react-native';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 interface AnalyzingAnimationProps {
   isVisible: boolean;
+  stage?: number;
   progress?: number;
-  duration?: number; // Duration in seconds (26-38 seconds range)
 }
 
 const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({ 
   isVisible, 
-  progress: externalProgress,
-  duration = 32 // Default 32 seconds
+  stage = 1, 
+  progress = 0 
 }) => {
-  const { t, isRTL } = useLanguage();
+  const { t } = useLanguage();
   const { theme } = useTheme();
-  const isDark = theme === 'dark';
 
-  // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const floatAnim = useRef(new Animated.Value(0)).current;
-  const particleAnims = useRef(Array.from({ length: 6 }, () => new Animated.Value(0))).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
 
-  // State
-  const [currentStage, setCurrentStage] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [isLive, setIsLive] = useState(false);
-
-  // Analysis stages with enhanced descriptions
-  const stages = [
-    {
-      title: t('analyzing.stage1'),
-      description: t('analyzing.stage1.desc'),
-      icon: FileText,
-      color: '#3b82f6',
-      duration: 0.15, // 15% of total time
-    },
-    {
-      title: t('analyzing.stage2'),
-      description: t('analyzing.stage2.desc'),
-      icon: Search,
-      color: '#8b5cf6',
-      duration: 0.25, // 25% of total time
-    },
-    {
-      title: t('analyzing.stage3'),
-      description: t('analyzing.stage3.desc'),
-      icon: Brain,
-      color: '#10b981',
-      duration: 0.35, // 35% of total time
-    },
-    {
-      title: t('analyzing.stage4'),
-      description: t('analyzing.stage4.desc'),
-      icon: Shield,
-      color: '#f59e0b',
-      duration: 0.20, // 20% of total time
-    },
-    {
-      title: t('analyzing.stage5'),
-      description: t('analyzing.stage5.desc'),
-      icon: CheckCircle,
-      color: '#059669',
-      duration: 0.05, // 5% of total time
-    },
-  ];
-
-  const getCurrentStage = (progress: number) => {
-    let cumulativeDuration = 0;
-    for (let i = 0; i < stages.length; i++) {
-      cumulativeDuration += stages[i].duration;
-      if (progress <= cumulativeDuration * 100) {
-        return i;
-      }
-    }
-    return stages.length - 1;
-  };
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     if (isVisible) {
-      // Entrance animations
+      // Entry animations
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 500,
+          duration: 400,
           useNativeDriver: true,
         }),
         Animated.spring(scaleAnim, {
           toValue: 1,
-          tension: 100,
+          tension: 120,
           friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 500,
           useNativeDriver: true,
         }),
       ]).start();
@@ -117,7 +62,7 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
       const pulseAnimation = Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, {
-            toValue: 1.1,
+            toValue: 1.2,
             duration: 1500,
             useNativeDriver: true,
           }),
@@ -129,74 +74,14 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
         ])
       );
 
-      const floatAnimation = Animated.loop(
-        Animated.sequence([
-          Animated.timing(floatAnim, {
-            toValue: 1,
-            duration: 2000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(floatAnim, {
-            toValue: 0,
-            duration: 2000,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-
-      // Particle animations
-      const particleAnimations = particleAnims.map((anim, index) => 
-        Animated.loop(
-          Animated.timing(anim, {
-            toValue: 1,
-            duration: 2000 + index * 200,
-            useNativeDriver: true,
-          })
-        )
-      );
-
       rotateAnimation.start();
       pulseAnimation.start();
-      floatAnimation.start();
-      particleAnimations.forEach(anim => anim.start());
-
-      // Progress simulation or use external progress
-      if (externalProgress === undefined) {
-        let progressValue = 0;
-        const progressInterval = setInterval(() => {
-          progressValue += (100 / (duration * 10)); // Update every 100ms
-          if (progressValue >= 100) {
-            progressValue = 100;
-            setIsLive(true);
-            clearInterval(progressInterval);
-          }
-          setProgress(progressValue);
-          setCurrentStage(getCurrentStage(progressValue));
-        }, 100);
-
-        return () => {
-          clearInterval(progressInterval);
-          rotateAnimation.stop();
-          pulseAnimation.stop();
-          floatAnimation.stop();
-          particleAnimations.forEach(anim => anim.stop());
-        };
-      } else {
-        setProgress(externalProgress);
-        setCurrentStage(getCurrentStage(externalProgress));
-        if (externalProgress >= 100) {
-          setIsLive(true);
-        }
-      }
 
       return () => {
         rotateAnimation.stop();
         pulseAnimation.stop();
-        floatAnimation.stop();
-        particleAnimations.forEach(anim => anim.stop());
       };
     } else {
-      // Exit animations
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 0,
@@ -210,209 +95,171 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
         }),
       ]).start();
     }
-  }, [isVisible, externalProgress, duration]);
+  }, [isVisible]);
 
-  const styles = getStyles(isDark, isRTL);
-
-  if (!isVisible) return null;
-
-  const currentStageData = stages[currentStage] || stages[0];
-  const StageIcon = currentStageData.icon;
-
-  const rotate = rotateAnim.interpolate({
+  const spin = rotateAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
   });
 
-  const float = floatAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-10, 10],
-  });
+  const stages = [
+    { 
+      key: 'stage1', 
+      icon: FileText, 
+      color: '#3b82f6',
+      title: t('analyzing.stage1'),
+      desc: t('analyzing.stage1.desc')
+    },
+    { 
+      key: 'stage2', 
+      icon: Search, 
+      color: '#8b5cf6',
+      title: t('analyzing.stage2'),
+      desc: t('analyzing.stage2.desc')
+    },
+    { 
+      key: 'stage3', 
+      icon: Brain, 
+      color: '#10b981',
+      title: t('analyzing.stage3'),
+      desc: t('analyzing.stage3.desc')
+    },
+    { 
+      key: 'stage4', 
+      icon: CheckCircle, 
+      color: '#059669',
+      title: t('analyzing.stage4'),
+      desc: t('analyzing.stage4.desc')
+    },
+    { 
+      key: 'stage5', 
+      icon: Sparkles, 
+      color: '#f59e0b',
+      title: t('analyzing.stage5'),
+      desc: t('analyzing.stage5.desc')
+    },
+  ];
+
+  const currentStage = stages[Math.min(stage - 1, stages.length - 1)];
+  const StageIcon = currentStage.icon;
+
+  if (!isVisible) return null;
+
+  const styles = getStyles(isDark);
 
   return (
     <View style={styles.overlay}>
-      <Animated.View
+      <Animated.View 
         style={[
           styles.container,
           {
             opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }],
-          },
+            transform: [
+              { scale: scaleAnim },
+              { translateY: slideAnim }
+            ],
+          }
         ]}
       >
-        {/* Background particles */}
-        <View style={styles.particlesContainer}>
-          {particleAnims.map((anim, index) => {
-            const opacity = anim.interpolate({
-              inputRange: [0, 0.5, 1],
-              outputRange: [0.3, 1, 0.3],
-            });
-            const translateY = anim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0, -50],
-            });
-            return (
-              <Animated.View
-                key={index}
-                style={[
-                  styles.particle,
-                  {
-                    opacity,
-                    transform: [{ translateY }],
-                    left: `${15 + index * 12}%`,
-                    backgroundColor: currentStageData.color,
-                  },
-                ]}
-              />
-            );
-          })}
-        </View>
-
-        {/* Main icon container */}
-        <Animated.View
+        {/* Main Icon with Enhanced Animation */}
+        <Animated.View 
           style={[
             styles.iconContainer,
-            {
-              backgroundColor: `${currentStageData.color}20`,
-              borderColor: `${currentStageData.color}40`,
+            { 
+              backgroundColor: `${currentStage.color}20`,
+              borderColor: `${currentStage.color}40`,
               transform: [
-                { scale: pulseAnim },
-                { translateY: float },
-              ],
-            },
+                { rotate: spin },
+                { scale: pulseAnim }
+              ]
+            }
           ]}
         >
-          <Animated.View
-            style={{
-              transform: [{ rotate }],
-            }}
-          >
-            <StageIcon size={48} color={currentStageData.color} />
+          <StageIcon size={36} color={currentStage.color} />
+
+          {/* Orbiting dots */}
+          <Animated.View style={[styles.orbitingDot, { transform: [{ rotate: spin }] }]}>
+            <View style={[styles.dot, { backgroundColor: currentStage.color }]} />
           </Animated.View>
-          
-          {/* Orbiting elements */}
-          <Animated.View
-            style={[
-              styles.orbitingElement,
-              {
-                transform: [
-                  { rotate },
-                  { translateX: 40 },
-                  { rotate: rotate },
-                ],
-              },
-            ]}
-          >
-            <Sparkles size={16} color={currentStageData.color} />
-          </Animated.View>
-          
-          <Animated.View
-            style={[
-              styles.orbitingElement,
-              {
-                transform: [
-                  { rotate: rotateAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['180deg', '540deg'],
-                  }) },
-                  { translateX: 35 },
-                  { rotate: rotateAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['180deg', '540deg'],
-                  }) },
-                ],
-              },
-            ]}
-          >
-            <Zap size={12} color={currentStageData.color} />
+          <Animated.View style={[styles.orbitingDot2, { transform: [{ rotate: spin }] }]}>
+            <View style={[styles.dot, { backgroundColor: currentStage.color }]} />
           </Animated.View>
         </Animated.View>
 
-        {/* Main title */}
-        <Text style={styles.title}>
-          {t('analyzing.title')}
-        </Text>
-
-        {/* Current stage */}
-        <Animated.View
-          style={[
-            styles.stageContainer,
-            {
-              transform: [{ translateY: float }],
-            },
-          ]}
-        >
-          <Text style={[styles.stageTitle, { color: currentStageData.color }]}>
-            {currentStageData.title}
-          </Text>
-          <Text style={styles.stageDescription}>
-            {currentStageData.description}
-          </Text>
-        </Animated.View>
-
-        {/* Progress bar */}
-        <View style={styles.progressContainer}>
-          <View style={styles.progressTrack}>
-            <Animated.View
-              style={[
-                styles.progressFill,
-                {
-                  width: `${progress}%`,
-                  backgroundColor: currentStageData.color,
-                },
-              ]}
-            />
-          </View>
-          <View style={styles.progressTextContainer}>
-            <Text style={styles.progressText}>
-              {isLive ? t('analyzing.live') : `${Math.round(progress)}%`}
-            </Text>
-            {isLive && (
-              <Animated.View
-                style={[
-                  styles.liveIndicator,
-                  {
-                    opacity: pulseAnim,
-                  },
-                ]}
-              />
-            )}
-          </View>
+        {/* Live Indicator */}
+        <View style={styles.liveContainer}>
+          <Animated.View style={[styles.liveDot, { transform: [{ scale: pulseAnim }] }]} />
+          <Text style={styles.liveText}>{t('analyzing.live')}</Text>
         </View>
 
-        {/* Stage indicators */}
+        <Text style={styles.title}>{t('analyzing.title')}</Text>
+
+        <Animated.Text 
+          style={[
+            styles.stageTitle, 
+            { 
+              color: currentStage.color,
+              transform: [{ translateY: slideAnim }]
+            }
+          ]}
+        >
+          {currentStage.title}
+        </Animated.Text>
+
+        <Text style={styles.stageDesc}>
+          {currentStage.desc}
+        </Text>
+
+        {/* Enhanced Progress Bar */}
+        {progress > 0 && (
+          <View style={styles.progressContainer}>
+            <View style={styles.progressBar}>
+              <Animated.View 
+                style={[
+                  styles.progressFill, 
+                  { 
+                    width: `${progress}%`, 
+                    backgroundColor: currentStage.color,
+                    shadowColor: currentStage.color,
+                  }
+                ]} 
+              />
+            </View>
+            <Text style={[styles.progressText, { color: currentStage.color }]}>
+              {Math.round(progress)}%
+            </Text>
+          </View>
+        )}
+
+        {/* Stage Indicators */}
         <View style={styles.stageIndicators}>
-          {stages.map((stage, index) => (
-            <Animated.View
-              key={index}
+          {stages.map((stageItem, index) => (
+            <Animated.View 
+              key={stageItem.key}
               style={[
                 styles.stageIndicator,
-                {
-                  backgroundColor: index <= currentStage ? stage.color : '#e5e7eb',
-                  transform: [
-                    {
-                      scale: index === currentStage ? pulseAnim : 1,
-                    },
-                  ],
-                },
-              ]}
+                { 
+                  backgroundColor: index < stage ? stageItem.color : (isDark ? '#374151' : '#e5e7eb'),
+                  transform: [{ scale: index === stage - 1 ? pulseAnim : 1 }]
+                }
+              ]} 
             />
           ))}
         </View>
 
-        {/* Additional info */}
-        <View style={styles.infoContainer}>
-          <View style={styles.infoItem}>
-            <Shield size={16} color={isDark ? '#10b981' : '#059669'} />
-            <Text style={styles.infoText}>{t('analyzing.shariaCompliant')}</Text>
+        {/* Enhanced Badges */}
+        <View style={styles.badgeContainer}>
+          <Animated.View style={[styles.badge, { transform: [{ scale: pulseAnim }] }]}>
+            <CheckCircle size={12} color="#ffffff" />
+            <Text style={styles.badgeText}>{t('analyzing.shariaCompliant')}</Text>
+          </Animated.View>
+          <View style={styles.badge}>
+            <Brain size={12} color="#ffffff" />
+            <Text style={styles.badgeText}>{t('analyzing.aiPowered')}</Text>
           </View>
-          <View style={styles.infoItem}>
-            <BookOpen size={16} color={isDark ? '#3b82f6' : '#2563eb'} />
-            <Text style={styles.infoText}>{t('analyzing.aiPowered')}</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <Scale size={16} color={isDark ? '#f59e0b' : '#d97706'} />
-            <Text style={styles.infoText}>{t('analyzing.expertReviewed')}</Text>
+          <View style={styles.badge}>
+            <Eye size={12} color="#ffffff" />
+            <Text style={styles.badgeText}>{t('analyzing.expertReviewed')}</Text>
           </View>
         </View>
       </Animated.View>
@@ -420,157 +267,166 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
   );
 };
 
-const getStyles = (isDark: boolean, isRTL: boolean) => {
-  return StyleSheet.create({
-    overlay: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: 'rgba(0, 0, 0, 0.85)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 1000,
-    },
-    container: {
-      backgroundColor: isDark ? '#1f2937' : '#ffffff',
-      borderRadius: 24,
-      padding: 32,
-      alignItems: 'center',
-      width: screenWidth * 0.9,
-      maxWidth: 400,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 20 },
-      shadowOpacity: 0.3,
-      shadowRadius: 30,
-      elevation: 15,
-      borderWidth: 1,
-      borderColor: isDark ? '#374151' : '#e5e7eb',
-    },
-    particlesContainer: {
-      ...StyleSheet.absoluteFillObject,
-      overflow: 'hidden',
-      borderRadius: 24,
-    },
-    particle: {
-      position: 'absolute',
-      width: 4,
-      height: 4,
-      borderRadius: 2,
-      top: '80%',
-    },
-    iconContainer: {
-      width: 120,
-      height: 120,
-      borderRadius: 60,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: 24,
-      borderWidth: 2,
-      position: 'relative',
-    },
-    orbitingElement: {
-      position: 'absolute',
-      width: 24,
-      height: 24,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: isDark ? '#f9fafb' : '#111827',
-      textAlign: 'center',
-      marginBottom: 20,
-    },
-    stageContainer: {
-      alignItems: 'center',
-      marginBottom: 24,
-      minHeight: 60,
-    },
-    stageTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      textAlign: 'center',
-      marginBottom: 8,
-    },
-    stageDescription: {
-      fontSize: 14,
-      color: isDark ? '#9ca3af' : '#6b7280',
-      textAlign: 'center',
-      lineHeight: 20,
-      paddingHorizontal: 16,
-    },
-    progressContainer: {
-      width: '100%',
-      alignItems: 'center',
-      marginBottom: 24,
-    },
-    progressTrack: {
-      width: '100%',
-      height: 8,
-      backgroundColor: isDark ? '#374151' : '#e5e7eb',
-      borderRadius: 4,
-      overflow: 'hidden',
-      marginBottom: 12,
-    },
-    progressFill: {
-      height: '100%',
-      borderRadius: 4,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 4,
-      elevation: 3,
-    },
-    progressTextContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
-    progressText: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: isDark ? '#d1d5db' : '#374151',
-    },
-    liveIndicator: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      backgroundColor: '#ef4444',
-    },
-    stageIndicators: {
-      flexDirection: 'row',
-      gap: 8,
-      marginBottom: 24,
-    },
-    stageIndicator: {
-      width: 12,
-      height: 12,
-      borderRadius: 6,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 4,
-      elevation: 3,
-    },
-    infoContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      width: '100%',
-      paddingTop: 16,
-      borderTopWidth: 1,
-      borderTopColor: isDark ? '#374151' : '#e5e7eb',
-    },
-    infoItem: {
-      alignItems: 'center',
-      flex: 1,
-      gap: 4,
-    },
-    infoText: {
-      fontSize: 10,
-      color: isDark ? '#9ca3af' : '#6b7280',
-      textAlign: 'center',
-      fontWeight: '500',
-    },
-  });
-};
+const getStyles = (isDark: boolean) => StyleSheet.create({
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  container: {
+    backgroundColor: isDark ? '#1f2937' : '#ffffff',
+    borderRadius: 24,
+    padding: 32,
+    width: screenWidth * 0.9,
+    maxWidth: 400,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 15 },
+    shadowOpacity: 0.4,
+    shadowRadius: 25,
+    elevation: 15,
+    borderWidth: 1,
+    borderColor: isDark ? '#374151' : '#e5e7eb',
+  },
+  iconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    borderWidth: 2,
+    position: 'relative',
+  },
+  orbitingDot: {
+    position: 'absolute',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  orbitingDot2: {
+    position: 'absolute',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  liveContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: '#ef4444',
+    borderRadius: 15,
+  },
+  liveDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#ffffff',
+    marginRight: 6,
+  },
+  liveText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: isDark ? '#f9fafb' : '#111827',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  stageTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  stageDesc: {
+    fontSize: 14,
+    color: isDark ? '#9ca3af' : '#6b7280',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 20,
+    paddingHorizontal: 16,
+  },
+  progressContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  progressBar: {
+    width: '100%',
+    height: 10,
+    backgroundColor: isDark ? '#374151' : '#e5e7eb',
+    borderRadius: 5,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  progressText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  stageIndicators: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 24,
+  },
+  stageIndicator: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  badgeContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  badge: {
+    backgroundColor: isDark ? '#10b981' : '#059669',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  badgeText: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+});
 
 export default AnalyzingAnimation;

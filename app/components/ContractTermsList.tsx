@@ -670,8 +670,7 @@ const ContractTermsList: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {isAskingQuestion && <QuestionAnimation isVisible={isAskingQuestion} />}
-      {isProcessingGeneralQuestion && <QuestionAnimation isVisible={isProcessingGeneralQuestion} />}
+      <QuestionAnimation isVisible={isAskingQuestion || isProcessingGeneralQuestion} />
       {generationType && (
         <GeneratingContractAnimation 
           progress={generationVisualProgress} 
@@ -774,8 +773,6 @@ const ContractTermsList: React.FC = () => {
               <Eye size={16} color={isDark ? '#fff' : '#000'} />
             </Button>
           )}
-        </```python
-
         </View>
 
         <View style={styles.buttonContainer}>

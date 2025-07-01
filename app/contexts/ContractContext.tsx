@@ -1,42 +1,75 @@
-
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Contract {
   id: string;
-  title: string;
-  content: string;
+  name: string;
   analysisDate: string;
   complianceScore: number;
-  analysisResult?: any;
+  sessionId: string;
+  data?: any;
+  interactions?: number;
+  modifications?: number;
+  hasGeneratedContract?: boolean;
+  fileSize?: string;
+  lastViewed?: string;
 }
 
-interface ContractContextType {
+interface ContractContextValue {
   contracts: Contract[];
   addContract: (contract: Contract) => void;
   removeContract: (id: string) => void;
-  updateContract: (id: string, updates: Partial<Contract>) => void;
-  getContract: (id: string) => Contract | undefined;
   clearAllContracts: () => void;
+  getContract: (id: string) => Contract | undefined;
+  updateContract: (id: string, updates: Partial<Contract>) => void;
+  isLoading: boolean;
 }
 
-const ContractContext = createContext<ContractContextType | undefined>(undefined);
+const ContractContext = createContext<ContractContextValue | undefined>(undefined);
 
-export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const useContract = () => {
+  const context = useContext(ContractContext);
+  if (!context) {
+    throw new Error('useContract must be used within a ContractProvider');
+  }
+  return context;
+};
+
+interface ContractProviderProps {
+  children: ReactNode;
+}
+
+export const ContractProvider: React.FC<ContractProviderProps> = ({ children }) => {
   const [contracts, setContracts] = useState<Contract[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Load contracts from storage on mount
   useEffect(() => {
     loadContracts();
   }, []);
 
   const loadContracts = async () => {
     try {
-      const data = await AsyncStorage.getItem('shariaa_contracts');
-      if (data) {
-        setContracts(JSON.parse(data));
+      setIsLoading(true);
+      const stored = await AsyncStorage.getItem('shariaa_contracts');
+      if (stored) {
+        const parsedContracts = JSON.parse(stored);
+        // Ensure all contracts have required fields with defaults
+        const normalizedContracts = parsedContracts.map((contract: any) => ({
+          interactions: 0,
+          modifications: 0,
+          hasGeneratedContract: false,
+          fileSize: 'Unknown',
+          lastViewed: contract.analysisDate,
+          ...contract,
+        }));
+        setContracts(normalizedContracts);
       }
     } catch (error) {
-      console.error('Error loading contracts:', error);
+      console.error('Failed to load contracts:', error);
+      setContracts([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -44,62 +77,65 @@ export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       await AsyncStorage.setItem('shariaa_contracts', JSON.stringify(newContracts));
     } catch (error) {
-      console.error('Error saving contracts:', error);
+      console.error('Failed to save contracts:', error);
     }
   };
 
   const addContract = (contract: Contract) => {
-    const newContracts = [contract, ...contracts];
+    const enrichedContract = {
+      interactions: 0,
+      modifications: 0,
+      hasGeneratedContract: false,
+      fileSize: 'Unknown',
+      lastViewed: new Date().toISOString(),
+      ...contract,
+    };
+
+    const newContracts = [enrichedContract, ...contracts.filter(c => c.id !== contract.id)];
     setContracts(newContracts);
     saveContracts(newContracts);
   };
 
   const removeContract = (id: string) => {
-    const newContracts = contracts.filter(contract => contract.id !== id);
+    const newContracts = contracts.filter(c => c.id !== id);
     setContracts(newContracts);
     saveContracts(newContracts);
   };
 
+  const clearAllContracts = async () => {
+    try {
+      setContracts([]);
+      await AsyncStorage.removeItem('shariaa_contracts');
+    } catch (error) {
+      console.error('Failed to clear contracts:', error);
+    }
+  };
+
+  const getContract = (id: string) => {
+    return contracts.find(c => c.id === id);
+  };
+
   const updateContract = (id: string, updates: Partial<Contract>) => {
-    const newContracts = contracts.map(contract =>
-      contract.id === id ? { ...contract, ...updates } : contract
+    const newContracts = contracts.map(contract => 
+      contract.id === id 
+        ? { ...contract, ...updates, lastViewed: new Date().toISOString() }
+        : contract
     );
     setContracts(newContracts);
     saveContracts(newContracts);
   };
 
-  const getContract = (id: string) => {
-    return contracts.find(contract => contract.id === id);
-  };
-
-  const clearAllContracts = () => {
-    setContracts([]);
-    saveContracts([]);
-  };
-
   return (
-    <ContractContext.Provider
-      value={{
-        contracts,
-        addContract,
-        removeContract,
-        updateContract,
-        getContract,
-        clearAllContracts,
-      }}
-    >
+    <ContractContext.Provider value={{
+      contracts,
+      addContract,
+      removeContract,
+      clearAllContracts,
+      getContract,
+      updateContract,
+      isLoading,
+    }}>
       {children}
     </ContractContext.Provider>
   );
 };
-
-export const useContract = () => {
-  const context = useContext(ContractContext);
-  if (context === undefined) {
-    throw new Error('useContract must be used within a ContractProvider');
-  }
-  return context;
-};
-export default ContractProvider;
-export {ContractContext};
-// This context provides a way to manage contracts in the application, allowing for adding, removing,

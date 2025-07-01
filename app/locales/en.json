@@ -300,7 +300,13 @@
     "saveAndReview": "Save & Review",
     "expertFeedback": "Expert Feedback",
     "lastModified": "Last Modified",
-    "interactionCount": "Interactions"
+    "interactionCount": "Interactions",
+    "reference": "Reference",
+    "askGeneralQuestion": "Ask General Question",
+    "generalQuestionPlaceholder": "Ask a general question about the entire contract...",
+    "answer": "Answer",
+    "generatingContract": "Generating Compliant Contract",
+    "generatingMarkedContract": "Generating Marked Contract"
   },
   "review": {
     "editSentForReview": "Review Submitted",

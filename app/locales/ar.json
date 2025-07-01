@@ -305,8 +305,9 @@
     "expertFeedback": "تعليقات الخبير",
     "lastModified": "آخر تعديل",
     "interactionCount": "التفاعلات",
+    "reference": "المرجع",
     "askGeneralQuestion": "اطرح سؤالاً عاماً",
-    "generalQuestionPlaceholder": "اطرح سؤالاً عاماً عن العقد...",
+    "generalQuestionPlaceholder": "اطرح سؤالاً عاماً عن العقد بأكمله...",
     "askQuestion": "اطرح سؤالاً",
     "newShariaIssue": "مشكلة شرعية جديدة",
     "alreadyCompliant": "هذا البند متوافق مع الشريعة بالفعل.",
@@ -315,7 +316,10 @@
     "editConfirmed": "تعديل مؤكد",
     "initialSuggestion": "الاقتراح الأولي",
     "reviewedSuggestion": "الاقتراح المراجع",
-    "yourEdit": "تعديلك"
+    "yourEdit": "تعديلك",
+    "answer": "الإجابة",
+    "generatingContract": "إنشاء عقد متوافق",
+    "generatingMarkedContract": "إنشاء عقد مُعلَّم"
   },
   "review": {
     "editSentForReview": "تم إرسال المراجعة",
