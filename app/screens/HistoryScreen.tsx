@@ -61,14 +61,24 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNavigate }) => 
     else setLoading(true);
 
     try {
-      const historyData = await getSessionHistory();
-      const enrichedData = await enrichSessionData(historyData);
-      setSessions(enrichedData);
-    } catch (error) {
-      console.error('Failed to load history:', error);
+      // Always start with local data for immediate display
       const localHistory = await getLocalSessions();
       const enrichedLocalData = await enrichSessionData(localHistory);
       setSessions(enrichedLocalData);
+
+      // Try to fetch remote data to supplement local data
+      try {
+        const remoteHistory = await getSessionHistory();
+        const enrichedRemoteData = await enrichSessionData(remoteHistory);
+        setSessions(enrichedRemoteData);
+      } catch (remoteError) {
+        console.log('Remote history not available, using local data only');
+        // Keep using local data, no need to throw error
+      }
+    } catch (error) {
+      console.error('Failed to load any history:', error);
+      // Set empty sessions if even local storage fails
+      setSessions([]);
     } finally {
       setLoading(false);
       setRefreshing(false);

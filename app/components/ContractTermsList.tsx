@@ -18,7 +18,7 @@ import { useSession, FrontendAnalysisTerm } from '../contexts/SessionContext';
 import type { GenerateModifiedContractApiResponse, GenerateMarkedContractApiResponse, CloudinaryFileInfo } from '../services/api';
 import * as apiService from '../services/api';
 import ContractPreviewModal from './ContractPreviewModal';
-import ComplianceBanner from './ComplianceBanner';
+
 import QuestionAnimation from './QuestionAnimation';
 import { 
   CheckCircle, 
@@ -56,6 +56,7 @@ const GeneratingContractAnimation: React.FC<{progress: number, type?: 'modified'
   const { t } = useLanguage();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const styles = getStyles(isDark, false); // Add missing styles definition
   
   const title = type === 'marked' ? (t('term.generatingMarkedContract') || 'Generating Marked Contract') : (t('term.generatingContract') || 'Generating Contract');
   const stages = [

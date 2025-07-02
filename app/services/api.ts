@@ -111,11 +111,22 @@ export const uploadContract = async (fileAsset: any, onUploadProgress?: (progres
 export const getSessionHistory = async (): Promise<SessionDetailsApiResponse[]> => {
   const headers = await getHeaders();
   try {
-    const response = await fetch(`${API_BASE_URL}/api/history`, { method: 'GET', headers });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    
+    const response = await fetch(`${API_BASE_URL}/api/history`, { 
+      method: 'GET', 
+      headers,
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
     return handleResponse<SessionDetailsApiResponse[]>(response);
   } catch (error) {
-    console.error("Failed to fetch remote history, falling back to local:", error);
-    return getLocalSessions();
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout - network not available');
+    }
+    throw error;
   }
 };
 
