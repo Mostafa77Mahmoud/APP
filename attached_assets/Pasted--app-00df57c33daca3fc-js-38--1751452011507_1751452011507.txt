@@ -1,0 +1,157 @@
+_app-00df57c33daca3fc.js:38 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+_app-00df57c33daca3fc.js:38 [LaunchDarkly] LaunchDarkly client initialized
+APP:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+stallwart.build.js:1 stallwart: failed ping 1
+stallwart.build.js:1 stallwart: failed ping 1
+stallwart.build.js:1 stallwart: failed ping 2
+stallwart.build.js:1 stallwart: failed ping 3
+framework-862a1af8891026db.js:1 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+_ @ framework-862a1af8891026db.js:1
+framework-862a1af8891026db.js:1 Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-862a1af8891026db.js:1
+framework-862a1af8891026db.js:1 Unrecognized feature: 'battery'.
+_ @ framework-862a1af8891026db.js:1
+framework-862a1af8891026db.js:1 Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-862a1af8891026db.js:1
+framework-862a1af8891026db.js:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-862a1af8891026db.js:1
+framework-862a1af8891026db.js:1 Unrecognized feature: 'layout-animations'.
+_ @ framework-862a1af8891026db.js:1
+framework-862a1af8891026db.js:1 Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-862a1af8891026db.js:1
+framework-862a1af8891026db.js:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-862a1af8891026db.js:1
+framework-862a1af8891026db.js:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-862a1af8891026db.js:1
+framework-862a1af8891026db.js:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-862a1af8891026db.js:1
+framework-862a1af8891026db.js:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-862a1af8891026db.js:1
+framework-862a1af8891026db.js:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-862a1af8891026db.js:1
+framework-862a1af8891026db.js:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-862a1af8891026db.js:1
+framework-862a1af8891026db.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-862a1af8891026db.js:1
+framework-862a1af8891026db.js:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-862a1af8891026db.js:1
+framework-862a1af8891026db.js:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-862a1af8891026db.js:1
+framework-862a1af8891026db.js:1 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+_ @ framework-862a1af8891026db.js:1
+workspace_iframe.html:32 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+workspace_iframe.html:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html:32 Unrecognized feature: 'battery'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+content-all.js:1 Uncaught (in promise) Error: Could not establish connection. Receiving end does not exist.
+    at y (content-all.js:1:49937)
+Console.js:61 Running application "main" with appParams:
+ Object 
+Development-level warnings: ON.
+Performance optimizations: OFF.
+Console.js:61 "shadow*" style props are deprecated. Use "boxShadow".
+Mt.forEach.n.<computed> @ Console.js:61
+Console.js:61 Animated: `useNativeDriver` is not supported because the native animated module is missing. Falling back to JS-based animation. To resolve this, add `RCTAnimation` module to this app, or remove `useNativeDriver`. Make sure to run `bundle exec pod install` first. Read more about autolinking: https://github.com/react-native-community/cli/blob/master/docs/autolinking.md
+Mt.forEach.n.<computed> @ Console.js:61
+f2d5c875-390e-40da-9306-f3656d6df411-00-2oqer22bh0wjs.kirk.replit.dev/:1 Access to fetch at 'http://localhost:5000/api/history' from origin 'https://f2d5c875-390e-40da-9306-f3656d6df411-00-2oqer22bh0wjs.kirk.replit.dev' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: It does not have HTTP ok status.
+localhost:5000/api/history:1 
+            
+            
+           Failed to load resource: net::ERR_FAILED
+Console.js:61 Failed to fetch remote history, falling back to local: TypeError: Failed to fetch
+    at window.fetch (Network.js:219:37)
+    at getSessionHistory (api.ts:114:28)
+    at async HistoryScreen.tsx:64:27
+Mt.forEach.n.<computed> @ Console.js:61
+Network.js:219 
+            
+            
+           
+        
+       Uncaught (in promise) TypeError: Failed to fetch
+    at window.fetch (Network.js:219:37)
+    at getSessionHistory (api.ts:114:28)
+    at async HistoryScreen.tsx:64:27
+symbolicate:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+Console.js:61 props.pointerEvents is deprecated. Use style.pointerEvents
+Mt.forEach.n.<computed> @ Console.js:61
+Console.js:61 SessionContext: Loading session data for a1909f89-e176-4dc0-9dd7-ba5ca7147106
+Console.js:61 SessionContext: Received data Object
+Console.js:61 SessionContext: Setting enriched terms Object
+Console.js:61 ReferenceError: styles is not defined
+    at GeneratingContractAnimation (ContractTermsList.tsx:70:19)
+    at react-stack-bottom-frame (react-dom-client.development.js:22428:20)
+    at renderWithHooks (react-dom-client.development.js:5757:22)
+    at updateFunctionComponent (react-dom-client.development.js:8018:19)
+    at beginWork (react-dom-client.development.js:9683:18)
+    at runWithFiberInDEV (react-dom-client.development.js:543:16)
+    at performUnitOfWork (react-dom-client.development.js:15044:22)
+    at workLoopSync (react-dom-client.development.js:14870:41)
+    at renderRootSync (react-dom-client.development.js:14850:11)
+    at performWorkOnRoot (react-dom-client.development.js:14384:44)
+    at performSyncWorkOnRoot (react-dom-client.development.js:15946:7)
+    at flushSyncWorkAcrossRoots_impl (react-dom-client.development.js:15807:21)
+    at processRootScheduleInMicrotask (react-dom-client.development.js:15841:7)
+    at react-dom-client.development.js:15962:13
+
+The above error occurred in the <GeneratingContractAnimation> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, LogBoxStateSubscription.
+
+Mt.forEach.n.<computed> @ Console.js:61
+registerError @ LogBox.web.ts:134
+console.error @ LogBox.web.ts:59
+defaultOnCaughtError @ react-dom-client.development.js:7445
+logCaughtError @ react-dom-client.development.js:7484
+runWithFiberInDEV @ react-dom-client.development.js:543
+inst.componentDidCatch.update.callback @ react-dom-client.development.js:7531
+callCallback @ react-dom-client.development.js:10680
+commitCallbacks @ react-dom-client.development.js:10700
+runWithFiberInDEV @ react-dom-client.development.js:543
+commitClassCallbacks @ react-dom-client.development.js:10919
+commitLayoutEffectOnFiber @ react-dom-client.development.js:11490
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:12412
+commitLayoutEffectOnFiber @ react-dom-client.development.js:11413
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:12412
+commitLayoutEffectOnFiber @ react-dom-client.development.js:11413
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:12412
+commitLayoutEffectOnFiber @ react-dom-client.development.js:11413
+recursivelyTraverseLayoutEffects @ react-dom-client.development.js:12412
+commitLayoutEffectOnFiber @ react-dom-client.development.js:11495
+commitLayoutEffects @ react-dom-client.development.js:12406
+commitRootImpl @ react-dom-client.development.js:15352
+commitRoot @ react-dom-client.development.js:15251
+commitRootWhenReady @ react-dom-client.development.js:14570
+performWorkOnRoot @ react-dom-client.development.js:14494
+performSyncWorkOnRoot @ react-dom-client.development.js:15946
+flushSyncWorkAcrossRoots_impl @ react-dom-client.development.js:15807
+processRootScheduleInMicrotask @ react-dom-client.development.js:15841
+(anonymous) @ react-dom-client.development.js:15962
