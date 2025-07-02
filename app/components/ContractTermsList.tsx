@@ -22,6 +22,7 @@ import type {
 import * as apiService from "../services/api";
 import ContractPreviewModal from "./ContractPreviewModal";
 import QuestionAnimation from "./QuestionAnimation";
+import ComplianceBanner from "./ComplianceBanner";
 import {
   CheckCircle,
   Send,
