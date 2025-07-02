@@ -21,7 +21,6 @@ import type {
 } from "../services/api";
 import * as apiService from "../services/api";
 import ContractPreviewModal from "./ContractPreviewModal";
-import ComplianceBanner from "./ComplianceBanner";
 import QuestionAnimation from "./QuestionAnimation";
 import {
   CheckCircle,
@@ -783,8 +782,7 @@ const ContractTermsList: React.FC = () => {
                       styles.referenceText,
                       {
                         color: isEffectivelyCompliant ? "#1e40af" : "#b45309",
-                        textAlign: isRTL ? "right" : "left",
-                      },
+                        textAlign: isRTL ? "right" : "left" },
                     ]}
                   >
                     {term.reference_number}
@@ -997,7 +995,7 @@ const ContractTermsList: React.FC = () => {
                       />
                       <TouchableOpacity
                         style={styles.sendButton}
-                        onPress={() => handleSendQuestion(term.term_id)}
+                        onPress={()              => handleSendQuestion(term.term_id)}
                         disabled={
                           (isTermProcessing &&
                             isTermProcessing[term.term_id]) ||

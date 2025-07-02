@@ -72,42 +72,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({ onBack }) => {
         <View style={styles.headerButton} />
       </Animated.View>
 
-      <Animated.View 
-        style={[
-          styles.summaryCard,
-          {
-            opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }, { scale: scaleAnim }]
-          }
-        ]}
-      >
-        <View style={styles.summaryHeader}>
-          <FileText size={24} color={isDark ? '#6ee7b7' : '#10b981'} />
-          <Text style={styles.summaryTitle}>{sessionDetails?.original_filename || t('results.summary')}</Text>
-        </View>
-        
-        <View style={styles.complianceContainer}>
-          <View style={styles.complianceScore}>
-            <Text style={styles.compliancePercentage}>{complianceRate}%</Text>
-            <Text style={styles.complianceLabel}>{t('results.compliance')}</Text>
-          </View>
-          
-          <View style={styles.complianceDetails}>
-            <View style={styles.complianceItem}>
-              <CheckCircle size={16} color="#10b981" />
-              <Text style={styles.complianceText}>
-                {compliantTerms} {t('filter.compliant')}
-              </Text>
-            </View>
-            <View style={styles.complianceItem}>
-              <AlertCircle size={16} color="#ef4444" />
-              <Text style={styles.complianceText}>
-                {totalTerms - compliantTerms} {t('filter.non-compliant')}
-              </Text>
-            </View>
-          </View>
-        </View>
-      </Animated.View>
+      
 
       <Animated.View 
         style={[
