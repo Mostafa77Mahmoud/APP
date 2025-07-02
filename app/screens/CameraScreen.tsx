@@ -1,6 +1,6 @@
 // app/screens/CameraScreen.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 // Corrected Import: Import Camera, CameraType, and CameraView as named exports
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -8,7 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useIsFocused } from '@react-navigation/native';
 import { useSession } from '../contexts/SessionContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { ArrowLeft, ArrowRight, Image as ImageIcon, File as FileIcon, RefreshCw } from 'lucide-react-native';
+import { ArrowLeft, ArrowRight, Image as ImageIcon, File as FileIcon, RefreshCw, Plus, Check, X } from 'lucide-react-native';
 import AnalyzingAnimation from '../components/AnalyzingAnimation';
 import { ScreenType } from '../MobileApp';
 
@@ -25,6 +25,11 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onNavigate, onBack }) => {
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null); // Corrected Type: Use CameraView for the ref
   const isFocused = useIsFocused();
+  
+  // Multi-page document capture states
+  const [capturedImages, setCapturedImages] = useState<Array<{uri: string, id: string}>>([]);
+  const [isMultiPageMode, setIsMultiPageMode] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   useEffect(() => {
     if (!permission) {
@@ -42,14 +47,51 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onNavigate, onBack }) => {
   const takePicture = async () => {
     if (cameraRef.current) {
       try {
-        const photo = await cameraRef.current.takePictureAsync({ quality: 0.7 });
+        const photo = await cameraRef.current.takePictureAsync({ quality: 0.8 });
         if (photo) {
-          const file = { uri: photo.uri, type: 'image/jpeg', name: 'capture.jpg' };
-          await handleAnalysis(file);
+          if (isMultiPageMode) {
+            // Add to captured images array
+            const newImage = {
+              uri: photo.uri,
+              id: Date.now().toString()
+            };
+            setCapturedImages(prev => [...prev, newImage]);
+          } else {
+            // Single page - process immediately
+            const file = { uri: photo.uri, type: 'image/jpeg', name: 'capture.jpg' };
+            await handleAnalysis(file);
+          }
         }
       } catch (error) {
         Alert.alert(t('error.generic'), t('error.cameraFailed'));
       }
+    }
+  };
+
+  const removeImage = (id: string) => {
+    setCapturedImages(prev => prev.filter(img => img.id !== id));
+  };
+
+  const generatePDFFromImages = async () => {
+    if (capturedImages.length === 0) return;
+    
+    setIsGeneratingPDF(true);
+    try {
+      // Here you would implement PDF generation
+      // For now, we'll simulate and use the first image
+      const file = { 
+        uri: capturedImages[0].uri, 
+        type: 'application/pdf', 
+        name: `contract_${Date.now()}.pdf` 
+      };
+      
+      setCapturedImages([]);
+      setIsMultiPageMode(false);
+      await handleAnalysis(file);
+    } catch (error) {
+      Alert.alert(t('error.generic'), 'Failed to generate PDF');
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
@@ -109,15 +151,68 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onNavigate, onBack }) => {
           <Text style={styles.instructionText}>{t('camera.instruction')}</Text>
         </View>
 
+        {/* Multi-page captured images preview */}
+        {isMultiPageMode && capturedImages.length > 0 && (
+          <View style={styles.imagePreviewContainer}>
+            <FlatList
+              horizontal
+              data={capturedImages}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View style={styles.previewImageContainer}>
+                  <TouchableOpacity 
+                    style={styles.removeImageButton}
+                    onPress={() => removeImage(item.id)}
+                  >
+                    <X size={16} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              )}
+              style={styles.imagePreviewList}
+            />
+            <Text style={styles.imageCountText}>
+              {capturedImages.length} {t('camera.pagesCaptures') || 'pages captured'}
+            </Text>
+          </View>
+        )}
+
         <View style={[styles.controls, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <TouchableOpacity style={styles.sideButton} onPress={pickImage}>
             <ImageIcon size={28} color="#fff" />
             <Text style={styles.sideButtonText}>{t('camera.gallery')}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.captureButton} onPress={takePicture} />
-          <TouchableOpacity style={styles.sideButton} onPress={() => onNavigate('upload')}>
-            <FileIcon size={28} color="#fff" />
-            <Text style={styles.sideButtonText}>{t('camera.files')}</Text>
+          
+          <View style={styles.centerControls}>
+            <TouchableOpacity 
+              style={[styles.captureButton, isMultiPageMode && styles.multiPageCaptureButton]} 
+              onPress={takePicture}
+            >
+              {isMultiPageMode && <Plus size={24} color="#000" />}
+            </TouchableOpacity>
+            
+            {isMultiPageMode && capturedImages.length > 0 && (
+              <TouchableOpacity 
+                style={styles.generatePDFButton} 
+                onPress={generatePDFFromImages}
+                disabled={isGeneratingPDF}
+              >
+                {isGeneratingPDF ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Check size={24} color="#fff" />
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
+          
+          <TouchableOpacity 
+            style={styles.sideButton} 
+            onPress={() => setIsMultiPageMode(!isMultiPageMode)}
+          >
+            <FileIcon size={28} color={isMultiPageMode ? "#10b981" : "#fff"} />
+            <Text style={[styles.sideButtonText, isMultiPageMode && { color: "#10b981" }]}>
+              {isMultiPageMode ? t('camera.single') : t('camera.multiPage')}
+            </Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -138,10 +233,50 @@ const styles = StyleSheet.create({
   frameContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   scanFrame: { width: '90%', aspectRatio: 1 / 1.4, borderWidth: 2, borderColor: 'rgba(255, 255, 255, 0.8)', borderRadius: 16, borderStyle: 'dashed' },
   instructionText: { color: '#fff', marginTop: 20, backgroundColor: 'rgba(0,0,0,0.5)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
+  imagePreviewContainer: { 
+    position: 'absolute', 
+    top: 100, 
+    left: 16, 
+    right: 16, 
+    backgroundColor: 'rgba(0,0,0,0.7)', 
+    borderRadius: 12, 
+    padding: 12 
+  },
+  imagePreviewList: { marginBottom: 8 },
+  previewImageContainer: { 
+    width: 60, 
+    height: 80, 
+    marginRight: 8, 
+    backgroundColor: 'rgba(255,255,255,0.2)', 
+    borderRadius: 8, 
+    position: 'relative' 
+  },
+  removeImageButton: { 
+    position: 'absolute', 
+    top: -8, 
+    right: -8, 
+    backgroundColor: '#ef4444', 
+    borderRadius: 12, 
+    width: 24, 
+    height: 24, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  imageCountText: { color: '#fff', fontSize: 14, textAlign: 'center', fontWeight: 'bold' },
   controls: { justifyContent: 'space-around', alignItems: 'center', paddingBottom: 30 },
+  centerControls: { alignItems: 'center', gap: 12 },
   sideButton: { alignItems: 'center', gap: 4 },
   sideButtonText: { color: '#fff', fontSize: 12 },
-  captureButton: { width: 70, height: 70, borderRadius: 35, backgroundColor: '#fff', borderWidth: 4, borderColor: 'rgba(0,0,0,0.3)' },
+  captureButton: { width: 70, height: 70, borderRadius: 35, backgroundColor: '#fff', borderWidth: 4, borderColor: 'rgba(0,0,0,0.3)', justifyContent: 'center', alignItems: 'center' },
+  multiPageCaptureButton: { backgroundColor: '#10b981' },
+  generatePDFButton: { 
+    width: 50, 
+    height: 50, 
+    borderRadius: 25, 
+    backgroundColor: '#10b981', 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
 });
 
 export default CameraScreen;
