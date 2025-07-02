@@ -66,18 +66,87 @@ const GeneratingContractAnimation: React.FC<{progress: number, type?: 'modified'
   ];
   const currentStage = stages.slice().reverse().find(s => progress >= s.threshold) || stages[0];
   
+  const modalStyle = {
+    position: 'absolute' as const,
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    backgroundColor: isDark ? '#1f2937' : '#ffffff',
+    borderRadius: 24,
+    padding: 24,
+    margin: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 10,
+    zIndex: 150,
+    minWidth: 300,
+  };
+
+  const contentStyle = {
+    alignItems: 'center' as const,
+  };
+
+  const iconStyle = {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+    marginBottom: 16,
+    backgroundColor: isDark ? '#374151' : '#f3f4f6',
+  };
+
+  const titleStyle = {
+    fontSize: 20,
+    fontWeight: 'bold' as const,
+    marginBottom: 8,
+    textAlign: 'center' as const,
+    color: isDark ? '#f9fafb' : '#111827',
+  };
+
+  const stageStyle = {
+    fontSize: 14,
+    marginBottom: 16,
+    textAlign: 'center' as const,
+    color: isDark ? '#9ca3af' : '#6b7280',
+  };
+
+  const progressBarStyle = {
+    width: 200,
+    height: 8,
+    borderRadius: 4,
+    overflow: 'hidden' as const,
+    marginBottom: 8,
+    backgroundColor: isDark ? '#374151' : '#e5e7eb',
+  };
+
+  const progressFillStyle = {
+    height: '100%',
+    backgroundColor: '#10b981',
+    borderRadius: 4,
+    width: `${progress}%`,
+  };
+
+  const progressTextStyle = {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: '#10b981',
+  };
+  
   return (
-    <View style={[styles.generatingModal, { backgroundColor: isDark ? '#1f2937' : '#ffffff' }]}>
-      <View style={styles.generatingContent}>
-        <View style={[styles.generatingIcon, { backgroundColor: isDark ? '#374151' : '#f3f4f6' }]}>
+    <View style={modalStyle}>
+      <View style={contentStyle}>
+        <View style={iconStyle}>
           <FileTextIcon size={32} color={isDark ? '#10b981' : '#059669'} />
         </View>
-        <Text style={[styles.generatingTitle, { color: isDark ? '#f9fafb' : '#111827' }]}>{title}</Text>
-        <Text style={[styles.generatingStage, { color: isDark ? '#9ca3af' : '#6b7280' }]}>{currentStage.name}</Text>
-        <View style={[styles.progressBar, { backgroundColor: isDark ? '#374151' : '#e5e7eb' }]}>
-          <View style={[styles.progressFill, { width: `${progress}%` }]} />
+        <Text style={titleStyle}>{title}</Text>
+        <Text style={stageStyle}>{currentStage.name}</Text>
+        <View style={progressBarStyle}>
+          <View style={progressFillStyle} />
         </View>
-        <Text style={styles.progressText}>{Math.round(progress)}%</Text>
+        <Text style={progressTextStyle}>{Math.round(progress)}%</Text>
       </View>
     </View>
   );
@@ -248,12 +317,12 @@ const ContractTermsList: React.FC = () => {
     setGenerationVisualProgress(0);
     setGenerationType(type);
 
-    const totalVisualDuration = 15 * 1000;
+    const totalVisualDuration = 8 * 1000; // Reduced duration for better UX
     let currentProgress = 0;
     const progressInterval = setInterval(() => {
       currentProgress += (100 / (totalVisualDuration / 100));
-      if (currentProgress >= 99) {
-        setGenerationVisualProgress(99);
+      if (currentProgress >= 95) {
+        setGenerationVisualProgress(95);
         clearInterval(progressInterval);
       } else {
         setGenerationVisualProgress(currentProgress);
@@ -265,28 +334,32 @@ const ContractTermsList: React.FC = () => {
       clearInterval(progressInterval);
       setGenerationVisualProgress(100);
 
-      if (response && response.success) {
-        Alert.alert(
-          type === 'modified' ? (t('contract.generated') || 'Contract Generated') : (t('contract.markedGenerated') || 'Marked Contract Generated'),
-          type === 'modified' ? (t('contract.generatedMessage') || 'Your modified contract has been generated successfully.') : (t('contract.markedGeneratedMessage') || 'Your marked contract has been generated successfully.')
-        );
-      } else {
-        Alert.alert(
-          t('error.generationFailed') || 'Generation Failed',
-          response?.message || (type === 'modified' ? "Could not generate the contract." : "Could not generate marked contract.")
-        );
+      // Small delay to show completion
+      setTimeout(() => {
+        setGenerationType(null);
         setGenerationVisualProgress(0);
-      }
+
+        if (response && response.success) {
+          Alert.alert(
+            type === 'modified' ? (t('contract.generated') || 'Contract Generated') : (t('contract.markedGenerated') || 'Marked Contract Generated'),
+            type === 'modified' ? (t('contract.generatedMessage') || 'Your modified contract has been generated successfully.') : (t('contract.markedGeneratedMessage') || 'Your marked contract has been generated successfully.')
+          );
+        } else {
+          Alert.alert(
+            t('error.generationFailed') || 'Generation Failed',
+            response?.message || (type === 'modified' ? "Could not generate the contract." : "Could not generate marked contract.")
+          );
+        }
+      }, 800);
     } catch (error) {
       clearInterval(progressInterval);
+      setGenerationType(null);
+      setGenerationVisualProgress(0);
       Alert.alert(
         t('error.generationFailed') || 'Generation Failed',
         'An error occurred while generating the contract.'
       );
-      setGenerationVisualProgress(0);
     }
-    
-    setTimeout(() => setGenerationType(null), 1500);
   };
 
   const handleGenerateContract = useCallback(() => {
@@ -299,10 +372,14 @@ const ContractTermsList: React.FC = () => {
     runGenerationProcess(generateMarkedContract, 'marked');
   }, [isGeneratingContract, isGeneratingMarkedContract, generateMarkedContract]);
 
-  const openPreviewModalWithType = async (type: 'modified' | 'marked') => {
-    setIsPreviewModalOpen(true);
-    setPreviewFileType(type);
-  };
+  const openPreviewModalWithType = useCallback(async (type: 'modified' | 'marked') => {
+    try {
+      setPreviewFileType(type);
+      setIsPreviewModalOpen(true);
+    } catch (error) {
+      Alert.alert(t('error.generic') || 'Error', 'Failed to open preview modal');
+    }
+  }, [t]);
 
   const filteredTerms = useMemo(() => {
     if (!analysisTerms) return [];
@@ -612,7 +689,12 @@ const ContractTermsList: React.FC = () => {
       {/* Generation Animation Overlay */}
       {(isGeneratingContract || isGeneratingMarkedContract) && generationType && (
         <Modal transparent visible animationType="fade">
-          <View style={styles.overlay}>
+          <View style={{
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
             <GeneratingContractAnimation progress={generationVisualProgress} type={generationType} />
           </View>
         </Modal>

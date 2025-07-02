@@ -72,14 +72,22 @@ const ContractPreviewModal: React.FC<ContractPreviewModalProps> = ({
 
     setIsLoading(true);
     try {
-      const supported = await Linking.canOpenURL(contractInfo.pdf_cloudinary_info.url);
+      const url = contractInfo.pdf_cloudinary_info.url;
+      console.log('Opening URL:', url);
+      
+      const supported = await Linking.canOpenURL(url);
       if (supported) {
-        await Linking.openURL(contractInfo.pdf_cloudinary_info.url);
+        await Linking.openURL(url);
       } else {
-        Alert.alert(t('contract.preview.errorTitle') || 'Error', 'Cannot open this URL');
+        // Fallback: try to open anyway
+        await Linking.openURL(url);
       }
     } catch (error) {
-      Alert.alert(t('contract.preview.errorTitle') || 'Error', 'Failed to open document');
+      console.error('Failed to open document:', error);
+      Alert.alert(
+        t('contract.preview.errorTitle') || 'Error', 
+        'Failed to open document. Please try downloading instead.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -101,24 +109,35 @@ const ContractPreviewModal: React.FC<ContractPreviewModalProps> = ({
           clearInterval(progressInterval);
           return 100;
         }
-        return prev + 10;
+        return prev + 15;
       });
-    }, 100);
+    }, 150);
 
     try {
-      const supported = await Linking.canOpenURL(contractInfo.docx_cloudinary_info.url);
-      if (supported) {
-        await Linking.openURL(contractInfo.docx_cloudinary_info.url);
-        Alert.alert('Success', 'Download started successfully');
-      } else {
-        Alert.alert(t('contract.preview.errorTitle') || 'Error', 'Cannot open this URL');
-      }
+      const url = contractInfo.docx_cloudinary_info.url;
+      console.log('Downloading from URL:', url);
+      
+      await Linking.openURL(url);
+      
+      // Wait for progress to complete
+      setTimeout(() => {
+        Alert.alert(
+          t('common.success') || 'Success', 
+          t('contract.preview.downloadStarted') || 'Download started successfully'
+        );
+      }, 1000);
     } catch (error) {
-      Alert.alert(t('contract.preview.errorTitle') || 'Error', 'Failed to download document');
+      console.error('Failed to download document:', error);
+      Alert.alert(
+        t('contract.preview.errorTitle') || 'Error', 
+        t('contract.preview.downloadFailed') || 'Failed to download document'
+      );
     } finally {
-      clearInterval(progressInterval);
-      setIsLoading(false);
-      setDownloadProgress(0);
+      setTimeout(() => {
+        clearInterval(progressInterval);
+        setIsLoading(false);
+        setDownloadProgress(0);
+      }, 1200);
     }
   };
 
