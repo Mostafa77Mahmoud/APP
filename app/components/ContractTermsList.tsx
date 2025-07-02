@@ -707,9 +707,6 @@ const ContractTermsList: React.FC = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
       >
-        {/* Compliance Banner */}
-        <ComplianceBanner />
-
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>{t('contract.terms') || 'Contract Terms Analysis'}</Text>
