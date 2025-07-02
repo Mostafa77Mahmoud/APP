@@ -1,0 +1,157 @@
+Uncaught Error
+ComplianceBanner is not defined
+Source
+ 
+ 709 |
+       
+>
+ 
+ 710 |
+         {
+/* Compliance Banner */
+}
+>
+ 711 |
+         
+<
+ComplianceBanner
+ 
+/
+>
+ 
+     |
+          
+^
+ 
+ 712 |
+ 
+ 713 |
+         {
+/* Header */
+}
+ 
+ 714 |
+         
+<
+View
+ style
+=
+{styles
+.
+header}
+>
+Call Stack
+ContractTermsList
+app/components/ContractTermsList.tsx:711:10
+See 11 more frames
+Component Stack
+ContractTermsList
+app/components/ContractTermsList.tsx:157:40
+div
+<anonymous>:-1:0
+React.forwardRef$argument_0
+node_modules/react-native-web/dist/exports/View/index.js:35:25
+React.forwardRef$argument_0
+node_modules/react-native-web/dist/vendor/react-native/Animated/createAnimatedComponent.js:25:45
+div
+<anonymous>:-1:0
+React.forwardRef$argument_0
+node_modules/react-native-web/dist/exports/View/index.js:35:25
+React.forwardRef$argument_0
+node_modules/react-native-safe-area-context/lib/module/SafeAreaView.web.js:23:3
+ResultsScreen
+app/screens/ResultsScreen.tsx:15:56
+div
+<anonymous>:-1:0
+React.forwardRef$argument_0
+node_modules/react-native-web/dist/exports/View/index.js:35:25
+React.forwardRef$argument_0
+node_modules/react-native-web/dist/vendor/react-native/Animated/createAnimatedComponent.js:25:45
+div
+<anonymous>:-1:0
+React.forwardRef$argument_0
+node_modules/react-native-web/dist/exports/View/index.js:35:25
+React.forwardRef$argument_0
+node_modules/react-native-safe-area-context/lib/module/SafeAreaView.web.js:23:3
+div
+<anonymous>:-1:0
+React.forwardRef$argument_0
+node_modules/react-native-web/dist/exports/View/index.js:35:25
+NativeSafeAreaProvider
+node_modules/react-native-safe-area-context/lib/module/NativeSafeAreaProvider.web.js:21:3
+SafeAreaProvider
+node_modules/react-native-safe-area-context/lib/module/SafeAreaContext.js:15:3
+MobileApp
+app/MobileApp.tsx:31:32
+div
+<anonymous>:-1:0
+React.forwardRef$argument_0
+node_modules/react-native-web/dist/exports/View/index.js:35:25
+ContractProvider
+app/contexts/ContractContext.tsx:42:69
+SessionProvider
+app/contexts/SessionContext.tsx:93:35
+AuthProvider
+app/contexts/AuthContext.tsx:19:32
+LanguageProvider
+app/contexts/LanguageContext.tsx:32:36
+ThemeProvider
+app/contexts/ThemeContext.tsx:16:33
+RootLayout(./_layout.tsx)
+<anonymous>:-1:0
+Suspense
+<anonymous>:-1:0
+Route
+node_modules/expo-router/build/Route.js:30:18
+BaseRoute
+node_modules/expo-router/build/useScreens.js:154:5
+StaticContainer
+node_modules/@react-navigation/core/lib/module/StaticContainer.js:9:16
+EnsureSingleNavigator
+node_modules/@react-navigation/core/lib/module/EnsureSingleNavigator.js:12:3
+SceneView
+node_modules/@react-navigation/core/lib/module/SceneView.js:15:3
+PreventRemoveProvider
+node_modules/@react-navigation/core/lib/module/PreventRemoveProvider.js:31:3
+NavigationStateListenerProvider
+node_modules/@react-navigation/core/lib/module/useNavigationState.js:24:3
+NavigationContent
+node_modules/@react-navigation/core/lib/module/useComponent.js:6:3
+React.useRef$argument_0
+node_modules/@react-navigation/core/lib/module/useComponent.js:22:5
+Content
+node_modules/expo-router/build/ExpoRoot.js:150:88
+div
+<anonymous>:-1:0
+React.forwardRef$argument_0
+node_modules/react-native-web/dist/exports/View/index.js:35:25
+NativeSafeAreaProvider
+node_modules/react-native-safe-area-context/lib/module/NativeSafeAreaProvider.web.js:21:3
+SafeAreaProvider
+node_modules/react-native-safe-area-context/lib/module/SafeAreaContext.js:15:3
+wrapper
+node_modules/expo-router/build/ExpoRoot.js:71:24
+ThemeProvider
+node_modules/@react-navigation/core/lib/module/theming/ThemeProvider.js:7:3
+EnsureSingleNavigator
+node_modules/@react-navigation/core/lib/module/EnsureSingleNavigator.js:12:3
+BaseNavigationContainer
+node_modules/@react-navigation/core/lib/module/BaseNavigationContainer.js:72:3
+NavigationContainerInner
+node_modules/expo-router/build/fork/NavigationContainer.js:32:37
+ContextNavigator
+node_modules/expo-router/build/ExpoRoot.js:90:29
+ExpoRoot
+node_modules/expo-router/build/ExpoRoot.js:65:30
+_HelmetProvider#constructor
+node_modules/expo-router/vendor/react-helmet-async/lib/index.js:483:5
+App
+<anonymous>:-1:0
+LogBoxStateSubscription#constructor
+node_modules/@expo/metro-runtime/src/error-overlay/Data/LogBoxData.tsx:365:7
+ErrorOverlay
+<anonymous>:-1:0
+withDevTools(ErrorOverlay)
+<anonymous>:-1:0
+AppContainer
+shim:react-native-web/dist/exports/AppRegistry/AppContainer.js
