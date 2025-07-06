@@ -1,0 +1,26 @@
+Disconnected from Metro (1006: "").
+
+To reconnect:
+- Ensure that Metro is running and available on the same network
+- Reload this app (will trigger further help if Metro cannot be connected to)
+      
+Animated: `useNativeDriver` is not supported because the native animated module is missing. Falling back to JS-based animation. To resolve this, add `RCTAnimation` module to this app, or remove `useNativeDriver`. Make sure to run `bundle exec pod install` first. Read more about autolinking: https://github.com/react-native-community/cli/blob/master/docs/autolinking.md
+React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+at t.value (https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+props.pointerEvents is deprecated. Use style.pointerEvents
+React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+at t.value (https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+<div class="luna-console-preview" data-id="36"><div class="luna-console-preview-container"><div class="luna-console-preview-icon-container"><span class="luna-console-icon luna-console-icon-caret-right"></span></div><span class="luna-console-preview-content-container"><span class="luna-console-descriptor">Error</span> <span class="luna-console-object-preview">{<span class="luna-console-key">componentStack</span>: <span class="luna-console-string">&quot;↵    at div (&lt;anonymous&gt;)↵    at View…&quot;</span>}</span></span></div><div class="luna-console-json luna-console-hidden"></div></div>
+
+The above error occurred in the <div> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, LogBoxStateSubscription.
+
+
+The above error occurred in the &lt;div&gt; component.
