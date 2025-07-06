@@ -1,0 +1,62 @@
+@app.route("/feedback/expert", methods=["POST"])
+def submit_expert_feedback():
+    if expert_feedback_collection is None or terms_collection is None:
+        return jsonify({"error": "Database service is currently unavailable."}), 503
+        
+    if not request.is_json:
+        return jsonify({"error": "Unsupported Media Type: Expected application/json"}), 415
+    
+    data = request.get_json()
+    session_id = request.cookies.get("session_id") or data.get("session_id")
+    term_id = data.get("term_id")
+    feedback_data = data.get("feedback_data")
+    expert_user_id = "default_expert_id" 
+    expert_username = "Default Expert"   
+
+    if not all([session_id, term_id, feedback_data]):
+        return jsonify({"error": "البيانات المطلوبة غير مكتملة (session_id, term_id, feedback_data)"}), 400
+    
+    original_term_doc = terms_collection.find_one({"session_id": session_id, "term_id": term_id})
+    snapshot_ai_data = {}
+    original_term_text_for_snapshot = ""
+    if original_term_doc:
+        original_term_text_for_snapshot = original_term_doc.get("term_text", "")
+        snapshot_ai_data = {
+            "original_ai_is_valid_sharia": original_term_doc.get("is_valid_sharia"),
+            "original_ai_sharia_issue": original_term_doc.get("sharia_issue"),
+            "original_ai_modified_term": original_term_doc.get("modified_term"),
+            "original_ai_reference_number": original_term_doc.get("reference_number")
+        }
+
+    feedback_doc = {
+        "session_id": session_id,
+        "term_id": term_id,
+        "original_term_text_snapshot": original_term_text_for_snapshot,
+        "expert_user_id": expert_user_id, 
+        "expert_username": expert_username, 
+        "feedback_timestamp": datetime.datetime.now(datetime.timezone.utc),
+        "ai_initial_analysis_assessment": { 
+            "is_correct_compliance": feedback_data.get("aiAnalysisApproved"),
+        },
+        "expert_verdict_is_valid_sharia": feedback_data.get("expertIsValidSharia"),
+        "expert_comment_on_term": feedback_data.get("expertComment"),
+        "expert_corrected_sharia_issue": feedback_data.get("expertCorrectedShariaIssue"),
+        "expert_corrected_reference": feedback_data.get("expertCorrectedReference"),
+        "expert_final_suggestion_for_term": feedback_data.get("expertCorrectedSuggestion"),
+        **snapshot_ai_data 
+    }
+
+    try:
+        result = expert_feedback_collection.insert_one(feedback_doc)
+        terms_collection.update_one(
+            {"session_id": session_id, "term_id": term_id},
+            {"$set": {
+                "has_expert_feedback": True, 
+                "last_expert_feedback_id": result.inserted_id, 
+                "expert_override_is_valid_sharia": feedback_data.get("expertIsValidSharia") 
+            }}
+        )
+        return jsonify({"success": True, "message": "تم حفظ ملاحظات الخبير بنجاح.", "feedback_id": str(result.inserted_id)}), 201
+    except Exception as e:
+        print(f"ERROR saving expert feedback: {e}"); traceback.print_exc()
+        return jsonify({"error": f"فشل حفظ ملاحظات الخبير: {str(e)}"}), 500
