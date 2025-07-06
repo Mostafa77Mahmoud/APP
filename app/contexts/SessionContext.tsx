@@ -398,7 +398,21 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       const answer = await api.askQuestion(sessionId, question, termId, term.term_text);
-      updateTermLocally({ term_id: termId, currentQaAnswer: answer });
+      
+      // Ensure immutable update with proper state management
+      setAnalysisTerms(prevTerms => {
+        if (!prevTerms) return null;
+        return prevTerms.map(t => 
+          t.term_id === termId 
+            ? { 
+                ...t, 
+                currentQaAnswer: answer,
+                lastModified: new Date().toISOString(),
+                interactionCount: (t.interactionCount || 0) + 1,
+              } 
+            : t
+        );
+      });
 
       // Add interaction
       await addInteraction({
@@ -409,7 +423,8 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
       return answer;
     } catch (err: any) {
-      Alert.alert("Interaction Error", err.message);
+      console.error('Error asking question about term:', err);
+      Alert.alert("Interaction Error", err.message || "Failed to get answer");
       return null;
     } finally {
       setIsAskingQuestion(false);

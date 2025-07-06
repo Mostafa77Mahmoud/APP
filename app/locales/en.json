@@ -206,7 +206,10 @@
     "subtitle": "Your AI-powered Islamic compliance assistant",
     "step1": {
       "title": "Upload Contracts",
-      "description": "Upload PDF, DOCX, or TXT contract files for analysis"
+      "description": "Upload PDF, DOCX, or TXT contract files for analysis",
+      "feature1": "Support for multiple file formats",
+      "feature2": "Camera scanning for physical documents",
+      "feature3": "Multi-page document capture"
     },
     "step2": {
       "title": "AI Analysis",
@@ -214,7 +217,14 @@
     },
     "step3": {
       "title": "Expert Review",
-      "description": "Get expert insights and modification suggestions"
+      "description": "Get expert insights and modification suggestions",
+      "feature1": "Term-specific compliance analysis",
+      "feature2": "Interactive question and answer system",
+      "feature3": "Expert feedback and corrections"
+    },
+    "step4": {
+      "feature1": "Generate modified contracts",
+      "feature2": "Download marked contract versions"
     },
     "skip": "Skip",
     "next": "Next",
@@ -226,6 +236,13 @@
     "camera": "Camera",
     "history": "History",
     "profile": "Profile"
+  },
+  "home": {
+    "guestUser": "Guest User",
+    "analytics": "Analytics",
+    "totalAnalyses": "Total Analyses",
+    "complianceRate": "Compliance Rate",
+    "thisMonth": "This Month"
   },
   "error": {
     "generic": "An error occurred",

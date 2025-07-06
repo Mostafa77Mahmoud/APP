@@ -1086,7 +1086,7 @@ const ContractTermsList: React.FC = () => {
                       />
                       <TouchableOpacity
                         style={styles.sendButton}
-                        onPress={()              => handleSendQuestion(term.term_id)}
+                        onPress={() => handleSendQuestion(term.term_id)}
                         disabled={
                           (isTermProcessing &&
                             isTermProcessing[term.term_id]) ||
@@ -1102,6 +1102,46 @@ const ContractTermsList: React.FC = () => {
                           {t("button.send") || "Send"}
                         </Text>
                       </TouchableOpacity>
+                    </View>
+                  )}
+
+                  {/* Display the current Q&A answer for this term */}
+                  {term.currentQaAnswer && (
+                    <View style={styles.termAnswerContainer}>
+                      <Text style={styles.termAnswerTitle}>
+                        {t("term.answer") || "Answer"}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.termAnswerText,
+                          { textAlign: isRTL ? "right" : "left" },
+                        ]}
+                      >
+                        {term.currentQaAnswer}
+                      </Text>
+                      {term.currentQaAnswer && !term.userModifiedText && !term.reviewedSuggestion && (
+                        <TouchableOpacity
+                          style={styles.useAnswerButton}
+                          onPress={() => handleUseAnswerAsSuggestion(term)}
+                          disabled={
+                            isReviewingModification &&
+                            isReviewingModification[term.term_id]
+                          }
+                        >
+                          {isReviewingModification &&
+                          isReviewingModification[term.term_id] ? (
+                            <ActivityIndicator size="small" color="#ffffff" />
+                          ) : (
+                            <CheckCircle size={16} color="#ffffff" />
+                          )}
+                          <Text style={styles.useAnswerButtonText}>
+                            {isReviewingModification &&
+                            isReviewingModification[term.term_id]
+                              ? t("processing") || "Processing..."
+                              : t("button.useAndReview") || "Use as Suggestion & Review"}
+                          </Text>
+                        </TouchableOpacity>
+                      )}
                     </View>
                   )}
                 </View>
@@ -2189,6 +2229,43 @@ const getStyles = (isDark: boolean, isRTL: boolean) =>
     modalSendButtonText: {
       color: "#ffffff",
       fontSize: 16,
+      fontWeight: "600",
+    },
+    termAnswerContainer: {
+      backgroundColor: isDark ? "#1e3a8a" : "#dbeafe",
+      borderRadius: 8,
+      padding: 14,
+      marginTop: 12,
+      borderLeftWidth: 4,
+      borderLeftColor: "#3b82f6",
+    },
+    termAnswerTitle: {
+      fontSize: 12,
+      fontWeight: "bold",
+      color: isDark ? "#93c5fd" : "#1e40af",
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+      marginBottom: 8,
+    },
+    termAnswerText: {
+      fontSize: 16,
+      color: isDark ? "#93c5fd" : "#1e40af",
+      lineHeight: 24,
+      marginBottom: 12,
+    },
+    useAnswerButton: {
+      flexDirection: isRTL ? "row-reverse" : "row",
+      alignItems: "center",
+      backgroundColor: "#3b82f6",
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 6,
+      gap: 6,
+      alignSelf: "flex-start",
+    },
+    useAnswerButtonText: {
+      color: "#ffffff",
+      fontSize: 14,
       fontWeight: "600",
     },
     expertFeedbackSection: {
