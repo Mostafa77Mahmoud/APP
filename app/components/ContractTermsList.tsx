@@ -1056,56 +1056,7 @@ const ContractTermsList: React.FC = () => {
     );
   };
 
-  const submitExpertFeedback = async () => {
-    if (!selectedSessionId || !expertFeedbackTermId) return;
-
-    try {
-      setIsSubmittingExpertFeedback(prev => ({ ...prev, [expertFeedbackTermId]: true }));
-
-      const payload = {
-        session_id: selectedSessionId,
-        term_id: expertFeedbackTermId,
-        feedback_data: {
-          aiAnalysisApproved: currentExpertFeedback.aiAnalysisApproved,
-          expertIsValidSharia: currentExpertFeedback.expertIsValidSharia,
-          expertComment: currentExpertFeedback.expertComment,
-          expertCorrectedShariaIssue: currentExpertFeedback.expertCorrectedShariaIssue,
-          expertCorrectedReference: currentExpertFeedback.expertCorrectedReference,
-          expertCorrectedSuggestion: currentExpertFeedback.expertCorrectedSuggestion
-        }
-      };
-
-      await submitExpertFeedbackAPI(payload);
-
-      setExpertFeedbackTermId(null);
-      setCurrentExpertFeedback({
-        aiAnalysisApproved: null,
-        expertIsValidSharia: undefined,
-        expertComment: '',
-        expertCorrectedShariaIssue: '',
-        expertCorrectedReference: '',
-        expertCorrectedSuggestion: ''
-      });
-
-      // Refresh session data
-      if (selectedSessionId) {
-        await loadSessionData(selectedSessionId);
-      }
-
-      Alert.alert(
-        t('expert.feedbackSubmitted') || 'Feedback Submitted',
-        t('expert.feedbackSubmittedMessage') || 'Your expert feedback has been submitted successfully.'
-      );
-    } catch (error) {
-      console.error('Error submitting expert feedback:', error);
-      Alert.alert(
-        t('error.generic') || 'Error',
-        t('expert.feedbackError') || 'Failed to submit expert feedback'
-      );
-    } finally {
-      setIsSubmittingExpertFeedback(prev => ({ ...prev, [expertFeedbackTermId]: false }));
-    }
-  };
+  
 
   return (
     <View style={styles.container}>
