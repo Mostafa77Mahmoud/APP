@@ -4,7 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { ArrowLeft, ArrowRight, LogOut, Moon, Sun, Languages, User, Shield, HelpCircle, Share2, Star } from 'lucide-react-native';
+import { useSession } from '../contexts/SessionContext';
+import { ArrowLeft, ArrowRight, LogOut, Moon, Sun, Languages, User, Shield, HelpCircle, Share2, Star, UserCheck } from 'lucide-react-native';
 
 interface ProfileScreenProps {
   onBack: () => void;
@@ -14,6 +15,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack }) => {
   const { t, language, setLanguage, isRTL } = useLanguage();
   const { user, logout, isGuestMode } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { currentUserRole, toggleUserRole } = useSession();
   const [notifications, setNotifications] = useState(true);
 
   const isDark = theme === 'dark';
@@ -83,6 +85,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack }) => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('profile.settings')}</Text>
+          <OptionRow
+            icon={<UserCheck size={20} color={styles.optionLabel.color} />}
+            label={t('profile.userRole')}
+            value={currentUserRole === 'regular_user' ? t('user.regular') : t('user.expert')}
+            onPress={toggleUserRole}
+          />
           <OptionRow
             icon={<Moon size={20} color={styles.optionLabel.color} />}
             label={t('profile.darkMode')}

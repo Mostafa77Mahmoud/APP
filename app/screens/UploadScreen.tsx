@@ -1,5 +1,3 @@
-
-// app/screens/UploadScreen.tsx
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,9 +16,9 @@ interface UploadScreenProps {
 const UploadScreen: React.FC<UploadScreenProps> = ({ onAnalysisComplete, onBack }) => {
   const { t, isRTL } = useLanguage();
   const { theme } = useTheme();
-  const { isAnalyzingContract, isUploading, uploadProgress } = useSession();
+  const { isAnalyzingContract, isUploading, uploadProgress, currentUserRole } = useSession();
   const [analysisStage, setAnalysisStage] = useState(1);
-  
+
   const isDark = theme === 'dark';
   const styles = getStyles(isDark, isRTL);
 
@@ -57,9 +55,14 @@ const UploadScreen: React.FC<UploadScreenProps> = ({ onAnalysisComplete, onBack 
           {isRTL ? <ArrowRight size={24} color={styles.headerTitle.color} /> : <ArrowLeft size={24} color={styles.headerTitle.color} />}
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('upload.title')}</Text>
+        <View style={styles.roleIndicator}>
+          <Text style={styles.roleText}>
+            {currentUserRole === 'regular_user' ? t('user.regular') : t('user.expert')}
+          </Text>
+        </View>
         <View style={styles.headerButton} />
       </View>
-      
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <UploadArea onAnalysisComplete={handleAnalysisComplete} />
       </ScrollView>
@@ -110,6 +113,19 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
+  },
+  roleIndicator: {
+    backgroundColor: isDark ? '#1e40af' : '#dbeafe',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginTop: 0,
+    alignSelf: 'center',
+  },
+  roleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: isDark ? '#60a5fa' : '#1e40af',
   },
 });
 
