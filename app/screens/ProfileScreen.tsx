@@ -85,12 +85,23 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack }) => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('profile.settings')}</Text>
-          <OptionRow
-            icon={<UserCheck size={20} color={styles.optionLabel.color} />}
-            label={t('profile.userRole')}
-            value={currentUserRole === 'regular_user' ? t('user.regular') : t('user.expert')}
-            onPress={toggleUserRole}
-          />
+          <TouchableOpacity style={styles.userRoleRow} onPress={toggleUserRole}>
+            <View style={styles.optionLabelContainer}>
+              <UserCheck size={20} color={styles.optionLabel.color} />
+              <Text style={styles.optionLabel}>{t('profile.userRole')}</Text>
+            </View>
+            <View style={styles.roleToggleContainer}>
+              <View style={[
+                styles.roleToggle,
+                { backgroundColor: currentUserRole === 'expert_user' ? '#f59e0b' : '#3b82f6' }
+              ]}>
+                <Text style={styles.roleToggleText}>
+                  {currentUserRole === 'regular_user' ? t('user.regular') : t('user.expert')}
+                </Text>
+              </View>
+              {isRTL ? <ArrowLeft size={16} color={styles.optionValue.color} /> : <ArrowRight size={16} color={styles.optionValue.color} />}
+            </View>
+          </TouchableOpacity>
           <OptionRow
             icon={<Moon size={20} color={styles.optionLabel.color} />}
             label={t('profile.darkMode')}
@@ -164,6 +175,32 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
   optionLabel: { fontSize: 16, color: isDark ? '#f9fafb' : '#111827' },
   optionValueContainer: { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 },
   optionValue: { fontSize: 16, color: isDark ? '#9ca3af' : '#6b7280' },
+  userRoleRow: {
+    flexDirection: isRTL ? 'row-reverse' : 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderTopWidth: 1,
+    borderTopColor: isDark ? '#27272a' : '#e5e7eb',
+  },
+  roleToggleContainer: {
+    flexDirection: isRTL ? 'row-reverse' : 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  roleToggle: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  roleToggleText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
   logoutButton: { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: isDark ? '#4b1d1d' : '#fee2e2', marginHorizontal: 16, marginTop: 32, paddingVertical: 14, borderRadius: 12 },
   logoutText: { color: '#ef4444', fontSize: 16, fontWeight: '600' },
 });

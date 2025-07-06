@@ -40,36 +40,36 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
       key: 'stage1', 
       icon: FileText, 
       color: '#3b82f6',
-      title: t('analyzing.stage1') || 'Reading Document',
-      desc: t('analyzing.stage1.desc') || 'Extracting and parsing document content'
+      title: t('analyzing.steps.stage1') || 'Extracting Text',
+      desc: t('analyzing.steps.stage1.desc') || 'Extracting and parsing document content'
     },
     { 
       key: 'stage2', 
       icon: Search, 
       color: '#8b5cf6',
-      title: t('analyzing.stage2') || 'Analyzing Terms',
-      desc: t('analyzing.stage2.desc') || 'Identifying contractual clauses and terms'
+      title: t('analyzing.steps.stage2') || 'Determine Clauses',
+      desc: t('analyzing.steps.stage2.desc') || 'Identifying contractual clauses and terms'
     },
     { 
       key: 'stage3', 
       icon: Brain, 
       color: '#10b981',
-      title: t('analyzing.stage3') || 'AI Processing',
-      desc: t('analyzing.stage3.desc') || 'Applying Sharia compliance analysis'
+      title: t('analyzing.steps.stage3') || 'AI Analysis',
+      desc: t('analyzing.steps.stage3.desc') || 'Applying Sharia compliance analysis'
     },
     { 
       key: 'stage4', 
       icon: Shield, 
       color: '#059669',
-      title: t('analyzing.stage4') || 'Compliance Check',
-      desc: t('analyzing.stage4.desc') || 'Evaluating Islamic law compliance'
+      title: t('analyzing.steps.stage4') || 'Compliance Check',
+      desc: t('analyzing.steps.stage4.desc') || 'Evaluating Islamic law compliance'
     },
     { 
       key: 'stage5', 
       icon: CheckCircle, 
       color: '#f59e0b',
-      title: t('analyzing.stage5') || 'Finalizing Results',
-      desc: t('analyzing.stage5.desc') || 'Preparing analysis report'
+      title: t('analyzing.steps.stage5') || 'Generate Report',
+      desc: t('analyzing.steps.stage5.desc') || 'Preparing final analysis report'
     },
   ];
 
@@ -315,8 +315,6 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
           <Zap size={12} color="#ffffff" />
         </View>
 
-        <Text style={styles.title}>{t('analyzing.title') || 'Analyzing Contract'}</Text>
-
         <Animated.Text 
           style={[
             styles.stageTitle, 
@@ -513,18 +511,11 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
-  title: {
-    fontSize: 26,
+  stageTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
-    color: isDark ? '#f9fafb' : '#111827',
     textAlign: 'center',
     marginBottom: 12,
-  },
-  stageTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: 8,
   },
   stageDesc: {
     fontSize: 14,

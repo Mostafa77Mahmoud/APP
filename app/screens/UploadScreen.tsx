@@ -6,7 +6,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useSession } from '../contexts/SessionContext';
 import UploadArea from '../components/UploadArea';
 import AnalyzingAnimation from '../components/AnalyzingAnimation';
-import { ArrowLeft, ArrowRight } from 'lucide-react-native';
+import { ArrowLeft, ArrowRight, Upload as UploadIcon, FileText, Loader, UserCheck } from 'lucide-react-native';
 
 interface UploadScreenProps {
   onAnalysisComplete: (sessionId: string) => void;
@@ -57,10 +57,15 @@ const UploadScreen: React.FC<UploadScreenProps> = ({ onAnalysisComplete, onBack 
         <Text style={styles.headerTitle}>{t('upload.title')}</Text>
         <View style={styles.roleIndicator}>
           <Text style={styles.roleText}>
-            {currentUserRole === 'regular_user' ? t('user.regular') : t('user.expert')}
+            {currentUserRole === 'expert_user' ? t('user.expert') : t('user.regular')}
           </Text>
+          <View style={[
+            styles.roleIcon,
+            { backgroundColor: currentUserRole === 'expert_user' ? '#f59e0b' : '#3b82f6' }
+          ]}>
+            <UserCheck size={16} color="#ffffff" />
+          </View>
         </View>
-        <View style={styles.headerButton} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -100,15 +105,28 @@ const getStyles = (isDark: boolean, isRTL: boolean) => StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: isDark ? '#27272a' : '#e5e7eb',
   },
-  headerButton: {
-    padding: 8,
-    width: 40,
+  headerButton: { padding: 8, width: 40 },
+  headerTitle: { fontSize: 20, fontWeight: 'bold', color: isDark ? '#f9fafb' : '#111827' },
+  roleIndicator: {
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
+    backgroundColor: isDark ? '#374151' : '#f3f4f6',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 8,
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  roleText: {
+    fontSize: 12,
+    fontWeight: '600',
     color: isDark ? '#f9fafb' : '#111827',
+  },
+  roleIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollContent: {
     flexGrow: 1,

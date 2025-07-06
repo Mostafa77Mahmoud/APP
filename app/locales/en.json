@@ -28,7 +28,19 @@
     "finalizing": "Final Analysis",
     "shariaCompliant": "Sharia Compliant",
     "aiPowered": "AI Powered",
-    "expertReviewed": "Expert Reviewed"
+    "expertReviewed": "Expert Reviewed",
+    "steps": {
+      "stage1": "Extracting Text",
+      "stage1.desc": "Reading and extracting content from document",
+      "stage2": "Determine Clauses",
+      "stage2.desc": "Identifying and parsing contract terms",
+      "stage3": "AI Analysis",
+      "stage3.desc": "Analyzing terms with AI algorithms",
+      "stage4": "Compliance Check",
+      "stage4.desc": "Checking Sharia law compliance",
+      "stage5": "Generate Report",
+      "stage5.desc": "Preparing final analysis report"
+    }
   },
   "results": {
     "title": "Analysis Results",
