@@ -222,7 +222,7 @@ export const getSessionHistory = async (): Promise<SessionDetailsApiResponse[]> 
   const headers = await getHeaders();
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // Increased to 10 second timeout
     
     const response = await fetch(`${API_BASE_URL}/api/history`, { 
       method: 'GET', 
@@ -233,10 +233,14 @@ export const getSessionHistory = async (): Promise<SessionDetailsApiResponse[]> 
     clearTimeout(timeoutId);
     return handleResponse<SessionDetailsApiResponse[]>(response);
   } catch (error) {
-    if (error.name === 'AbortError') {
-      throw new Error('Request timeout - network not available');
+    console.warn('Session history fetch failed:', error);
+    if (error.name === 'AbortError' || error.message?.includes('aborted')) {
+      console.log('Request timeout - using local data only');
+      // Return empty array to fallback to local data
+      return [];
     }
-    throw error;
+    // For other network errors, also return empty array to use local data
+    return [];
   }
 };
 

@@ -199,7 +199,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
   };
 
   // Enhanced document generation with proper multi-page support
-  const generateDocumentFromImages = async (): Promise<{ uri: string; name: string; type: string; images?: any[] } | null> => {
+  const generateDocumentFromImages = async (): Promise<{ uri: string; name: string; type: string; images?: any[]; file?: File } | null> => {
     try {
       if (capturedImages.length === 0) {
         throw new Error('No images to convert');
@@ -224,20 +224,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
       const fileName = `contract_${timestamp}`;
 
       if (Platform.OS === 'web') {
-        // For web, create both a document package and prepare for upload
-        const documentPackage = {
-          uri: 'web-multi-page-document',
-          name: `${fileName}.json`,
-          type: 'application/json',
-          images: base64Images,
-          metadata: {
-            totalPages: capturedImages.length,
-            createdAt: new Date().toISOString(),
-            platform: 'web'
-          }
-        };
-
-        // Also create HTML for download/print
+        // Create HTML content for both download and PDF generation
         const htmlContent = `
           <!DOCTYPE html>
           <html>
@@ -308,9 +295,9 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
           </html>
         `;
 
-        // Create downloadable HTML
-        const blob = new Blob([htmlContent], { type: 'text/html' });
-        const htmlUrl = URL.createObjectURL(blob);
+        // Create HTML blob for download
+        const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+        const htmlUrl = URL.createObjectURL(htmlBlob);
         
         // Auto-download the HTML document
         const a = document.createElement('a');
@@ -320,82 +307,37 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
         a.click();
         document.body.removeChild(a);
 
-        console.log('Generated document package:', documentPackage);
+        // Create a structured document package for upload
+        const documentPackage = {
+          uri: 'web-multi-page-document',
+          name: `${fileName}.json`,
+          type: 'application/json',
+          images: base64Images,
+          metadata: {
+            totalPages: capturedImages.length,
+            createdAt: new Date().toISOString(),
+            platform: 'web'
+          }
+        };
 
+        console.log('Generated document package:', documentPackage);
         return documentPackage;
       } else {
-        // For native platforms, use expo-print to create actual PDF
-        try {
-          const Print = require('expo-print');
-          const FileSystem = require('expo-file-system');
+        // For native platforms, create JSON package (since expo-print is causing issues)
+        const documentPackage = {
+          uri: 'native-multi-page-document',
+          name: `${fileName}.json`,
+          type: 'application/json',
+          images: base64Images,
+          metadata: {
+            totalPages: capturedImages.length,
+            createdAt: new Date().toISOString(),
+            platform: 'native'
+          }
+        };
 
-          const htmlContent = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="utf-8">
-              <title>Contract Document</title>
-              <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                .header { text-align: center; padding: 20px; border-bottom: 2px solid #10b981; margin-bottom: 30px; }
-                .header h1 { color: #10b981; font-size: 24px; margin-bottom: 10px; }
-                .page { page-break-after: always; margin-bottom: 40px; padding: 20px; text-align: center; }
-                .page:last-child { page-break-after: avoid; }
-                img { max-width: 100%; height: auto; }
-              </style>
-            </head>
-            <body>
-              <div class="header">
-                <h1>Contract Analysis Document</h1>
-                <p>Generated: ${new Date().toLocaleDateString()}</p>
-                <p>Total Pages: ${capturedImages.length}</p>
-              </div>
-              ${base64Images.map((image, index) => `
-                <div class="page">
-                  <h3>Page ${index + 1} of ${capturedImages.length}</h3>
-                  <img src="${image.base64}" alt="Contract Page ${index + 1}" />
-                </div>
-              `).join('')}
-            </body>
-            </html>
-          `;
-
-          const { uri } = await Print.printToFileAsync({
-            html: htmlContent,
-            base64: false,
-            width: 612,
-            height: 792,
-            margins: { left: 20, top: 20, right: 20, bottom: 20 },
-          });
-
-          const pdfFileName = `${fileName}.pdf`;
-          const permanentUri = `${FileSystem.documentDirectory}${pdfFileName}`;
-
-          await FileSystem.moveAsync({ from: uri, to: permanentUri });
-
-          return {
-            uri: permanentUri,
-            name: pdfFileName,
-            type: 'application/pdf',
-            images: base64Images
-          };
-        } catch (nativeError) {
-          console.error('Native PDF generation failed:', nativeError);
-          // Fallback to JSON package for native too
-          return {
-            uri: 'native-multi-page-document',
-            name: `${fileName}.json`,
-            type: 'application/json',
-            images: base64Images,
-            metadata: {
-              totalPages: capturedImages.length,
-              createdAt: new Date().toISOString(),
-              platform: 'native',
-              fallback: true
-            }
-          };
-        }
+        console.log('Generated native document package:', documentPackage);
+        return documentPackage;
       }
     } catch (error) {
       console.error('Document generation error:', error);
@@ -427,79 +369,36 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
 
       console.log('Generated document:', documentFile);
 
-      // Show success message with options
-      Alert.alert(
-        `Document Generated Successfully`,
-        `Your ${capturedImages.length}-page contract has been prepared for analysis.`,
-        [
-          {
-            text: 'Share Document',
-            onPress: async () => {
-              if (Platform.OS === 'web') {
-                // Web sharing already handled in generateDocumentFromImages
-                console.log('Document downloaded for sharing');
-              } else {
-                try {
-                  const Sharing = require('expo-sharing');
-                  if (await Sharing.isAvailableAsync()) {
-                    await Sharing.shareAsync(documentFile.uri);
-                  }
-                } catch (shareError) {
-                  console.error('Sharing error:', shareError);
-                  Alert.alert('Share Error', 'Unable to share document');
-                }
-              }
-            }
-          },
-          {
-            text: '🔍 Analyze Contract',
-            style: 'default',
-            onPress: async () => {
-              try {
-                console.log('Starting contract analysis upload...');
-                setIsProcessing(true);
-                setUploadProgress(0);
-                
-                const result = await uploadContract(documentFile, (progress) => {
-                  console.log(`Upload progress: ${progress}%`);
-                  setUploadProgress(progress);
-                });
-                
-                if (result && result.session_id) {
-                  console.log('Upload successful, navigating to results');
-                  setUploadProgress(100);
-                  
-                  // Brief delay to show completion
-                  await new Promise(resolve => setTimeout(resolve, 500));
-                  
-                  // Clear captured images and reset state
-                  setCapturedImages([]);
-                  setShowPreview(false);
-                  setUploadProgress(0);
-                  onNavigate('results', { sessionId: result.session_id });
-                } else {
-                  throw new Error('Invalid response from analysis service');
-                }
-              } catch (uploadError) {
-                console.error('Upload error:', uploadError);
-                setUploadProgress(0);
-                Alert.alert(
-                  'Analysis Error',
-                  `Failed to upload document for analysis: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`
-                );
-              } finally {
-                setIsProcessing(false);
-              }
-            }
-          }
-        ]
-      );
-
+      // Automatically proceed to analysis without showing intermediate alert
+      console.log('Starting contract analysis upload...');
+      setUploadProgress(0);
+      
+      const result = await uploadContract(documentFile, (progress) => {
+        console.log(`Upload progress: ${progress}%`);
+        setUploadProgress(progress);
+      });
+      
+      if (result && result.session_id) {
+        console.log('Upload successful, navigating to results');
+        setUploadProgress(100);
+        
+        // Brief delay to show completion
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Clear captured images and reset state
+        setCapturedImages([]);
+        setShowPreview(false);
+        setUploadProgress(0);
+        onNavigate('results', { sessionId: result.session_id });
+      } else {
+        throw new Error('Invalid response from analysis service');
+      }
     } catch (error) {
-      console.error('Processing error:', error);
+      console.error('Processing/Upload error:', error);
+      setUploadProgress(0);
       Alert.alert(
-        t('camera.uploadError'),
-        error instanceof Error ? error.message : t('camera.uploadErrorMessage')
+        'Analysis Error',
+        `Failed to process and upload document: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     } finally {
       setIsProcessing(false);
