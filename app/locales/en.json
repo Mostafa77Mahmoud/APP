@@ -146,7 +146,7 @@
     "confirm": "Analyze Contract",
     "multiPageMode": "Multi-page mode enabled",
     "pageAdded": "Page Added",
-    "pageAddedMessage": "Page {count} captured successfully",
+    "pageAddedMessage": "Page {count} captured successfully. Add more pages or finish to continue.",
     "addMore": "Add More",
     "finish": "Finish",
     "page": "Page",
@@ -157,7 +157,10 @@
     "galleryError": "Failed to pick image from gallery",
     "pdfError": "Document Generation Error",
     "pdfSuccess": "PDF Generated Successfully",
-    "pdfSuccessMessage": "Your contract has been converted to PDF format"
+    "pdfSuccessMessage": "Your contract has been converted to PDF format",
+    "multiPageDocument": "Multi-page Document",
+    "reviewPages": "Review Pages",
+    "capturedPages": "Captured Pages"
   },
   "history": {
     "title": "Contract History",
