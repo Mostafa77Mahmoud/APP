@@ -1,0 +1,32 @@
+> Please ensure the following functionalities are fully implemented and working as intended:
+>
+> ### 1. **Camera Flow (Multi-Page Contract Capture & Analysis):**
+>
+> * The camera screen should open correctly using the device camera.
+> * The user should be able to **take multiple photos**, representing multiple pages of a contract.
+> * After capturing, there should be a clear **"Confirm & Analyze"** button.
+> * When the user confirms, the app should **convert all captured images into a single PDF file**.
+> * This PDF should then be **sent to the backend** for analysis using the appropriate API endpoint (e.g., `/analyze`).
+>> ### 2. **History Screen (Local Contract Records):**
+>
+> * There must be a **History screen** that displays a list of previously analyzed contracts (by the same user).
+> * These records should be **stored locally** on the device using persistent storage (e.g., AsyncStorage, SQLite, or MMKV).
+> * For each contract in the history, display:
+>
+>   * The contract name or file name
+>   * Date and time of analysis
+>   * Summary result or status (e.g., "Compliant", "Needs Review")
+> * Please also **document clearly**:
+>
+>   * The exact API endpoint used to send the contract to the backend
+>   * The **data format** sent in the request (e.g., form-data with PDF file, or base64, etc.)
+>   * The **response structure** expected from the backend, including all fields (e.g., `summary`, `extracted_text`, `issues_detected`, etc.)
+>
+> ### 3. **Localization (Arabic & English):**
+>
+> * The entire app should support **English and Arabic**.
+> * All screen texts, button labels, alerts, and messages should be translatable.
+> * Use a structured i18n system (e.g., `i18n-js`, `react-i18next`, or Expo localization).
+> * Make sure the translation files (`en.json` and `ar.json`) contain all relevant keys, and test both languages thoroughly.
+
+> ⚠️ Please confirm that these three parts are fully working and provide relevant screenshots, code snippets, or comments to validate the implementation.
