@@ -94,50 +94,29 @@ export const uploadContract = async (fileAsset: any, onUploadProgress?: (progres
   
   try {
     // Handle multi-page image documents
-    if (fileAsset.images && Array.isArray(fileAsset.images)) {
+    if (fileAsset.images && Array.isArray(fileAsset.images) && fileAsset.images.length > 1) {
       console.log('📤 API: Processing multi-page document with', fileAsset.images.length, 'pages');
       
-      // Create a structured data object for multi-page uploads
-      const multiPageData = {
-        type: 'multi-page-images',
-        pages: fileAsset.images.map((img, index) => ({
-          pageNumber: index + 1,
-          base64: img.base64 || img.uri, // Use base64 if available, fallback to uri
-          width: img.width,
-          height: img.height,
-          timestamp: img.timestamp
-        })),
-        metadata: {
-          totalPages: fileAsset.images.length,
-          fileName: fileAsset.name || `contract_${Date.now()}.json`,
-          createdAt: new Date().toISOString(),
-          platform: Platform.OS
-        }
-      };
-      
-      if (Platform.OS === 'web') {
-        // For web, create a proper blob and append to FormData
-        const dataBlob = new Blob([JSON.stringify(multiPageData)], { 
-          type: 'application/json' 
-        });
-        formData.append('file', dataBlob, fileAsset.name || 'contract_multi_page.json');
+      if (Platform.OS === 'web' && fileAsset.file) {
+        // For web, use the file directly (it's already a text file with base64 data)
+        formData.append('file', fileAsset.file);
         formData.append('upload_type', 'multi-page-images');
-        formData.append('file_format', 'json');
+        formData.append('total_pages', fileAsset.images.length.toString());
         
-        console.log('📤 API: Added web multi-page JSON blob to FormData');
+        console.log('📤 API: Added web multi-page text file to FormData');
       } else {
-        // For native platforms
-        const jsonString = JSON.stringify(multiPageData);
+        // For native platforms, create a file with the multi-page data
         const fileData = {
-          uri: `data:application/json;charset=utf-8,${encodeURIComponent(jsonString)}`,
-          type: 'application/json',
-          name: fileAsset.name || 'contract_multi_page.json',
+          uri: fileAsset.uri,
+          type: fileAsset.type || 'text/plain',
+          name: fileAsset.name || `contract_multipage_${Date.now()}.txt`,
         } as any;
         
         formData.append('file', fileData);
         formData.append('upload_type', 'multi-page-images');
-        formData.append('file_format', 'json');
-        console.log('📤 API: Added native multi-page JSON to FormData');
+        formData.append('total_pages', fileAsset.images.length.toString());
+        
+        console.log('📤 API: Added native multi-page text file to FormData');
       }
     } 
     // Handle single file uploads (legacy)

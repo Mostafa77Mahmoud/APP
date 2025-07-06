@@ -224,7 +224,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
       const fileName = `contract_${timestamp}`;
 
       if (Platform.OS === 'web') {
-        // Create HTML content for both download and PDF generation
+        // Create HTML content for download
         const htmlContent = `
           <!DOCTYPE html>
           <html>
@@ -307,37 +307,69 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
         a.click();
         document.body.removeChild(a);
 
-        // Create a structured document package for upload
-        const documentPackage = {
-          uri: 'web-multi-page-document',
-          name: `${fileName}.json`,
-          type: 'application/json',
-          images: base64Images,
-          metadata: {
-            totalPages: capturedImages.length,
-            createdAt: new Date().toISOString(),
-            platform: 'web'
-          }
-        };
-
-        console.log('Generated document package:', documentPackage);
-        return documentPackage;
+        // For multi-page uploads, return the first image as the primary file
+        // and pass the rest as additional data
+        if (capturedImages.length === 1) {
+          // Single page - send as regular image
+          const singleImageBlob = await fetch(base64Images[0].base64).then(r => r.blob());
+          const singleImageFile = new File([singleImageBlob], `${fileName}.jpg`, { type: 'image/jpeg' });
+          
+          return {
+            uri: URL.createObjectURL(singleImageFile),
+            name: `${fileName}.jpg`,
+            type: 'image/jpeg',
+            file: singleImageFile
+          };
+        } else {
+          // Multi-page - create a text file with all base64 images
+          const multiPageData = base64Images.map((img, index) => 
+            `--- PAGE ${index + 1} ---\n${img.base64}\n`
+          ).join('\n');
+          
+          const multiPageBlob = new Blob([multiPageData], { type: 'text/plain' });
+          const multiPageFile = new File([multiPageBlob], `${fileName}_multipage.txt`, { type: 'text/plain' });
+          
+          return {
+            uri: URL.createObjectURL(multiPageFile),
+            name: `${fileName}_multipage.txt`,
+            type: 'text/plain',
+            file: multiPageFile,
+            images: base64Images,
+            metadata: {
+              totalPages: capturedImages.length,
+              createdAt: new Date().toISOString(),
+              platform: 'web'
+            }
+          };
+        }
       } else {
-        // For native platforms, create JSON package (since expo-print is causing issues)
-        const documentPackage = {
-          uri: 'native-multi-page-document',
-          name: `${fileName}.json`,
-          type: 'application/json',
-          images: base64Images,
-          metadata: {
-            totalPages: capturedImages.length,
-            createdAt: new Date().toISOString(),
-            platform: 'native'
-          }
-        };
-
-        console.log('Generated native document package:', documentPackage);
-        return documentPackage;
+        // For native platforms, create a text file with base64 data
+        if (capturedImages.length === 1) {
+          // Single page
+          return {
+            uri: base64Images[0].uri,
+            name: `${fileName}.jpg`,
+            type: 'image/jpeg',
+            images: base64Images
+          };
+        } else {
+          // Multi-page
+          const multiPageData = base64Images.map((img, index) => 
+            `--- PAGE ${index + 1} ---\n${img.base64}\n`
+          ).join('\n');
+          
+          return {
+            uri: `data:text/plain;charset=utf-8,${encodeURIComponent(multiPageData)}`,
+            name: `${fileName}_multipage.txt`,
+            type: 'text/plain',
+            images: base64Images,
+            metadata: {
+              totalPages: capturedImages.length,
+              createdAt: new Date().toISOString(),
+              platform: 'native'
+            }
+          };
+        }
       }
     } catch (error) {
       console.error('Document generation error:', error);
