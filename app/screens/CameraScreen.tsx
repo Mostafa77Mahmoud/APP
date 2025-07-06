@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -12,9 +13,11 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Camera, CameraType, FlashMode } from 'expo-camera';
+import { Camera, CameraView, CameraType, FlashMode, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useLanguage } from '../contexts/LanguageContext';
@@ -32,6 +35,7 @@ interface CapturedImage {
   uri: string;
   width: number;
   height: number;
+  timestamp: number;
 }
 
 const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
@@ -39,27 +43,38 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark';
 
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const [cameraType, setCameraType] = useState(CameraType.back);
-  const [flashMode, setFlashMode] = useState(FlashMode.off);
+  const [permission, requestPermission] = useCameraPermissions();
+  const [cameraType, setCameraType] = useState<CameraType>('back');
+  const [flashMode, setFlashMode] = useState<FlashMode>('off');
   const [isMultiPage, setIsMultiPage] = useState(false);
   const [capturedImages, setCapturedImages] = useState<CapturedImage[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
-  const cameraRef = useRef<Camera>(null);
+  const cameraRef = useRef<CameraView>(null);
 
   useEffect(() => {
-    requestCameraPermission();
+    requestCameraAndMediaPermissions();
   }, []);
 
-  const requestCameraPermission = async () => {
-    const cameraPermission = await Camera.requestCameraPermissionsAsync();
-    const mediaLibraryPermission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    setHasPermission(
-      cameraPermission.status === 'granted' && mediaLibraryPermission.status === 'granted'
-    );
+  const requestCameraAndMediaPermissions = async () => {
+    try {
+      if (!permission?.granted) {
+        await requestPermission();
+      }
+      
+      const mediaLibraryPermission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (!mediaLibraryPermission.granted) {
+        Alert.alert(
+          t('camera.permissionRequired'),
+          t('camera.mediaPermissionMessage')
+        );
+      }
+    } catch (error) {
+      console.error('Permission request error:', error);
+    }
   };
 
   const takePicture = async () => {
@@ -72,15 +87,20 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
       setIsProcessing(true);
 
       const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.8,
+        quality: 0.9,
         base64: false,
         skipProcessing: false,
       });
+
+      if (!photo?.uri) {
+        throw new Error('Failed to capture image');
+      }
 
       const newImage: CapturedImage = {
         uri: photo.uri,
         width: photo.width || width,
         height: photo.height || height,
+        timestamp: Date.now(),
       };
 
       if (isMultiPage) {
@@ -117,72 +137,192 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
     }
   };
 
+  const convertImageToBase64 = async (imageUri: string): Promise<string> => {
+    try {
+      const base64 = await FileSystem.readAsStringAsync(imageUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      return `data:image/jpeg;base64,${base64}`;
+    } catch (error) {
+      console.error('Error converting image to base64:', error);
+      throw error;
+    }
+  };
+
   const generatePDFFromImages = async (): Promise<{ uri: string; name: string; type: string } | null> => {
     try {
       if (capturedImages.length === 0) {
         throw new Error('No images to convert');
       }
 
-      // For web platform, we'll create a simple PDF-like structure
-      if (Platform.OS === 'web') {
-        // Create a basic HTML structure that can be converted to PDF
-        const htmlContent = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <title>Contract Document</title>
-            <style>
-              body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
-              .page { page-break-after: always; margin-bottom: 20px; }
-              .page:last-child { page-break-after: avoid; }
-              img { max-width: 100%; height: auto; border: 1px solid #ccc; }
-              .page-number { text-align: center; margin-top: 10px; color: #666; }
-            </style>
-          </head>
-          <body>
-            ${capturedImages.map((image, index) => `
-              <div class="page">
-                <img src="${image.uri}" alt="Contract Page ${index + 1}" />
-                <div class="page-number">Page ${index + 1} of ${capturedImages.length}</div>
+      setIsGeneratingPDF(true);
+
+      // Convert all images to base64
+      const base64Images = await Promise.all(
+        capturedImages.map(async (image) => {
+          const base64 = await convertImageToBase64(image.uri);
+          return { ...image, base64 };
+        })
+      );
+
+      // Create HTML content for PDF
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Contract Document</title>
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            body {
+              font-family: 'Arial', sans-serif;
+              line-height: 1.6;
+              color: #333;
+            }
+            .header {
+              text-align: center;
+              padding: 20px;
+              border-bottom: 2px solid #10b981;
+              margin-bottom: 30px;
+            }
+            .header h1 {
+              color: #10b981;
+              font-size: 24px;
+              margin-bottom: 10px;
+            }
+            .header p {
+              color: #666;
+              font-size: 14px;
+            }
+            .page {
+              page-break-after: always;
+              margin-bottom: 40px;
+              padding: 20px;
+              text-align: center;
+            }
+            .page:last-child {
+              page-break-after: avoid;
+            }
+            .page-title {
+              font-size: 18px;
+              font-weight: bold;
+              margin-bottom: 20px;
+              color: #2d3748;
+            }
+            .image-container {
+              border: 2px solid #e2e8f0;
+              border-radius: 8px;
+              padding: 10px;
+              background: #f7fafc;
+              margin-bottom: 20px;
+            }
+            img {
+              max-width: 100%;
+              height: auto;
+              border-radius: 4px;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .page-info {
+              margin-top: 15px;
+              padding: 10px;
+              background: #edf2f7;
+              border-radius: 4px;
+              font-size: 12px;
+              color: #4a5568;
+            }
+            .footer {
+              position: fixed;
+              bottom: 20px;
+              left: 0;
+              right: 0;
+              text-align: center;
+              font-size: 10px;
+              color: #a0aec0;
+            }
+            @media print {
+              .page {
+                margin: 0;
+                padding: 20px;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Contract Analysis Document</h1>
+            <p>Generated on ${new Date().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}</p>
+            <p>Total Pages: ${capturedImages.length}</p>
+          </div>
+          
+          ${base64Images.map((image, index) => `
+            <div class="page">
+              <div class="page-title">Page ${index + 1} of ${capturedImages.length}</div>
+              <div class="image-container">
+                <img src="${image.base64}" alt="Contract Page ${index + 1}" />
               </div>
-            `).join('')}
-          </body>
-          </html>
-        `;
+              <div class="page-info">
+                <strong>Image Details:</strong><br>
+                Resolution: ${image.width} × ${image.height}px<br>
+                Captured: ${new Date(image.timestamp).toLocaleString()}
+              </div>
+            </div>
+          `).join('')}
+          
+          <div class="footer">
+            <p>Generated by Sharia Contract Analyzer</p>
+          </div>
+        </body>
+        </html>
+      `;
 
-        // Create a blob with the HTML content
-        const blob = new Blob([htmlContent], { type: 'text/html' });
-        const uri = URL.createObjectURL(blob);
+      // Generate PDF
+      const { uri } = await Print.printToFileAsync({
+        html: htmlContent,
+        base64: false,
+        width: 612,
+        height: 792,
+        margins: {
+          left: 20,
+          top: 20,
+          right: 20,
+          bottom: 20,
+        },
+      });
 
-        return {
-          uri: uri,
-          name: `contract_${Date.now()}.html`,
-          type: 'text/html'
-        };
-      }
-
-      // For native platforms, use the first image as primary
-      const primaryImage = capturedImages[0];
-
-      // Copy the image to a permanent location
-      const fileName = `contract_${Date.now()}.jpg`;
+      const fileName = `contract_${Date.now()}.pdf`;
       const permanentUri = `${FileSystem.documentDirectory}${fileName}`;
 
-      await FileSystem.copyAsync({
-        from: primaryImage.uri,
+      // Move to permanent location
+      await FileSystem.moveAsync({
+        from: uri,
         to: permanentUri,
       });
 
       return {
         uri: permanentUri,
         name: fileName,
-        type: 'image/jpeg'
+        type: 'application/pdf'
       };
 
     } catch (error) {
       console.error('PDF generation error:', error);
+      Alert.alert(
+        t('camera.pdfError'),
+        'Failed to generate PDF. Please try again.'
+      );
       return null;
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
@@ -202,20 +342,39 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
         throw new Error('Failed to generate PDF');
       }
 
-      console.log('Generated file:', pdfFile);
+      console.log('Generated PDF:', pdfFile);
 
-      // Upload the contract
-      const result = await uploadContract(pdfFile);
-
-      if (result.success && result.sessionId) {
-        // Navigate to results screen
-        onNavigate('results', { sessionId: result.sessionId });
-      } else {
-        throw new Error(result.error || 'Upload failed');
-      }
+      // Show success message with option to share
+      Alert.alert(
+        'PDF Generated Successfully',
+        'Your contract has been converted to PDF format.',
+        [
+          {
+            text: 'Share PDF',
+            onPress: async () => {
+              if (await Sharing.isAvailableAsync()) {
+                await Sharing.shareAsync(pdfFile.uri);
+              }
+            }
+          },
+          {
+            text: 'Analyze',
+            style: 'default',
+            onPress: async () => {
+              // Upload the contract for analysis
+              const result = await uploadContract(pdfFile);
+              if (result.success && result.sessionId) {
+                onNavigate('results', { sessionId: result.sessionId });
+              } else {
+                throw new Error(result.error || 'Upload failed');
+              }
+            }
+          }
+        ]
+      );
 
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('Processing error:', error);
       Alert.alert(
         t('camera.uploadError'),
         error instanceof Error ? error.message : t('camera.uploadErrorMessage')
@@ -230,7 +389,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaType.Images,
         allowsEditing: true,
-        quality: 0.8,
+        quality: 0.9,
         allowsMultipleSelection: isMultiPage,
       });
 
@@ -239,6 +398,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
           uri: asset.uri,
           width: asset.width || width,
           height: asset.height || height,
+          timestamp: Date.now(),
         }));
 
         if (isMultiPage) {
@@ -254,21 +414,21 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
     }
   };
 
-  if (hasPermission === null) {
+  if (!permission) {
     return (
       <View style={[styles.container, styles.centered]}>
         <ActivityIndicator size="large" color="#10b981" />
-        <Text style={styles.loadingText}>{t('camera.requestingPermission')}</Text>
+        <Text style={styles.loadingText}>Initializing camera...</Text>
       </View>
     );
   }
 
-  if (hasPermission === false) {
+  if (!permission.granted) {
     return (
       <View style={[styles.container, styles.centered]}>
         <Ionicons name="camera-outline" size={64} color="#666" />
         <Text style={styles.permissionText}>{t('camera.permissionDenied')}</Text>
-        <TouchableOpacity style={styles.permissionButton} onPress={requestCameraPermission}>
+        <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
           <Text style={styles.permissionButtonText}>{t('camera.grantPermission')}</Text>
         </TouchableOpacity>
       </View>
@@ -283,16 +443,16 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
             <Ionicons name="arrow-back" size={24} color={isDarkMode ? '#fff' : '#000'} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: isDarkMode ? '#fff' : '#000' }]}>
-            {t('camera.preview')}
+            {t('camera.preview')} ({capturedImages.length} {capturedImages.length === 1 ? 'page' : 'pages'})
           </Text>
           <TouchableOpacity onPress={onBack} style={styles.headerButton}>
             <Ionicons name="close" size={24} color={isDarkMode ? '#fff' : '#000'} />
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.previewContainer}>
+        <ScrollView style={styles.previewContainer} showsVerticalScrollIndicator={false}>
           {capturedImages.map((image, index) => (
-            <View key={index} style={styles.imagePreview}>
+            <View key={`${image.uri}-${index}`} style={styles.imagePreview}>
               <Image source={{ uri: image.uri }} style={styles.previewImage} />
               <TouchableOpacity
                 style={styles.removeButton}
@@ -309,18 +469,22 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
 
         <View style={styles.previewActions}>
           <TouchableOpacity style={styles.retakeButton} onPress={retakePicture}>
+            <Ionicons name="camera" size={20} color="#10b981" style={{ marginRight: 8 }} />
             <Text style={styles.retakeButtonText}>{t('camera.retake')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.confirmButton, isProcessing && styles.disabledButton]}
+            style={[styles.confirmButton, (isProcessing || isGeneratingPDF) && styles.disabledButton]}
             onPress={handleConfirm}
-            disabled={isProcessing}
+            disabled={isProcessing || isGeneratingPDF}
           >
-            {isProcessing ? (
+            {isProcessing || isGeneratingPDF ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Text style={styles.confirmButtonText}>{t('camera.confirm')}</Text>
+              <>
+                <Ionicons name="document-text" size={20} color="#fff" style={{ marginRight: 8 }} />
+                <Text style={styles.confirmButtonText}>Generate PDF</Text>
+              </>
             )}
           </TouchableOpacity>
         </View>
@@ -345,20 +509,20 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
         </TouchableOpacity>
       </View>
 
-      <Camera
+      <CameraView
         ref={cameraRef}
         style={styles.camera}
-        type={cameraType}
-        flashMode={flashMode}
+        facing={cameraType}
+        flash={flashMode}
       >
         <View style={styles.cameraOverlay}>
           <View style={styles.topControls}>
             <TouchableOpacity
               style={styles.controlButton}
-              onPress={() => setFlashMode(flashMode === FlashMode.off ? FlashMode.on : FlashMode.off)}
+              onPress={() => setFlashMode(flashMode === 'off' ? 'on' : 'off')}
             >
               <Ionicons
-                name={flashMode === FlashMode.off ? 'flash-off' : 'flash'}
+                name={flashMode === 'off' ? 'flash-off' : 'flash'}
                 size={24}
                 color="#fff"
               />
@@ -366,7 +530,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
 
             <TouchableOpacity
               style={styles.controlButton}
-              onPress={() => setCameraType(cameraType === CameraType.back ? CameraType.front : CameraType.back)}
+              onPress={() => setCameraType(cameraType === 'back' ? 'front' : 'back')}
             >
               <Ionicons name="camera-reverse" size={24} color="#fff" />
             </TouchableOpacity>
@@ -398,10 +562,11 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
             </View>
           </View>
         </View>
-      </Camera>
+      </CameraView>
 
       {isMultiPage && (
         <View style={[styles.modeIndicator, { backgroundColor: isDarkMode ? '#1a1a1a' : '#fff' }]}>
+          <Ionicons name="documents" size={16} color="#10b981" style={{ marginRight: 8 }} />
           <Text style={[styles.modeText, { color: isDarkMode ? '#fff' : '#000' }]}>
             {t('camera.multiPageMode')}
           </Text>
@@ -506,6 +671,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   modeText: {
     fontSize: 14,
@@ -555,6 +722,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#10b981',
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   retakeButtonText: {
     color: '#10b981',
@@ -567,6 +736,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#10b981',
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   confirmButtonText: {
     color: '#fff',
