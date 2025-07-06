@@ -136,12 +136,50 @@
     "grantPermission": "Grant Camera Permission",
     "capture": "Capture",
     "retake": "Retake",
-    "analyze": "Analyze"
+    "analyze": "Analyze",
+    "instruction": "Position contract within the frame and tap to capture",
+    "gallery": "Gallery",
+    "multiPage": "Multi-Page",
+    "single": "Single",
+    "pagesCaptures": "pages captured",
+    "cameraFailed": "Failed to take picture"
   },
   "history": {
     "title": "Contract History",
     "noContracts": "No contracts analyzed yet",
-    "noContractsDesc": "Upload and analyze your first contract to see it here"
+    "noContractsDesc": "Upload and analyze your first contract to see it here",
+    "searchPlaceholder": "Search contracts...",
+    "results": "results",
+    "interactions": "interactions",
+    "views": "views",
+    "hasContract": "Generated",
+    "modifications": "modifications",
+    "compliance": {
+      "high": "High Compliance",
+      "medium": "Medium Compliance", 
+      "low": "Low Compliance"
+    },
+    "sort": {
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "compliance": "Compliance",
+      "interactions": "Interactions"
+    },
+    "filter": {
+      "high": "High Compliance",
+      "medium": "Medium Compliance",
+      "low": "Low Compliance"
+    },
+    "sessionDetails": "Contract Details",
+    "filename": "File Name",
+    "analysisDate": "Analysis Date",
+    "termsAnalyzed": "Terms Analyzed",
+    "deleteConfirmation": "Are you sure you want to delete this contract analysis?",
+    "clearAll": "Clear All",
+    "clearAllConfirm": "Clear All History",
+    "clearAllMessage": "This will permanently delete all contract history. This action cannot be undone.",
+    "empty": "No contracts found",
+    "emptyDesc": "No contracts match your current search or filter criteria"
   },
   "profile": {
     "title": "Profile",
@@ -185,5 +223,12 @@
   },
   "processing": "Processing...",
   "loading": "Loading...",
-  "refresh": "Refresh"
+  "refresh": "Refresh",
+  "common": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "close": "Close",
+    "clear": "Clear",
+    "loading": "Loading..."
+  }
 }

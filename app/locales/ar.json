@@ -136,12 +136,50 @@
     "grantPermission": "منح إذن الكاميرا",
     "capture": "التقاط",
     "retake": "إعادة الالتقاط",
-    "analyze": "تحليل"
+    "analyze": "تحليل",
+    "instruction": "ضع العقد داخل الإطار واضغط للالتقاط",
+    "gallery": "المعرض",
+    "multiPage": "متعدد الصفحات",
+    "single": "صفحة واحدة",
+    "pagesCaptures": "صفحات ملتقطة",
+    "cameraFailed": "فشل في التقاط الصورة"
   },
   "history": {
     "title": "تاريخ العقود",
     "noContracts": "لم يتم تحليل أي عقود بعد",
-    "noContractsDesc": "ارفع وحلل عقدك الأول لرؤيته هنا"
+    "noContractsDesc": "ارفع وحلل عقدك الأول لرؤيته هنا",
+    "searchPlaceholder": "البحث في العقود...",
+    "results": "نتائج",
+    "interactions": "تفاعلات",
+    "views": "مشاهدات",
+    "hasContract": "مُنشأ",
+    "modifications": "تعديلات",
+    "compliance": {
+      "high": "امتثال عالي",
+      "medium": "امتثال متوسط",
+      "low": "امتثال منخفض"
+    },
+    "sort": {
+      "newest": "الأحدث",
+      "oldest": "الأقدم",
+      "compliance": "الامتثال",
+      "interactions": "التفاعلات"
+    },
+    "filter": {
+      "high": "امتثال عالي",
+      "medium": "امتثال متوسط",
+      "low": "امتثال منخفض"
+    },
+    "sessionDetails": "تفاصيل العقد",
+    "filename": "اسم الملف",
+    "analysisDate": "تاريخ التحليل",
+    "termsAnalyzed": "البنود المحللة",
+    "deleteConfirmation": "هل أنت متأكد من حذف تحليل هذا العقد؟",
+    "clearAll": "مسح الكل",
+    "clearAllConfirm": "مسح كل التاريخ",
+    "clearAllMessage": "سيؤدي هذا إلى حذف كل تاريخ العقود نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+    "empty": "لم يتم العثور على عقود",
+    "emptyDesc": "لا توجد عقود تطابق معايير البحث أو التصفية الحالية"
   },
   "profile": {
     "title": "الملف الشخصي",
@@ -185,5 +223,12 @@
   },
   "processing": "جاري المعالجة...",
   "loading": "جاري التحميل...",
-  "refresh": "تحديث"
+  "refresh": "تحديث",
+  "common": {
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "close": "إغلاق",
+    "clear": "مسح",
+    "loading": "جاري التحميل..."
+  }
 }
