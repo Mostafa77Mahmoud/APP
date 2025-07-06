@@ -707,17 +707,20 @@ const ContractTermsList: React.FC = () => {
 
   const renderTerm = (term: FrontendAnalysisTerm, index: number) => {
     let isEffectivelyCompliant = term.is_valid_sharia;
+    
+    // Expert override takes highest priority
     if (
       term.expert_override_is_valid_sharia !== null &&
       term.expert_override_is_valid_sharia !== undefined
     ) {
       isEffectivelyCompliant = term.expert_override_is_valid_sharia;
-    } else if (term.isUserConfirmed) {
-      isEffectivelyCompliant =
-        term.isReviewedSuggestionValid !== null
-          ? term.isReviewedSuggestionValid
-          : true;
-    } else if (
+    } 
+    // User confirmed terms are always compliant (they've been fixed)
+    else if (term.isUserConfirmed) {
+      isEffectivelyCompliant = true;
+    } 
+    // If suggestion has been reviewed but not confirmed yet
+    else if (
       term.isReviewedSuggestionValid !== null &&
       term.isReviewedSuggestionValid !== undefined
     ) {

@@ -1,5 +1,5 @@
 // app/contexts/LanguageContext.tsx
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert, I18nManager } from 'react-native';
 import * as Updates from 'expo-updates';
@@ -49,25 +49,28 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     loadLanguage();
   }, []);
 
-  const setLanguage = async (lang: Language) => {
+  const setLanguage = useCallback(async (lang: Language) => {
     try {
       setLanguageState(lang);
       await AsyncStorage.setItem('shariaa_language', lang);
       const isRTL = lang === 'ar';
-      
+
       // This is crucial for RTL changes to apply correctly in React Native
       I18nManager.forceRTL(isRTL);
       I18nManager.allowRTL(isRTL);
-      
-      // Reload the app to apply RTL layout changes.
-      // This provides a more consistent experience than trying to dynamically update the layout.
-      await Updates.reloadAsync();
+
+      // Only reload in production builds, not in development
+      if (__DEV__) {
+        console.log('Language changed to:', lang, '(reload skipped in development)');
+      } else {
+        await Updates.reloadAsync();
+      }
 
     } catch (e) {
       console.error("Failed to set language and reload", e)
       Alert.alert("Error", "Could not switch language. Please restart the app.");
     }
-  };
+  }, []);
 
   const t = (key: string, params?: Record<string, string | number>): string => {
     const langTranslations = translations[language];

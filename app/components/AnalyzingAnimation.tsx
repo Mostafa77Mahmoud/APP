@@ -145,9 +145,9 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
           setCurrentStep(stepNumber);
           setStepProgress(0);
 
-          // Progress within each step (smooth progression over 6-7 seconds)
-          const stepDuration = 6000 + Math.random() * 1000; // 6-7 seconds
-          const progressInterval = 100; // Update every 100ms
+          // Progress within each step (longer duration to cover API delays)
+          const stepDuration = 10000 + Math.random() * 5000; // 10-15 seconds per step
+          const progressInterval = 150; // Update every 150ms for smoother animation
           const progressIncrement = 100 / (stepDuration / progressInterval);
 
           progressTimer = setInterval(() => {
@@ -156,7 +156,7 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
               if (newProgress >= 100) {
                 clearInterval(progressTimer);
                 // Move to next step after a brief pause
-                stepTimer = setTimeout(() => runStep(stepNumber + 1), 500);
+                stepTimer = setTimeout(() => runStep(stepNumber + 1), 800);
                 return 100;
               }
               return newProgress;
