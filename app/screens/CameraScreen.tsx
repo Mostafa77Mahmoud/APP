@@ -15,9 +15,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Camera, CameraView, CameraType, FlashMode, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useLanguage } from '../contexts/LanguageContext';
@@ -36,6 +33,7 @@ interface CapturedImage {
   width: number;
   height: number;
   timestamp: number;
+  base64?: string;
 }
 
 const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
@@ -77,6 +75,59 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
     }
   };
 
+  // Web-compatible base64 conversion
+  const convertImageToBase64Web = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        resolve(result);
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Web-compatible image to base64 conversion
+  const convertImageToBase64 = async (imageUri: string): Promise<string> => {
+    try {
+      if (Platform.OS === 'web') {
+        // For web, we'll create a canvas to convert the image
+        return new Promise((resolve, reject) => {
+          const img = new globalThis.Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = img.width;
+            canvas.height = img.height;
+            
+            if (ctx) {
+              ctx.drawImage(img, 0, 0);
+              const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+              resolve(dataURL);
+            } else {
+              reject(new Error('Failed to get canvas context'));
+            }
+          };
+          img.onerror = () => reject(new Error('Failed to load image'));
+          img.src = imageUri;
+        });
+      } else {
+        // For native platforms, use expo-file-system
+        const FileSystem = require('expo-file-system');
+        const base64 = await FileSystem.readAsStringAsync(imageUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        return `data:image/jpeg;base64,${base64}`;
+      }
+    } catch (error) {
+      console.error('Error converting image to base64:', error);
+      throw error;
+    }
+  };
+
   const takePicture = async () => {
     if (!cameraRef.current) {
       Alert.alert(t('camera.error'), t('camera.notAvailable'));
@@ -88,7 +139,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
 
       const photo = await cameraRef.current.takePictureAsync({
         quality: 0.9,
-        base64: false,
+        base64: Platform.OS !== 'web', // Only get base64 on native
         skipProcessing: false,
       });
 
@@ -137,18 +188,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
     }
   };
 
-  const convertImageToBase64 = async (imageUri: string): Promise<string> => {
-    try {
-      const base64 = await FileSystem.readAsStringAsync(imageUri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-      return `data:image/jpeg;base64,${base64}`;
-    } catch (error) {
-      console.error('Error converting image to base64:', error);
-      throw error;
-    }
-  };
-
+  // Web-compatible PDF generation using HTML/CSS
   const generatePDFFromImages = async (): Promise<{ uri: string; name: string; type: string } | null> => {
     try {
       if (capturedImages.length === 0) {
@@ -165,160 +205,139 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
         })
       );
 
-      // Create HTML content for PDF
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <title>Contract Document</title>
-          <style>
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
-            body {
-              font-family: 'Arial', sans-serif;
-              line-height: 1.6;
-              color: #333;
-            }
-            .header {
-              text-align: center;
-              padding: 20px;
-              border-bottom: 2px solid #10b981;
-              margin-bottom: 30px;
-            }
-            .header h1 {
-              color: #10b981;
-              font-size: 24px;
-              margin-bottom: 10px;
-            }
-            .header p {
-              color: #666;
-              font-size: 14px;
-            }
-            .page {
-              page-break-after: always;
-              margin-bottom: 40px;
-              padding: 20px;
-              text-align: center;
-            }
-            .page:last-child {
-              page-break-after: avoid;
-            }
-            .page-title {
-              font-size: 18px;
-              font-weight: bold;
-              margin-bottom: 20px;
-              color: #2d3748;
-            }
-            .image-container {
-              border: 2px solid #e2e8f0;
-              border-radius: 8px;
-              padding: 10px;
-              background: #f7fafc;
-              margin-bottom: 20px;
-            }
-            img {
-              max-width: 100%;
-              height: auto;
-              border-radius: 4px;
-              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            }
-            .page-info {
-              margin-top: 15px;
-              padding: 10px;
-              background: #edf2f7;
-              border-radius: 4px;
-              font-size: 12px;
-              color: #4a5568;
-            }
-            .footer {
-              position: fixed;
-              bottom: 20px;
-              left: 0;
-              right: 0;
-              text-align: center;
-              font-size: 10px;
-              color: #a0aec0;
-            }
-            @media print {
-              .page {
-                margin: 0;
-                padding: 20px;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>Contract Analysis Document</h1>
-            <p>Generated on ${new Date().toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}</p>
-            <p>Total Pages: ${capturedImages.length}</p>
-          </div>
-          
-          ${base64Images.map((image, index) => `
-            <div class="page">
-              <div class="page-title">Page ${index + 1} of ${capturedImages.length}</div>
-              <div class="image-container">
+      if (Platform.OS === 'web') {
+        // For web, create a downloadable HTML file or use browser print
+        const htmlContent = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Contract Document</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .header { text-align: center; padding: 20px; border-bottom: 2px solid #10b981; margin-bottom: 30px; }
+              .header h1 { color: #10b981; font-size: 24px; margin-bottom: 10px; }
+              .header p { color: #666; font-size: 14px; }
+              .page { page-break-after: always; margin-bottom: 40px; padding: 20px; text-align: center; }
+              .page:last-child { page-break-after: avoid; }
+              .page-title { font-size: 18px; font-weight: bold; margin-bottom: 20px; color: #2d3748; }
+              .image-container { border: 2px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f7fafc; margin-bottom: 20px; }
+              img { max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+              .page-info { margin-top: 15px; padding: 10px; background: #edf2f7; border-radius: 4px; font-size: 12px; color: #4a5568; }
+              @media print { .page { margin: 0; padding: 20px; } }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>Contract Analysis Document</h1>
+              <p>Generated on ${new Date().toLocaleDateString()}</p>
+              <p>Total Pages: ${capturedImages.length}</p>
+            </div>
+            ${base64Images.map((image, index) => `
+              <div class="page">
+                <div class="page-title">Page ${index + 1} of ${capturedImages.length}</div>
+                <div class="image-container">
+                  <img src="${image.base64}" alt="Contract Page ${index + 1}" />
+                </div>
+                <div class="page-info">
+                  <strong>Image Details:</strong><br>
+                  Resolution: ${image.width} × ${image.height}px<br>
+                  Captured: ${new Date(image.timestamp).toLocaleString()}
+                </div>
+              </div>
+            `).join('')}
+          </body>
+          </html>
+        `;
+
+        // Create a blob and download link
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        
+        // Create download link
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `contract_${Date.now()}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        // Also offer to print
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+          printWindow.document.write(htmlContent);
+          printWindow.document.close();
+          printWindow.print();
+        }
+
+        return {
+          uri: url,
+          name: `contract_${Date.now()}.html`,
+          type: 'text/html'
+        };
+      } else {
+        // For native platforms, use expo-print
+        const Print = require('expo-print');
+        const FileSystem = require('expo-file-system');
+
+        const htmlContent = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Contract Document</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .header { text-align: center; padding: 20px; border-bottom: 2px solid #10b981; margin-bottom: 30px; }
+              .header h1 { color: #10b981; font-size: 24px; margin-bottom: 10px; }
+              .page { page-break-after: always; margin-bottom: 40px; padding: 20px; text-align: center; }
+              .page:last-child { page-break-after: avoid; }
+              img { max-width: 100%; height: auto; border-radius: 4px; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>Contract Analysis Document</h1>
+              <p>Generated on ${new Date().toLocaleDateString()}</p>
+              <p>Total Pages: ${capturedImages.length}</p>
+            </div>
+            ${base64Images.map((image, index) => `
+              <div class="page">
+                <h3>Page ${index + 1} of ${capturedImages.length}</h3>
                 <img src="${image.base64}" alt="Contract Page ${index + 1}" />
               </div>
-              <div class="page-info">
-                <strong>Image Details:</strong><br>
-                Resolution: ${image.width} × ${image.height}px<br>
-                Captured: ${new Date(image.timestamp).toLocaleString()}
-              </div>
-            </div>
-          `).join('')}
-          
-          <div class="footer">
-            <p>Generated by Sharia Contract Analyzer</p>
-          </div>
-        </body>
-        </html>
-      `;
+            `).join('')}
+          </body>
+          </html>
+        `;
 
-      // Generate PDF
-      const { uri } = await Print.printToFileAsync({
-        html: htmlContent,
-        base64: false,
-        width: 612,
-        height: 792,
-        margins: {
-          left: 20,
-          top: 20,
-          right: 20,
-          bottom: 20,
-        },
-      });
+        const { uri } = await Print.printToFileAsync({
+          html: htmlContent,
+          base64: false,
+          width: 612,
+          height: 792,
+          margins: { left: 20, top: 20, right: 20, bottom: 20 },
+        });
 
-      const fileName = `contract_${Date.now()}.pdf`;
-      const permanentUri = `${FileSystem.documentDirectory}${fileName}`;
+        const fileName = `contract_${Date.now()}.pdf`;
+        const permanentUri = `${FileSystem.documentDirectory}${fileName}`;
 
-      // Move to permanent location
-      await FileSystem.moveAsync({
-        from: uri,
-        to: permanentUri,
-      });
+        await FileSystem.moveAsync({ from: uri, to: permanentUri });
 
-      return {
-        uri: permanentUri,
-        name: fileName,
-        type: 'application/pdf'
-      };
-
+        return {
+          uri: permanentUri,
+          name: fileName,
+          type: 'application/pdf'
+        };
+      }
     } catch (error) {
       console.error('PDF generation error:', error);
       Alert.alert(
         t('camera.pdfError'),
-        'Failed to generate PDF. Please try again.'
+        'Failed to generate document. Please try again.'
       );
       return null;
     } finally {
@@ -335,25 +354,31 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
     setIsProcessing(true);
 
     try {
-      // Generate PDF from images
-      const pdfFile = await generatePDFFromImages();
+      // Generate document from images
+      const documentFile = await generatePDFFromImages();
 
-      if (!pdfFile) {
-        throw new Error('Failed to generate PDF');
+      if (!documentFile) {
+        throw new Error('Failed to generate document');
       }
 
-      console.log('Generated PDF:', pdfFile);
+      console.log('Generated document:', documentFile);
 
-      // Show success message with option to share
+      // Show success message with options
       Alert.alert(
-        'PDF Generated Successfully',
-        'Your contract has been converted to PDF format.',
+        'Document Generated Successfully',
+        'Your contract has been converted to a document format.',
         [
           {
-            text: 'Share PDF',
+            text: 'Share Document',
             onPress: async () => {
-              if (await Sharing.isAvailableAsync()) {
-                await Sharing.shareAsync(pdfFile.uri);
+              if (Platform.OS === 'web') {
+                // Web sharing handled in generatePDFFromImages
+                return;
+              } else {
+                const Sharing = require('expo-sharing');
+                if (await Sharing.isAvailableAsync()) {
+                  await Sharing.shareAsync(documentFile.uri);
+                }
               }
             }
           },
@@ -361,12 +386,46 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
             text: 'Analyze',
             style: 'default',
             onPress: async () => {
-              // Upload the contract for analysis
-              const result = await uploadContract(pdfFile);
-              if (result.success && result.sessionId) {
-                onNavigate('results', { sessionId: result.sessionId });
-              } else {
-                throw new Error(result.error || 'Upload failed');
+              try {
+                // For web, we'll send the images directly for analysis
+                if (Platform.OS === 'web') {
+                  // Convert images to base64 for upload
+                  const imagesWithBase64 = await Promise.all(
+                    capturedImages.map(async (image) => ({
+                      ...image,
+                      base64: await convertImageToBase64(image.uri)
+                    }))
+                  );
+                  
+                  // Create a pseudo file object for web upload
+                  const pseudoFile = {
+                    uri: 'web-images',
+                    name: `contract_images_${Date.now()}.json`,
+                    type: 'application/json',
+                    images: imagesWithBase64
+                  };
+                  
+                  const result = await uploadContract(pseudoFile);
+                  if (result.success && result.sessionId) {
+                    onNavigate('results', { sessionId: result.sessionId });
+                  } else {
+                    throw new Error(result.error || 'Upload failed');
+                  }
+                } else {
+                  // For native, upload the generated PDF
+                  const result = await uploadContract(documentFile);
+                  if (result.success && result.sessionId) {
+                    onNavigate('results', { sessionId: result.sessionId });
+                  } else {
+                    throw new Error(result.error || 'Upload failed');
+                  }
+                }
+              } catch (uploadError) {
+                console.error('Upload error:', uploadError);
+                Alert.alert(
+                  t('camera.uploadError'),
+                  uploadError instanceof Error ? uploadError.message : t('camera.uploadErrorMessage')
+                );
               }
             }
           }
@@ -453,7 +512,11 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
         <ScrollView style={styles.previewContainer} showsVerticalScrollIndicator={false}>
           {capturedImages.map((image, index) => (
             <View key={`${image.uri}-${index}`} style={styles.imagePreview}>
-              <Image source={{ uri: image.uri }} style={styles.previewImage} />
+              <Image 
+                source={{ uri: image.uri }} 
+                style={styles.previewImage}
+                resizeMode="contain"
+              />
               <TouchableOpacity
                 style={styles.removeButton}
                 onPress={() => removeImage(index)}
@@ -483,7 +546,9 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
             ) : (
               <>
                 <Ionicons name="document-text" size={20} color="#fff" style={{ marginRight: 8 }} />
-                <Text style={styles.confirmButtonText}>Generate PDF</Text>
+                <Text style={styles.confirmButtonText}>
+                  {Platform.OS === 'web' ? 'Generate Document' : 'Generate PDF'}
+                </Text>
               </>
             )}
           </TouchableOpacity>
@@ -690,7 +755,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 400,
     borderRadius: 8,
-    resizeMode: 'contain',
   },
   removeButton: {
     position: 'absolute',

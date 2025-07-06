@@ -155,7 +155,7 @@
     "uploadError": "Upload Error",
     "uploadErrorMessage": "Failed to upload contract. Please try again.",
     "galleryError": "Failed to pick image from gallery",
-    "pdfError": "PDF Generation Error",
+    "pdfError": "Document Generation Error",
     "pdfSuccess": "PDF Generated Successfully",
     "pdfSuccessMessage": "Your contract has been converted to PDF format"
   },
