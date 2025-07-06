@@ -1183,7 +1183,7 @@ const ContractTermsList: React.FC = () => {
                   activeFilter === filterValue && styles.filterTabTextActive,
                 ]}
               >
-                {t(`filter.${filterValue}`) || filterValue}
+                {t('filter.' + filterValue) || filterValue}
               </Text>
             </TouchableOpacity>
           ))}
