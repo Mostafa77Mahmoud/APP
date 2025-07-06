@@ -80,31 +80,82 @@ export const authApi = {
 // --- Main App API Functions ---
 
 export const uploadContract = async (fileAsset: any, onUploadProgress?: (progress: number) => void): Promise<AnalyzeApiResponse> => {
-  const formData = new FormData();
-  
-  if (Platform.OS === 'web' && fileAsset.file) {
-    formData.append('file', fileAsset.file);
-  } else {
-    const fileData = {
-      uri: fileAsset.uri,
-      type: fileAsset.mimeType,
-      name: fileAsset.name,
-    } as any;
-    formData.append('file', fileData);
-  }
-  
-  onUploadProgress?.(50);
-  
-  const headers = await getHeaders(true);
-  
-  const response = await fetch(`${API_BASE_URL}/analyze`, { 
-    method: 'POST', 
-    body: formData, 
-    headers
+  console.log('📤 API: Starting upload with file:', {
+    uri: fileAsset.uri,
+    type: fileAsset.type,
+    name: fileAsset.name,
+    size: fileAsset.size,
+    hasMetadata: !!fileAsset.metadata
   });
 
-  onUploadProgress?.(100);
-  return handleResponse<AnalyzeApiResponse>(response);
+  const formData = new FormData();
+  
+  try {
+    if (Platform.OS === 'web' && fileAsset.file) {
+      // Web file upload
+      formData.append('file', fileAsset.file);
+      console.log('📤 API: Added web file to FormData');
+    } else {
+      // React Native file upload
+      const fileData = {
+        uri: fileAsset.uri,
+        type: fileAsset.type || fileAsset.mimeType || 'image/jpeg',
+        name: fileAsset.name || `upload_${Date.now()}.jpg`,
+      } as any;
+      
+      // Add size if available
+      if (fileAsset.size) {
+        fileData.size = fileAsset.size;
+      }
+      
+      formData.append('file', fileData);
+      console.log('📤 API: Added native file to FormData:', fileData);
+      
+      // Add metadata if available (for multi-page documents)
+      if (fileAsset.metadata) {
+        formData.append('metadata', JSON.stringify(fileAsset.metadata));
+        console.log('📤 API: Added metadata:', fileAsset.metadata);
+      }
+    }
+    
+    onUploadProgress?.(30);
+    
+    const headers = await getHeaders(true);
+    console.log('📤 API: Request headers prepared (excluding auth token)');
+    
+    onUploadProgress?.(50);
+    
+    console.log('📤 API: Sending request to:', `${API_BASE_URL}/analyze`);
+    const response = await fetch(`${API_BASE_URL}/analyze`, { 
+      method: 'POST', 
+      body: formData, 
+      headers
+    });
+
+    console.log('📤 API: Response received:', {
+      status: response.status,
+      statusText: response.statusText,
+      contentType: response.headers.get('content-type')
+    });
+
+    onUploadProgress?.(100);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ API: Upload failed:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorText: errorText
+      });
+      throw new Error(`Upload failed (${response.status}): ${errorText || response.statusText}`);
+    }
+    
+    return handleResponse<AnalyzeApiResponse>(response);
+  } catch (error) {
+    console.error('❌ API: Upload error:', error);
+    onUploadProgress?.(0);
+    throw error;
+  }
 };
 
 
