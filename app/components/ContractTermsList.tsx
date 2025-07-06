@@ -988,7 +988,7 @@ const ContractTermsList: React.FC = () => {
                           isReviewingModification[term.term_id])
                       }
                     >
-                      {isTermProcessing && isTermProcessing[term.term_id]<previous_generation>```python
+                      {isTermProcessing && isTermProcessing[term.term_id]<previous_generation>
 ? (
                         <ActivityIndicator size="small" color="#ffffff" />
                       ) : (
