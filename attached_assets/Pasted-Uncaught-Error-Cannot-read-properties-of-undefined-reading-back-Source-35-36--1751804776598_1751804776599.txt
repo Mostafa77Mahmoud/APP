@@ -1,0 +1,163 @@
+Uncaught Error
+Cannot read properties of undefined (reading 'back')
+Source
+ 
+ 35 |
+ }
+ 
+ 36 |
+>
+ 37 |
+ 
+const
+ 
+CameraScreen
+:
+ 
+React
+.
+FC
+<
+CameraScreenProps
+>
+ 
+=
+ ({ onBack
+,
+ onNavigate }) 
+=>
+ {
+ 
+    |
+                                                      
+^
+ 
+ 38 |
+   
+const
+ { t
+,
+ isRTL } 
+=
+ useLanguage()
+;
+ 
+ 39 |
+   
+const
+ { theme } 
+=
+ useTheme()
+;
+ 
+ 40 |
+   
+const
+ isDarkMode 
+=
+ theme 
+===
+ 
+'dark'
+;
+Call Stack
+CameraScreen
+app/screens/CameraScreen.tsx:43:59
+See 11 more frames
+Component Stack
+CameraScreen
+app/screens/CameraScreen.tsx:37:54
+div
+<anonymous>:-1:0
+<global>
+node_modules/react-native-web/dist/exports/StyleSheet/preprocess.js:119:21
+FillRateHelper#computeBlankness
+node_modules/react-native-web/dist/vendor/react-native/FillRateHelper/index.js:169:36
+div
+<anonymous>:-1:0
+<global>
+node_modules/react-native-web/dist/exports/StyleSheet/preprocess.js:119:21
+<unknown>
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+div
+<anonymous>:-1:0
+<global>
+node_modules/react-native-web/dist/exports/StyleSheet/preprocess.js:119:21
+NativeSafeAreaProvider
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+SafeAreaProvider
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+SyntheticError
+node_modules/@expo/metro-runtime/src/error-overlay/modules/ExceptionsManager/index.ts:13:36
+div
+<anonymous>:-1:0
+<global>
+node_modules/react-native-web/dist/exports/StyleSheet/preprocess.js:119:21
+ContractProvider
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+SessionProvider
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+<global>
+node_modules/lucide-react-native/dist/esm/icons/zap-off.js:20:31
+LanguageProvider
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+<anonymous>
+node_modules/expo-updates/build/Updates.types.js:34:5
+RootLayout(./_layout.tsx)
+<anonymous>:-1:0
+Suspense
+<anonymous>:-1:0
+Route
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+loadValue
+app/hooks/useLocalStorage.ts:21:5
+StaticContainer
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+EnsureSingleNavigator
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+SceneView
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+PreventRemoveProvider
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+NavigationStateListenerProvider
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+NavigationContent
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+<unknown>
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+Content
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+div
+<anonymous>:-1:0
+<global>
+node_modules/react-native-web/dist/exports/StyleSheet/preprocess.js:119:21
+NativeSafeAreaProvider
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+SafeAreaProvider
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+wrapper
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+ThemeProvider
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+EnsureSingleNavigator
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+displayFromFontSource
+node_modules/expo-font/build/FontLoader.web.js:24:5
+useOptionsGetters
+node_modules/@react-navigation/core/lib/module/useOptionsGetters.js:70:3
+ContextNavigator
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+ExpoRoot
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
+createNestedStateObject
+node_modules/@react-navigation/core/lib/module/getStateFromPath.js:489:5
+App
+<anonymous>:-1:0
+<anonymous>
+node_modules/pretty-format/node_modules/react-is/cjs/react-is.development.js:39
+ErrorOverlay
+<anonymous>:-1:0
+withDevTools(ErrorOverlay)
+<anonymous>:-1:0
+AppContainer
+https://6ea52e66-82a9-4367-9daa-c0f65a1681d8-00-5vxzf3578jta.worf.replit.dev/node_modules/expo-router/entry.bundle
