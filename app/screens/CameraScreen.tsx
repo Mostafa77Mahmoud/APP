@@ -49,6 +49,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const cameraRef = useRef<CameraView>(null);
 
@@ -456,23 +457,38 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
             onPress: async () => {
               try {
                 console.log('Starting contract analysis upload...');
+                setIsProcessing(true);
+                setUploadProgress(0);
                 
                 const result = await uploadContract(documentFile, (progress) => {
                   console.log(`Upload progress: ${progress}%`);
+                  setUploadProgress(progress);
                 });
                 
                 if (result && result.session_id) {
                   console.log('Upload successful, navigating to results');
+                  setUploadProgress(100);
+                  
+                  // Brief delay to show completion
+                  await new Promise(resolve => setTimeout(resolve, 500));
+                  
+                  // Clear captured images and reset state
+                  setCapturedImages([]);
+                  setShowPreview(false);
+                  setUploadProgress(0);
                   onNavigate('results', { sessionId: result.session_id });
                 } else {
                   throw new Error('Invalid response from analysis service');
                 }
               } catch (uploadError) {
                 console.error('Upload error:', uploadError);
+                setUploadProgress(0);
                 Alert.alert(
                   'Analysis Error',
                   `Failed to upload document for analysis: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`
                 );
+              } finally {
+                setIsProcessing(false);
               }
             }
           }
@@ -589,7 +605,12 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
             disabled={isProcessing || isGeneratingPDF}
           >
             {isProcessing || isGeneratingPDF ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <>
+                <ActivityIndicator size="small" color="#fff" style={{ marginRight: 8 }} />
+                <Text style={styles.confirmButtonText}>
+                  {uploadProgress > 0 ? `Uploading ${uploadProgress}%` : 'Processing...'}
+                </Text>
+              </>
             ) : (
               <>
                 <Ionicons name="document-text" size={20} color="#fff" style={{ marginRight: 8 }} />

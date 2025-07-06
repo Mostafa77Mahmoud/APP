@@ -97,60 +97,47 @@ export const uploadContract = async (fileAsset: any, onUploadProgress?: (progres
     if (fileAsset.images && Array.isArray(fileAsset.images)) {
       console.log('📤 API: Processing multi-page document with', fileAsset.images.length, 'pages');
       
-      if (Platform.OS === 'web') {
-        // For web multi-page uploads, send as structured data
-        const multiPageData = {
-          type: 'multi-page-images',
-          pages: fileAsset.images.map((img, index) => ({
-            pageNumber: index + 1,
-            base64: img.base64,
-            width: img.width,
-            height: img.height,
-            timestamp: img.timestamp
-          })),
-          metadata: {
-            totalPages: fileAsset.images.length,
-            fileName: fileAsset.name,
-            createdAt: new Date().toISOString()
-          }
-        };
-        
-        // Create a blob from the structured data
-        const dataBlob = new Blob([JSON.stringify(multiPageData)], { type: 'application/json' });
-        formData.append('file', dataBlob, fileAsset.name);
-        formData.append('upload_type', 'multi-page-images');
-        
-        console.log('📤 API: Added multi-page data to FormData');
-      } else {
-        // For native, if we have a PDF file, use it directly
-        if (fileAsset.type === 'application/pdf' && fileAsset.uri !== 'native-multi-page-document') {
-          const fileData = {
-            uri: fileAsset.uri,
-            type: fileAsset.type,
-            name: fileAsset.name,
-          } as any;
-          
-          formData.append('file', fileData);
-          console.log('📤 API: Added native PDF to FormData');
-        } else {
-          // Fallback: send as structured JSON data
-          const multiPageData = {
-            type: 'multi-page-images',
-            pages: fileAsset.images,
-            metadata: fileAsset.metadata || { totalPages: fileAsset.images.length }
-          };
-          
-          const dataBlob = JSON.stringify(multiPageData);
-          const fileData = {
-            uri: 'data:application/json;base64,' + btoa(dataBlob),
-            type: 'application/json',
-            name: fileAsset.name,
-          } as any;
-          
-          formData.append('file', fileData);
-          formData.append('upload_type', 'multi-page-images');
-          console.log('📤 API: Added native multi-page JSON to FormData');
+      // Create a structured data object for multi-page uploads
+      const multiPageData = {
+        type: 'multi-page-images',
+        pages: fileAsset.images.map((img, index) => ({
+          pageNumber: index + 1,
+          base64: img.base64 || img.uri, // Use base64 if available, fallback to uri
+          width: img.width,
+          height: img.height,
+          timestamp: img.timestamp
+        })),
+        metadata: {
+          totalPages: fileAsset.images.length,
+          fileName: fileAsset.name || `contract_${Date.now()}.json`,
+          createdAt: new Date().toISOString(),
+          platform: Platform.OS
         }
+      };
+      
+      if (Platform.OS === 'web') {
+        // For web, create a proper blob and append to FormData
+        const dataBlob = new Blob([JSON.stringify(multiPageData)], { 
+          type: 'application/json' 
+        });
+        formData.append('file', dataBlob, fileAsset.name || 'contract_multi_page.json');
+        formData.append('upload_type', 'multi-page-images');
+        formData.append('file_format', 'json');
+        
+        console.log('📤 API: Added web multi-page JSON blob to FormData');
+      } else {
+        // For native platforms
+        const jsonString = JSON.stringify(multiPageData);
+        const fileData = {
+          uri: `data:application/json;charset=utf-8,${encodeURIComponent(jsonString)}`,
+          type: 'application/json',
+          name: fileAsset.name || 'contract_multi_page.json',
+        } as any;
+        
+        formData.append('file', fileData);
+        formData.append('upload_type', 'multi-page-images');
+        formData.append('file_format', 'json');
+        console.log('📤 API: Added native multi-page JSON to FormData');
       }
     } 
     // Handle single file uploads (legacy)
@@ -187,6 +174,15 @@ export const uploadContract = async (fileAsset: any, onUploadProgress?: (progres
     onUploadProgress?.(50);
     
     console.log('📤 API: Sending request to:', `${API_BASE_URL}/analyze`);
+    console.log('📤 API: FormData entries:');
+    for (let pair of formData.entries()) {
+      if (pair[1] instanceof File || pair[1] instanceof Blob) {
+        console.log(`  ${pair[0]}: [${pair[1].constructor.name}] ${pair[1].name || 'unnamed'} (${pair[1].size} bytes)`);
+      } else {
+        console.log(`  ${pair[0]}: ${pair[1]}`);
+      }
+    }
+    
     const response = await fetch(`${API_BASE_URL}/analyze`, { 
       method: 'POST', 
       body: formData, 
