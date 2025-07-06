@@ -49,7 +49,11 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onNavigate, onBack }) => {
   const takePicture = async () => {
     if (cameraRef.current) {
       try {
-        const photo = await cameraRef.current.takePictureAsync({ quality: 0.8 });
+        const photo = await cameraRef.current.takePictureAsync({ 
+          quality: 0.8,
+          base64: false,
+          skipProcessing: false
+        });
         if (photo) {
           if (isMultiPageMode) {
             const newImage = {
@@ -58,11 +62,17 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onNavigate, onBack }) => {
             };
             setCapturedImages(prev => [...prev, newImage]);
           } else {
-            const file = { uri: photo.uri, type: 'image/jpeg', name: 'capture.jpg' };
+            // Single image mode - directly upload as image
+            const file = { 
+              uri: photo.uri, 
+              type: 'image/jpeg', 
+              name: `contract_${Date.now()}.jpg` 
+            };
             await handleAnalysis(file);
           }
         }
       } catch (error) {
+        console.error('Camera capture error:', error);
         Alert.alert(t('error.generic'), t('error.cameraFailed'));
       }
     }
@@ -72,84 +82,143 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onNavigate, onBack }) => {
     setCapturedImages(prev => prev.filter(img => img.id !== id));
   };
 
+  const generateHTMLContent = (images: Array<{uri: string, id: string}>) => {
+    const imageElements = images.map((img, index) => `
+      <div style="page-break-after: ${index < images.length - 1 ? 'always' : 'avoid'}; text-align: center; margin: 20px 0;">
+        <h3>Page ${index + 1}</h3>
+        <img src="${img.uri}" style="max-width: 100%; max-height: 80vh; object-fit: contain;" />
+      </div>
+    `).join('');
+
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Contract Document</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              margin: 0; 
+              padding: 20px;
+              background: white;
+            }
+            h1 { 
+              text-align: center; 
+              color: #333;
+              margin-bottom: 30px;
+            }
+            h3 { 
+              color: #666; 
+              margin-bottom: 15px;
+            }
+            @media print {
+              body { margin: 0; padding: 10px; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Contract Document - ${new Date().toLocaleDateString()}</h1>
+          ${imageElements}
+        </body>
+      </html>
+    `;
+  };
+
   const generatePDFFromImages = async () => {
-    if (capturedImages.length === 0) return;
+    if (capturedImages.length === 0) {
+      Alert.alert(t('error.generic'), 'No images to convert');
+      return;
+    }
 
     setIsGeneratingPDF(true);
     try {
-      // Create a proper PDF from images using FileSystem
+      // Create directory for PDFs
       const pdfDir = `${FileSystem.documentDirectory}contracts/`;
-      
-      // Ensure directory exists
       await FileSystem.makeDirectoryAsync(pdfDir, { intermediates: true });
       
       const timestamp = Date.now();
-      const pdfPath = `${pdfDir}contract_${timestamp}.pdf`;
-
-      // For now, we'll create a simple approach by combining images
-      // In a real implementation, you'd use a proper PDF library
-      // For this example, we'll use the first image as the main content
-      // and create a valid file structure
       
       if (capturedImages.length === 1) {
-        // Single image - copy as PDF (this is a simplified approach)
-        await FileSystem.copyAsync({
-          from: capturedImages[0].uri,
-          to: pdfPath
-        });
-      } else {
-        // Multiple images - for now, we'll use the first image
-        // In production, you'd use a proper PDF generation library
-        await FileSystem.copyAsync({
-          from: capturedImages[0].uri,
-          to: pdfPath
-        });
-      }
-
-      // Get file info
-      const fileInfo = await FileSystem.getInfoAsync(pdfPath);
-      
-      if (fileInfo.exists) {
-        const file = {
-          uri: pdfPath,
-          type: 'application/pdf',
-          name: `contract_${timestamp}.pdf`,
-          size: fileInfo.size
+        // Single image - upload directly as image file
+        const imageFile = {
+          uri: capturedImages[0].uri,
+          type: 'image/jpeg',
+          name: `contract_${timestamp}.jpg`
         };
-
+        
         setCapturedImages([]);
         setIsMultiPageMode(false);
-        await handleAnalysis(file);
-      } else {
-        throw new Error('Failed to create PDF file');
+        setShowConfirmation(false);
+        await handleAnalysis(imageFile);
+        return;
       }
+
+      // Multiple images - create a simple text-based PDF approach
+      // Since HTML-to-PDF might not work in React Native Web, we'll create a simple multi-image approach
+      
+      // For now, let's use the first image as the primary document
+      // In a production app, you would use a proper PDF generation library
+      const primaryImage = capturedImages[0];
+      const multiPageFile = {
+        uri: primaryImage.uri,
+        type: 'image/jpeg',
+        name: `contract_multipage_${timestamp}.jpg`,
+        metadata: {
+          totalPages: capturedImages.length,
+          additionalImages: capturedImages.slice(1).map(img => img.uri)
+        }
+      };
+
+      setCapturedImages([]);
+      setIsMultiPageMode(false);
+      setShowConfirmation(false);
+      await handleAnalysis(multiPageFile);
+
     } catch (error) {
       console.error('PDF generation error:', error);
-      Alert.alert(t('error.generic'), 'Failed to generate PDF from images');
+      Alert.alert(
+        t('error.generic'), 
+        'Failed to process images. Please try uploading individual images instead.'
+      );
     } finally {
       setIsGeneratingPDF(false);
     }
   };
 
   const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
-    });
-    if (!result.canceled && result.assets[0]) {
-      const file = { 
-        uri: result.assets[0].uri, 
-        type: result.assets[0].mimeType || 'image/jpeg', 
-        name: result.assets[0].fileName || 'image.jpg' 
-      };
-      await handleAnalysis(file);
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.9,
+        allowsEditing: false,
+        allowsMultipleSelection: false,
+      });
+      
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        const file = { 
+          uri: asset.uri, 
+          type: asset.mimeType || 'image/jpeg', 
+          name: asset.fileName || `gallery_image_${Date.now()}.jpg`
+        };
+        await handleAnalysis(file);
+      }
+    } catch (error) {
+      console.error('Image picker error:', error);
+      Alert.alert(t('error.generic'), 'Failed to select image from gallery');
     }
   };
 
-  const isProcessing = isUploading || isAnalyzingContract;
+  const isProcessing = isUploading || isAnalyzingContract || isGeneratingPDF;
 
   if (!permission) {
-    return <View style={styles.permissionContainer}><ActivityIndicator /></View>;
+    return (
+      <View style={styles.permissionContainer}>
+        <ActivityIndicator size="large" color="#10b981" />
+        <Text style={styles.permissionText}>Loading camera...</Text>
+      </View>
+    );
   }
 
   if (!permission.granted) {
@@ -164,7 +233,12 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onNavigate, onBack }) => {
   }
 
   if (isProcessing) {
-    return <AnalyzingAnimation isAnalyzing={true} />;
+    return (
+      <AnalyzingAnimation 
+        isAnalyzing={true} 
+        message={isGeneratingPDF ? "Processing images..." : undefined}
+      />
+    );
   }
 
   const handleConfirmPhotos = () => {
@@ -174,15 +248,26 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onNavigate, onBack }) => {
 
   const handleContinueToAnalyze = async () => {
     setIsConvertingToPdf(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Add a small delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 1000));
     setIsConvertingToPdf(false);
     await generatePDFFromImages();
+  };
+
+  const handleCancelMultiPage = () => {
+    setCapturedImages([]);
+    setIsMultiPageMode(false);
+    setShowConfirmation(false);
   };
 
   return (
     <View style={styles.container}>
       {isFocused && (
-        <CameraView style={StyleSheet.absoluteFill} facing='back' ref={cameraRef} />
+        <CameraView 
+          style={StyleSheet.absoluteFill} 
+          facing='back' 
+          ref={cameraRef}
+        />
       )}
       <SafeAreaView style={styles.overlay}>
         <View style={[styles.header, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
@@ -190,14 +275,24 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onNavigate, onBack }) => {
             {isRTL ? <ArrowRight size={24} color="#fff" /> : <ArrowLeft size={24} color="#fff" />}
           </TouchableOpacity>
           <Text style={styles.headerText}>{t('camera.title')}</Text>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity 
+            style={styles.iconButton}
+            onPress={() => {
+              // Toggle camera facing - for future enhancement
+            }}
+          >
             <RefreshCw size={24} color="#fff" />
           </TouchableOpacity>
         </View>
 
         <View style={styles.frameContainer}>
           <View style={styles.scanFrame} />
-          <Text style={styles.instructionText}>{t('camera.instruction')}</Text>
+          <Text style={styles.instructionText}>
+            {isMultiPageMode 
+              ? (t('camera.multiPageInstruction') || 'Capture multiple pages of your contract')
+              : (t('camera.instruction') || 'Position contract within frame and capture')
+            }
+          </Text>
         </View>
 
         {isMultiPageMode && capturedImages.length > 0 && (
@@ -218,6 +313,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onNavigate, onBack }) => {
                 </View>
               )}
               style={styles.imagePreviewList}
+              showsHorizontalScrollIndicator={false}
             />
             <Text style={styles.imageCountText}>
               {capturedImages.length} {t('camera.pagesCaptures') || 'pages captured'}
@@ -267,20 +363,34 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onNavigate, onBack }) => {
               <View style={styles.convertingContainer}>
                 <ActivityIndicator size="small" color="#10b981" />
                 <Text style={styles.convertingText}>
-                  {t('camera.convertingToPdf')}
+                  {t('camera.convertingToPdf') || 'Processing images...'}
                 </Text>
               </View>
             ) : (
-              <TouchableOpacity
-                style={styles.continueButton}
-                onPress={handleContinueToAnalyze}
-                disabled={isAnalyzingContract || isUploading}
-              >
-                <Upload size={20} color="#ffffff" />
-                <Text style={styles.continueButtonText}>
-                  {isAnalyzingContract || isUploading ? t('processing') : t('camera.continueToAnalyze')}
-                </Text>
-              </TouchableOpacity>
+              <View style={styles.confirmationButtons}>
+                <TouchableOpacity
+                  style={styles.cancelConfirmButton}
+                  onPress={handleCancelMultiPage}
+                >
+                  <X size={16} color="#ef4444" />
+                  <Text style={styles.cancelConfirmButtonText}>
+                    {t('camera.cancel') || 'Cancel'}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.continueButton}
+                  onPress={handleContinueToAnalyze}
+                  disabled={isAnalyzingContract || isUploading}
+                >
+                  <Upload size={20} color="#ffffff" />
+                  <Text style={styles.continueButtonText}>
+                    {isAnalyzingContract || isUploading 
+                      ? (t('processing') || 'Processing...') 
+                      : (t('camera.continueToAnalyze') || 'Analyze Document')
+                    }
+                  </Text>
+                </TouchableOpacity>
+              </View>
             )}
           </View>
         )}
@@ -290,18 +400,75 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onNavigate, onBack }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000' },
-  permissionContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000', padding: 20 },
-  permissionText: { color: '#fff', fontSize: 18, textAlign: 'center', marginBottom: 20 },
-  permissionButton: { backgroundColor: '#10b981', padding: 15, borderRadius: 10 },
-  permissionButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  overlay: { flex: 1, justifyContent: 'space-between', backgroundColor: 'transparent' },
-  header: { justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 16 },
-  iconButton: { padding: 8 },
-  headerText: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
-  frameContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scanFrame: { width: '90%', aspectRatio: 1 / 1.4, borderWidth: 2, borderColor: 'rgba(255, 255, 255, 0.8)', borderRadius: 16, borderStyle: 'dashed' },
-  instructionText: { color: '#fff', marginTop: 20, backgroundColor: 'rgba(0,0,0,0.5)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#000' 
+  },
+  permissionContainer: { 
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    backgroundColor: '#000', 
+    padding: 20 
+  },
+  permissionText: { 
+    color: '#fff', 
+    fontSize: 18, 
+    textAlign: 'center', 
+    marginBottom: 20 
+  },
+  permissionButton: { 
+    backgroundColor: '#10b981', 
+    padding: 15, 
+    borderRadius: 10 
+  },
+  permissionButtonText: { 
+    color: '#fff', 
+    fontSize: 16, 
+    fontWeight: 'bold' 
+  },
+  overlay: { 
+    flex: 1, 
+    justifyContent: 'space-between', 
+    backgroundColor: 'transparent' 
+  },
+  header: { 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    paddingHorizontal: 16, 
+    paddingTop: 16 
+  },
+  iconButton: { 
+    padding: 8 
+  },
+  headerText: { 
+    color: '#fff', 
+    fontSize: 20, 
+    fontWeight: 'bold' 
+  },
+  frameContainer: { 
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  scanFrame: { 
+    width: '90%', 
+    aspectRatio: 1 / 1.4, 
+    borderWidth: 2, 
+    borderColor: 'rgba(255, 255, 255, 0.8)', 
+    borderRadius: 16, 
+    borderStyle: 'dashed' 
+  },
+  instructionText: { 
+    color: '#fff', 
+    marginTop: 20, 
+    backgroundColor: 'rgba(0,0,0,0.5)', 
+    paddingHorizontal: 12, 
+    paddingVertical: 6, 
+    borderRadius: 8,
+    textAlign: 'center',
+    fontSize: 16
+  },
   imagePreviewContainer: { 
     position: 'absolute', 
     top: 100, 
@@ -311,7 +478,9 @@ const styles = StyleSheet.create({
     borderRadius: 12, 
     padding: 12 
   },
-  imagePreviewList: { marginBottom: 8 },
+  imagePreviewList: { 
+    marginBottom: 8 
+  },
   previewImageContainer: { 
     width: 60, 
     height: 80, 
@@ -337,13 +506,42 @@ const styles = StyleSheet.create({
     justifyContent: 'center', 
     alignItems: 'center' 
   },
-  imageCountText: { color: '#fff', fontSize: 14, textAlign: 'center', fontWeight: 'bold' },
-  controls: { justifyContent: 'space-around', alignItems: 'center', paddingBottom: 30 },
-  centerControls: { alignItems: 'center', gap: 12 },
-  sideButton: { alignItems: 'center', gap: 4 },
-  sideButtonText: { color: '#fff', fontSize: 12 },
-  captureButton: { width: 70, height: 70, borderRadius: 35, backgroundColor: '#fff', borderWidth: 4, borderColor: 'rgba(0,0,0,0.3)', justifyContent: 'center', alignItems: 'center' },
-  multiPageCaptureButton: { backgroundColor: '#10b981' },
+  imageCountText: { 
+    color: '#fff', 
+    fontSize: 14, 
+    textAlign: 'center', 
+    fontWeight: 'bold' 
+  },
+  controls: { 
+    justifyContent: 'space-around', 
+    alignItems: 'center', 
+    paddingBottom: 30 
+  },
+  centerControls: { 
+    alignItems: 'center', 
+    gap: 12 
+  },
+  sideButton: { 
+    alignItems: 'center', 
+    gap: 4 
+  },
+  sideButtonText: { 
+    color: '#fff', 
+    fontSize: 12 
+  },
+  captureButton: { 
+    width: 70, 
+    height: 70, 
+    borderRadius: 35, 
+    backgroundColor: '#fff', 
+    borderWidth: 4, 
+    borderColor: 'rgba(0,0,0,0.3)', 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  multiPageCaptureButton: { 
+    backgroundColor: '#10b981' 
+  },
   generatePDFButton: { 
     width: 50, 
     height: 50, 
@@ -369,6 +567,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#059669',
     fontWeight: '500',
+  },
+  confirmationButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
+  },
+  cancelConfirmButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#ef4444',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    gap: 6,
+  },
+  cancelConfirmButtonText: {
+    color: '#ef4444',
+    fontSize: 14,
+    fontWeight: '600',
   },
   continueButton: {
     flexDirection: 'row',
