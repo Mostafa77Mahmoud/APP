@@ -356,6 +356,59 @@ const ContractTermsList: React.FC = () => {
     [reviewUserModification, editingTermId, analysisTerms, t],
   );
 
+  const handleSubmitExpertFeedback = useCallback(async () => {
+    if (!expertFeedbackTermId || !selectedSessionId) return;
+
+    setIsSubmittingExpertFeedback(prev => ({ ...prev, [expertFeedbackTermId]: true }));
+
+    try {
+      const payload = {
+        session_id: selectedSessionId,
+        term_id: expertFeedbackTermId,
+        feedback_data: {
+          aiAnalysisApproved: currentExpertFeedback.aiAnalysisApproved,
+          expertIsValidSharia: currentExpertFeedback.expertIsValidSharia,
+          expertComment: currentExpertFeedback.expertComment,
+          expertCorrectedShariaIssue: currentExpertFeedback.expertCorrectedShariaIssue,
+          expertCorrectedReference: currentExpertFeedback.expertCorrectedReference,
+          expertCorrectedSuggestion: currentExpertFeedback.expertCorrectedSuggestion
+        }
+      };
+
+      const success = await submitExpertFeedbackAPI(payload);
+
+      if (success) {
+        setExpertFeedbackTermId(null);
+        setCurrentExpertFeedback({
+          aiAnalysisApproved: null,
+          expertIsValidSharia: undefined,
+          expertComment: '',
+          expertCorrectedShariaIssue: '',
+          expertCorrectedReference: '',
+          expertCorrectedSuggestion: ''
+        });
+
+        // Refresh session data
+        if (selectedSessionId) {
+          await loadSessionData(selectedSessionId);
+        }
+
+        Alert.alert(
+          t('expert.feedbackSubmitted') || 'Feedback Submitted',
+          t('expert.feedbackSubmittedMessage') || 'Your expert feedback has been submitted successfully.'
+        );
+      }
+    } catch (error) {
+      console.error('Error submitting expert feedback:', error);
+      Alert.alert(
+        t('error.generic') || 'Error',
+        t('expert.feedbackError') || 'Failed to submit expert feedback'
+      );
+    } finally {
+      setIsSubmittingExpertFeedback(prev => ({ ...prev, [expertFeedbackTermId]: false }));
+    }
+  }, [expertFeedbackTermId, selectedSessionId, currentExpertFeedback, submitExpertFeedbackAPI, loadSessionData, t]);
+
   const handleConfirmChanges = useCallback(
     async (term: FrontendAnalysisTerm) => {
       if (
@@ -935,7 +988,8 @@ const ContractTermsList: React.FC = () => {
                           isReviewingModification[term.term_id])
                       }
                     >
-                      {isTermProcessing && isTermProcessing[term.term_id] ? (
+                      {isTermProcessing && isTermProcessing[term.term_id]<previous_generation>```python
+? (
                         <ActivityIndicator size="small" color="#ffffff" />
                       ) : (
                         <ThumbsUp size={16} color="#ffffff" />
@@ -1056,7 +1110,7 @@ const ContractTermsList: React.FC = () => {
     );
   };
 
-  
+
 
   return (
     <View style={styles.container}>
@@ -1481,7 +1535,7 @@ const ContractTermsList: React.FC = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.modalSendButton}
-                onPress={submitExpertFeedback}
+                onPress={handleSubmitExpertFeedback}
                 disabled={
                   isSubmittingExpertFeedback[expertFeedbackTermId] ||
                   !currentExpertFeedback.expertComment?.trim()

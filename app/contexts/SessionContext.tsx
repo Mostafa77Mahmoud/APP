@@ -53,6 +53,8 @@ interface SessionContextType {
   sessionDetails: SessionDetails | null;
   currentUserRole: UserRole;
   sessionInteractions: SessionInteraction[];
+  selectedSessionId: string | null;
+  loadSessionData: (sessionId: string) => Promise<void>;
   toggleUserRole: () => void;
   setUserRole: (role: UserRole) => void;
   isUploading: boolean;
@@ -92,6 +94,7 @@ const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export const SessionProvider = ({ children }: { children: ReactNode }) => {
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [analysisTerms, setAnalysisTerms] = useState<FrontendAnalysisTerm[] | null>(null);
   const [sessionDetails, setSessionDetails] = useState<SessionDetails | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<UserRole>('regular_user');
@@ -308,6 +311,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
       });
 
       setSessionId(sessionData.session_id);
+      setSelectedSessionId(sessionData.session_id);
       setSessionDetails({
         ...sessionData,
         totalInteractions: getSessionInteractions(sid).length,
@@ -697,6 +701,8 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   return (
     <SessionContext.Provider value={{
       sessionId, 
+      selectedSessionId,
+      loadSessionData,
       analysisTerms, 
       complianceStats, 
       sessionDetails, 
@@ -735,6 +741,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
       getSessionInteractions,
       bookmarkSession,
       getSessionStats,
+      submitExpertFeedback,
     }}>
       {children}
     </SessionContext.Provider>
