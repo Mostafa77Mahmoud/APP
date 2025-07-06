@@ -45,6 +45,13 @@ import {
   FileSearch,
   Eye,
 } from "lucide-react-native";
+import {
+  getSessionDetails,
+  askQuestion,
+  confirmTermModification,
+  reviewUserModification,
+  submitExpertFeedback as submitExpertFeedbackAPI,
+} from "../services/api";
 
 interface ExpertFeedbackData {
   aiAnalysisApproved: boolean | null;
@@ -192,6 +199,8 @@ const ContractTermsList: React.FC = () => {
     currentUserRole,
     updatePdfPreviewInfo,
     submitExpertFeedback,
+    selectedSessionId,
+    loadSessionData,
   } = useSession();
 
   const isDark = theme === "dark";
@@ -793,7 +802,7 @@ const ContractTermsList: React.FC = () => {
             </View>
 
             {/* Expert Feedback Section - Only show for expert users */}
-            {currentUserRole === 'shariah_expert' && (
+            {currentUserRole === "shariah_expert" && (
               <View style={styles.expertFeedbackSection}>
                 <TouchableOpacity
                   style={styles.expertFeedbackButton}
@@ -801,14 +810,15 @@ const ContractTermsList: React.FC = () => {
                 >
                   <ExpertIcon size={16} color="#f59e0b" />
                   <Text style={styles.expertFeedbackButtonText}>
-                    {t('expert.provideFeedback') || 'Provide Expert Feedback'}
+                    {t("expert.provideFeedback") || "Provide Expert Feedback"}
                   </Text>
                 </TouchableOpacity>
                 {term.has_expert_feedback && (
                   <View style={styles.expertFeedbackIndicator}>
                     <ExpertIcon size={14} color="#10b981" />
                     <Text style={styles.expertFeedbackIndicatorText}>
-                      {t('expert.feedbackProvided') || 'Expert feedback provided'}
+                      {t("expert.feedbackProvided") ||
+                        "Expert feedback provided"}
                     </Text>
                   </View>
                 )}
@@ -1044,6 +1054,57 @@ const ContractTermsList: React.FC = () => {
         )}
       </View>
     );
+  };
+
+  const submitExpertFeedback = async () => {
+    if (!selectedSessionId || !expertFeedbackTermId) return;
+
+    try {
+      setIsSubmittingExpertFeedback(prev => ({ ...prev, [expertFeedbackTermId]: true }));
+
+      const payload = {
+        session_id: selectedSessionId,
+        term_id: expertFeedbackTermId,
+        feedback_data: {
+          aiAnalysisApproved: currentExpertFeedback.aiAnalysisApproved,
+          expertIsValidSharia: currentExpertFeedback.expertIsValidSharia,
+          expertComment: currentExpertFeedback.expertComment,
+          expertCorrectedShariaIssue: currentExpertFeedback.expertCorrectedShariaIssue,
+          expertCorrectedReference: currentExpertFeedback.expertCorrectedReference,
+          expertCorrectedSuggestion: currentExpertFeedback.expertCorrectedSuggestion
+        }
+      };
+
+      await submitExpertFeedbackAPI(payload);
+
+      setExpertFeedbackTermId(null);
+      setCurrentExpertFeedback({
+        aiAnalysisApproved: null,
+        expertIsValidSharia: undefined,
+        expertComment: '',
+        expertCorrectedShariaIssue: '',
+        expertCorrectedReference: '',
+        expertCorrectedSuggestion: ''
+      });
+
+      // Refresh session data
+      if (selectedSessionId) {
+        await loadSessionData(selectedSessionId);
+      }
+
+      Alert.alert(
+        t('expert.feedbackSubmitted') || 'Feedback Submitted',
+        t('expert.feedbackSubmittedMessage') || 'Your expert feedback has been submitted successfully.'
+      );
+    } catch (error) {
+      console.error('Error submitting expert feedback:', error);
+      Alert.alert(
+        t('error.generic') || 'Error',
+        t('expert.feedbackError') || 'Failed to submit expert feedback'
+      );
+    } finally {
+      setIsSubmittingExpertFeedback(prev => ({ ...prev, [expertFeedbackTermId]: false }));
+    }
   };
 
   return (
@@ -1469,36 +1530,7 @@ const ContractTermsList: React.FC = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.modalSendButton}
-                onPress={async () => {
-                  if (!expertFeedbackTermId || !currentExpertFeedback.expertComment?.trim()) return;
-                  
-                  setIsSubmittingExpertFeedback(prev => ({ ...prev, [expertFeedbackTermId]: true }));
-                  
-                  const payload = {
-                    term_id: expertFeedbackTermId,
-                    feedback_data: {
-                      aiAnalysisApproved: currentExpertFeedback.aiAnalysisApproved ?? null,
-                      expertIsValidSharia: currentExpertFeedback.expertIsValidSharia ?? false,
-                      expertComment: currentExpertFeedback.expertComment || '',
-                      expertCorrectedShariaIssue: currentExpertFeedback.expertCorrectedShariaIssue || '',
-                      expertCorrectedReference: currentExpertFeedback.expertCorrectedReference || '',
-                      expertCorrectedSuggestion: currentExpertFeedback.expertCorrectedSuggestion || '',
-                    },
-                  };
-                  
-                  const success = await submitExpertFeedback(payload);
-                  
-                  setIsSubmittingExpertFeedback(prev => ({ ...prev, [expertFeedbackTermId]: false }));
-                  
-                  if (success) {
-                    setExpertFeedbackTermId(null);
-                    setCurrentExpertFeedback({});
-                    Alert.alert(
-                      t('expert.feedbackSubmitted') || 'Feedback Submitted',
-                      t('expert.feedbackSubmittedMessage') || 'Your expert feedback has been submitted successfully.'
-                    );
-                  }
-                }}
+                onPress={submitExpertFeedback}
                 disabled={
                   isSubmittingExpertFeedback[expertFeedbackTermId] ||
                   !currentExpertFeedback.expertComment?.trim()
