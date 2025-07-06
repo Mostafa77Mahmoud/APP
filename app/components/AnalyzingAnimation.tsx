@@ -54,8 +54,8 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
       key: 'stage3', 
       icon: Brain, 
       color: '#10b981',
-      title: t('analyzing.steps.stage3') || 'AI Analysis',
-      desc: t('analyzing.steps.stage3.desc') || 'Applying Sharia compliance analysis'
+      title: t('analyzing.steps.stage3') || 'Generate Suggestions',
+      desc: t('analyzing.steps.stage3.desc') || 'Generating Sharia-compliant suggestions'
     },
     { 
       key: 'stage4', 
@@ -324,7 +324,7 @@ const AnalyzingAnimation: React.FC<AnalyzingAnimationProps> = ({
             }
           ]}
         >
-          {currentStage || currentStageData.title}
+          {currentStageData.title}
         </Animated.Text>
 
         <Text style={styles.stageDesc}>

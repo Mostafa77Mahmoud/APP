@@ -190,8 +190,8 @@ const ContractTermsList: React.FC = () => {
     isAnalyzingContract,
     clearSession,
     currentUserRole,
-    setPreviewLoading,
     updatePdfPreviewInfo,
+    submitExpertFeedback,
   } = useSession();
 
   const isDark = theme === "dark";
@@ -792,6 +792,29 @@ const ContractTermsList: React.FC = () => {
               )}
             </View>
 
+            {/* Expert Feedback Section - Only show for expert users */}
+            {currentUserRole === 'shariah_expert' && (
+              <View style={styles.expertFeedbackSection}>
+                <TouchableOpacity
+                  style={styles.expertFeedbackButton}
+                  onPress={() => setExpertFeedbackTermId(term.term_id)}
+                >
+                  <ExpertIcon size={16} color="#f59e0b" />
+                  <Text style={styles.expertFeedbackButtonText}>
+                    {t('expert.provideFeedback') || 'Provide Expert Feedback'}
+                  </Text>
+                </TouchableOpacity>
+                {term.has_expert_feedback && (
+                  <View style={styles.expertFeedbackIndicator}>
+                    <ExpertIcon size={14} color="#10b981" />
+                    <Text style={styles.expertFeedbackIndicatorText}>
+                      {t('expert.feedbackProvided') || 'Expert feedback provided'}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
+
             <View style={styles.suggestionSection}>
               {editingTermId === term.term_id ? (
                 <View style={styles.editContainer}>
@@ -1324,6 +1347,178 @@ const ContractTermsList: React.FC = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Expert Feedback Modal */}
+      {expertFeedbackTermId && currentUserRole === 'shariah_expert' && (
+        <Modal
+          visible={true}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => setExpertFeedbackTermId(null)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                {t('expert.provideFeedback') || 'Provide Expert Feedback'}
+              </Text>
+              <TouchableOpacity
+                style={styles.modalCloseButton}
+                onPress={() => {
+                  setExpertFeedbackTermId(null);
+                  setCurrentExpertFeedback({});
+                }}
+              >
+                <XCircle size={24} color={isDark ? "#9ca3af" : "#6b7280"} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalContent}>
+              <View style={styles.expertFeedbackForm}>
+                <Text style={styles.feedbackLabel}>
+                  {t('expert.aiAnalysisApproval') || 'Do you approve the AI analysis?'}
+                </Text>
+                <View style={styles.approvalButtons}>
+                  <TouchableOpacity
+                    style={[
+                      styles.approvalButton,
+                      currentExpertFeedback.aiAnalysisApproved === true && styles.approvalButtonActive,
+                    ]}
+                    onPress={() =>
+                      setCurrentExpertFeedback(prev => ({ ...prev, aiAnalysisApproved: true }))
+                    }
+                  >
+                    <Text style={styles.approvalButtonText}>
+                      {t('expert.approve') || 'Approve'}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.approvalButton,
+                      currentExpertFeedback.aiAnalysisApproved === false && styles.approvalButtonActive,
+                    ]}
+                    onPress={() =>
+                      setCurrentExpertFeedback(prev => ({ ...prev, aiAnalysisApproved: false }))
+                    }
+                  >
+                    <Text style={styles.approvalButtonText}>
+                      {t('expert.reject') || 'Reject'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <Text style={styles.feedbackLabel}>
+                  {t('expert.isValidSharia') || 'Is this term Sharia compliant?'}
+                </Text>
+                <View style={styles.approvalButtons}>
+                  <TouchableOpacity
+                    style={[
+                      styles.approvalButton,
+                      currentExpertFeedback.expertIsValidSharia === true && styles.approvalButtonActive,
+                    ]}
+                    onPress={() =>
+                      setCurrentExpertFeedback(prev => ({ ...prev, expertIsValidSharia: true }))
+                    }
+                  >
+                    <Text style={styles.approvalButtonText}>
+                      {t('expert.compliant') || 'Compliant'}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.approvalButton,
+                      currentExpertFeedback.expertIsValidSharia === false && styles.approvalButtonActive,
+                    ]}
+                    onPress={() =>
+                      setCurrentExpertFeedback(prev => ({ ...prev, expertIsValidSharia: false }))
+                    }
+                  >
+                    <Text style={styles.approvalButtonText}>
+                      {t('expert.nonCompliant') || 'Non-Compliant'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <Text style={styles.feedbackLabel}>
+                  {t('expert.comment') || 'Expert Comment'}
+                </Text>
+                <TextInput
+                  style={[styles.feedbackInput, { textAlign: isRTL ? 'right' : 'left' }]}
+                  placeholder={t('expert.commentPlaceholder') || 'Provide your expert comment...'}
+                  placeholderTextColor={isDark ? '#6b7280' : '#9ca3af'}
+                  value={currentExpertFeedback.expertComment || ''}
+                  onChangeText={(text) =>
+                    setCurrentExpertFeedback(prev => ({ ...prev, expertComment: text }))
+                  }
+                  multiline
+                  numberOfLines={4}
+                />
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => {
+                  setExpertFeedbackTermId(null);
+                  setCurrentExpertFeedback({});
+                }}
+              >
+                <Text style={styles.modalCancelButtonText}>
+                  {t('term.cancel') || 'Cancel'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalSendButton}
+                onPress={async () => {
+                  if (!expertFeedbackTermId || !currentExpertFeedback.expertComment?.trim()) return;
+                  
+                  setIsSubmittingExpertFeedback(prev => ({ ...prev, [expertFeedbackTermId]: true }));
+                  
+                  const payload = {
+                    term_id: expertFeedbackTermId,
+                    feedback_data: {
+                      aiAnalysisApproved: currentExpertFeedback.aiAnalysisApproved ?? null,
+                      expertIsValidSharia: currentExpertFeedback.expertIsValidSharia ?? false,
+                      expertComment: currentExpertFeedback.expertComment || '',
+                      expertCorrectedShariaIssue: currentExpertFeedback.expertCorrectedShariaIssue || '',
+                      expertCorrectedReference: currentExpertFeedback.expertCorrectedReference || '',
+                      expertCorrectedSuggestion: currentExpertFeedback.expertCorrectedSuggestion || '',
+                    },
+                  };
+                  
+                  const success = await submitExpertFeedback(payload);
+                  
+                  setIsSubmittingExpertFeedback(prev => ({ ...prev, [expertFeedbackTermId]: false }));
+                  
+                  if (success) {
+                    setExpertFeedbackTermId(null);
+                    setCurrentExpertFeedback({});
+                    Alert.alert(
+                      t('expert.feedbackSubmitted') || 'Feedback Submitted',
+                      t('expert.feedbackSubmittedMessage') || 'Your expert feedback has been submitted successfully.'
+                    );
+                  }
+                }}
+                disabled={
+                  isSubmittingExpertFeedback[expertFeedbackTermId] ||
+                  !currentExpertFeedback.expertComment?.trim()
+                }
+              >
+                {isSubmittingExpertFeedback[expertFeedbackTermId] ? (
+                  <ActivityIndicator size="small" color="#ffffff" />
+                ) : (
+                  <Send size={16} color="#ffffff" />
+                )}
+                <Text style={styles.modalSendButtonText}>
+                  {isSubmittingExpertFeedback[expertFeedbackTermId]
+                    ? t('processing') || 'Processing...'
+                    : t('expert.submitFeedback') || 'Submit Feedback'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
 
       {/* Contract Preview Modal */}
       <ContractPreviewModal
@@ -1955,6 +2150,85 @@ const getStyles = (isDark: boolean, isRTL: boolean) =>
       color: "#ffffff",
       fontSize: 16,
       fontWeight: "600",
+    },
+    expertFeedbackSection: {
+      borderTopWidth: 1,
+      borderTopColor: isDark ? "#374151" : "#e5e7eb",
+      paddingTop: 12,
+      gap: 8,
+    },
+    expertFeedbackButton: {
+      flexDirection: isRTL ? "row-reverse" : "row",
+      alignItems: "center",
+      backgroundColor: "transparent",
+      borderWidth: 1,
+      borderColor: "#f59e0b",
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      gap: 6,
+    },
+    expertFeedbackButtonText: {
+      color: "#f59e0b",
+      fontSize: 14,
+      fontWeight: "500",
+    },
+    expertFeedbackIndicator: {
+      flexDirection: isRTL ? "row-reverse" : "row",
+      alignItems: "center",
+      backgroundColor: isDark ? "#064e3b" : "#d1fae5",
+      borderRadius: 6,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      gap: 4,
+    },
+    expertFeedbackIndicatorText: {
+      color: isDark ? "#a7f3d0" : "#059669",
+      fontSize: 12,
+      fontWeight: "500",
+    },
+    expertFeedbackForm: {
+      gap: 16,
+    },
+    feedbackLabel: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: isDark ? "#f9fafb" : "#111827",
+      marginBottom: 8,
+    },
+    approvalButtons: {
+      flexDirection: isRTL ? "row-reverse" : "row",
+      gap: 12,
+      marginBottom: 16,
+    },
+    approvalButton: {
+      flex: 1,
+      backgroundColor: isDark ? "#374151" : "#f3f4f6",
+      borderWidth: 1,
+      borderColor: isDark ? "#4b5563" : "#d1d5db",
+      borderRadius: 8,
+      paddingVertical: 12,
+      alignItems: "center",
+    },
+    approvalButtonActive: {
+      backgroundColor: "#f59e0b",
+      borderColor: "#f59e0b",
+    },
+    approvalButtonText: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: isDark ? "#f9fafb" : "#111827",
+    },
+    feedbackInput: {
+      backgroundColor: isDark ? "#374151" : "#f9fafb",
+      borderWidth: 1,
+      borderColor: isDark ? "#4b5563" : "#d1d5db",
+      borderRadius: 8,
+      padding: 12,
+      fontSize: 16,
+      minHeight: 100,
+      color: isDark ? "#f9fafb" : "#111827",
+      marginBottom: 16,
     },
   });
 

@@ -93,7 +93,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack }) => {
             <View style={styles.roleToggleContainer}>
               <View style={[
                 styles.roleToggle,
-                { backgroundColor: currentUserRole === 'expert_user' ? '#f59e0b' : '#3b82f6' }
+                { backgroundColor: currentUserRole === 'shariah_expert' ? '#f59e0b' : '#3b82f6' }
               ]}>
                 <Text style={styles.roleToggleText}>
                   {currentUserRole === 'regular_user' ? t('user.regular') : t('user.expert')}

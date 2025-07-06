@@ -57,11 +57,11 @@ const UploadScreen: React.FC<UploadScreenProps> = ({ onAnalysisComplete, onBack 
         <Text style={styles.headerTitle}>{t('upload.title')}</Text>
         <View style={styles.roleIndicator}>
           <Text style={styles.roleText}>
-            {currentUserRole === 'expert_user' ? t('user.expert') : t('user.regular')}
+            {currentUserRole === 'shariah_expert' ? t('user.expert') : t('user.regular')}
           </Text>
           <View style={[
             styles.roleIcon,
-            { backgroundColor: currentUserRole === 'expert_user' ? '#f59e0b' : '#3b82f6' }
+            { backgroundColor: currentUserRole === 'shariah_expert' ? '#f59e0b' : '#3b82f6' }
           ]}>
             <UserCheck size={16} color="#ffffff" />
           </View>

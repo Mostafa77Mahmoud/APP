@@ -31,13 +31,13 @@
     "expertReviewed": "Expert Reviewed",
     "steps": {
       "stage1": "Extracting Text",
-      "stage1.desc": "Reading and extracting content from document",
+      "stage1.desc": "Extracting and parsing document content",
       "stage2": "Determine Clauses",
-      "stage2.desc": "Identifying and parsing contract terms",
-      "stage3": "AI Analysis",
-      "stage3.desc": "Analyzing terms with AI algorithms",
+      "stage2.desc": "Identifying contractual clauses and terms",
+      "stage3": "Generate Suggestions",
+      "stage3.desc": "Generating Sharia-compliant suggestions",
       "stage4": "Compliance Check",
-      "stage4.desc": "Checking Sharia law compliance",
+      "stage4.desc": "Evaluating Islamic law compliance",
       "stage5": "Generate Report",
       "stage5.desc": "Preparing final analysis report"
     }
@@ -88,7 +88,7 @@
     "stage4": "Finalizing Document"
   },
   "filter": {
-    "all": "All Terms", 
+    "all": "All Terms",
     "compliant": "Compliant",
     "non-compliant": "Non-Compliant",
     "showAll": "Show All Terms"
@@ -109,26 +109,22 @@
   },
   "user": {
     "regular": "Regular User",
-    "expert": "Expert"
+    "expert": "Expert User"
   },
   "expert": {
-    "feedbackTitle": "Expert Feedback",
     "provideFeedback": "Provide Expert Feedback",
-    "aiAssessmentCorrect": "Is the AI assessment correct?",
-    "yes": "Yes",
-    "no": "No",
-    "correctedCompliance": "Corrected compliance status:",
-    "comments": "Expert Comments",
-    "commentsPlaceholder": "Provide your expert analysis and feedback...",
+    "feedbackProvided": "Expert feedback provided",
+    "aiAnalysisApproval": "Do you approve the AI analysis?",
+    "approve": "Approve",
+    "reject": "Reject",
+    "isValidSharia": "Is this term Sharia compliant?",
+    "compliant": "Compliant",
+    "nonCompliant": "Non-Compliant",
+    "comment": "Expert Comment",
+    "commentPlaceholder": "Provide your expert comment...",
     "submitFeedback": "Submit Feedback",
     "feedbackSubmitted": "Feedback Submitted",
-    "feedbackSubmittedDesc": "Your expert feedback has been recorded",
-    "submissionFailed": "Submission Failed",
-    "submissionFailedDesc": "Could not submit your feedback. Please try again.",
-    "validation": {
-      "assessmentMissing": "Assessment Required",
-      "assessmentMissingDesc": "Please indicate whether the AI assessment is correct"
-    }
+    "feedbackSubmittedMessage": "Your expert feedback has been submitted successfully."
   },
   "questionAnimation": {
     "processing": "Processing your question...",
@@ -165,7 +161,7 @@
     "modifications": "modifications",
     "compliance": {
       "high": "High Compliance",
-      "medium": "Medium Compliance", 
+      "medium": "Medium Compliance",
       "low": "Low Compliance"
     },
     "sort": {

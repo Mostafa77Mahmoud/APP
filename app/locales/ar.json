@@ -31,13 +31,13 @@
     "expertReviewed": "مراجعة الخبراء",
     "steps": {
       "stage1": "استخراج النص",
-      "stage1.desc": "قراءة واستخراج المحتوى من الوثيقة",
+      "stage1.desc": "استخراج ومعالجة محتوى الوثيقة",
       "stage2": "تحديد البنود",
-      "stage2.desc": "تحديد وتحليل شروط العقد",
-      "stage3": "التحليل بالذكاء الاصطناعي",
-      "stage3.desc": "تحليل البنود باستخدام خوارزميات الذكاء الاصطناعي",
+      "stage2.desc": "تحديد البنود والشروط التعاقدية",
+      "stage3": "توليد الاقتراحات",
+      "stage3.desc": "توليد اقتراحات متوافقة مع الشريعة",
       "stage4": "فحص الامتثال",
-      "stage4.desc": "فحص الامتثال لأحكام الشريعة الإسلامية",
+      "stage4.desc": "تقييم الامتثال للشريعة الإسلامية",
       "stage5": "إنشاء التقرير",
       "stage5.desc": "إعداد تقرير التحليل النهائي"
     }
@@ -89,7 +89,7 @@
   },
   "filter": {
     "all": "جميع البنود",
-    "compliant": "متوافق", 
+    "compliant": "متوافق",
     "non-compliant": "غير متوافق",
     "showAll": "إظهار جميع البنود"
   },
@@ -109,26 +109,22 @@
   },
   "user": {
     "regular": "مستخدم عادي",
-    "expert": "خبير"
+    "expert": "مستخدم خبير"
   },
   "expert": {
-    "feedbackTitle": "تعليقات الخبير",
-    "provideFeedback": "تقديم تعليقات الخبير",
-    "aiAssessmentCorrect": "هل تقييم الذكاء الاصطناعي صحيح؟",
-    "yes": "نعم",
-    "no": "لا",
-    "correctedCompliance": "حالة الامتثال المصححة:",
-    "comments": "تعليقات الخبير",
-    "commentsPlaceholder": "قدم تحليلك وتعليقاتك الخبيرة...",
-    "submitFeedback": "إرسال التعليقات",
-    "feedbackSubmitted": "تم إرسال التعليقات",
-    "feedbackSubmittedDesc": "تم تسجيل تعليقاتك الخبيرة",
-    "submissionFailed": "فشل الإرسال",
-    "submissionFailedDesc": "لا يمكن إرسال تعليقاتك. يرجى المحاولة مرة أخرى.",
-    "validation": {
-      "assessmentMissing": "التقييم مطلوب",
-      "assessmentMissingDesc": "يرجى الإشارة إلى ما إذا كان تقييم الذكاء الاصطناعي صحيحاً"
-    }
+    "provideFeedback": "تقديم ملاحظات الخبير",
+    "feedbackProvided": "تم تقديم ملاحظات الخبير",
+    "aiAnalysisApproval": "هل توافق على تحليل الذكي الاصطناعي؟",
+    "approve": "أوافق",
+    "reject": "أرفض",
+    "isValidSharia": "هل هذا البند متوافق مع الشريعة؟",
+    "compliant": "متوافق",
+    "nonCompliant": "غير متوافق",
+    "comment": "تعليق الخبير",
+    "commentPlaceholder": "قدم تعليقك كخبير...",
+    "submitFeedback": "إرسال الملاحظات",
+    "feedbackSubmitted": "تم إرسال الملاحظات",
+    "feedbackSubmittedMessage": "تم إرسال ملاحظات الخبير بنجاح."
   },
   "questionAnimation": {
     "processing": "معالجة سؤالك...",
