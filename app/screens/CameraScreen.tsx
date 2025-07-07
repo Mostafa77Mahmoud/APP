@@ -325,36 +325,23 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
       console.log('Generated document:', documentFile);
       setIsGeneratingPDF(false);
 
-      // Automatically proceed to analysis without showing intermediate alert
-      console.log('Starting contract analysis upload...');
-      setUploadProgress(0);
+      // Clear captured images and reset camera state
+      setCapturedImages([]);
+      setShowPreview(false);
 
-      const result = await uploadContract(documentFile, (progress) => {
-        console.log(`Upload progress: ${progress}%`);
-        setUploadProgress(progress);
+      // Navigate to upload screen with the generated document
+      // This provides the same UX as regular file uploads
+      onNavigate('upload', { 
+        preSelectedFile: documentFile,
+        fromCamera: true,
+        pageCount: capturedImages.length 
       });
 
-      if (result && result.session_id) {
-        console.log('Upload successful, navigating to results');
-        setUploadProgress(100);
-
-        // Brief delay to show completion
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        // Clear captured images and reset state
-        setCapturedImages([]);
-        setShowPreview(false);
-        setUploadProgress(0);
-        onNavigate('results', { sessionId: result.session_id });
-      } else {
-        throw new Error('Invalid response from analysis service');
-      }
     } catch (error) {
-      console.error('Processing/Upload error:', error);
-      setUploadProgress(0);
+      console.error('Document generation error:', error);
       Alert.alert(
-        'Analysis Error',
-        `Failed to process and upload document: ${error instanceof Error ? error.message : 'Unknown error'}`
+        'Document Generation Error',
+        `Failed to generate document: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     } finally {
       setIsProcessing(false);

@@ -12,11 +12,19 @@ import { Button } from './ui/button';
 
 interface UploadAreaProps {
   onAnalysisComplete: (sessionId: string) => void;
+  preSelectedFile?: any;
+  fromCamera?: boolean;
+  pageCount?: number;
 }
 
 const { width: screenWidth } = Dimensions.get('window');
 
-const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
+const UploadArea: React.FC<UploadAreaProps> = ({ 
+  onAnalysisComplete, 
+  preSelectedFile, 
+  fromCamera = false, 
+  pageCount = 1 
+}) => {
   const { t, isRTL } = useLanguage();
   const { theme } = useTheme();
   const { addContract } = useContract();
@@ -31,7 +39,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
     clearSession 
   } = useSession();
   
-  const [selectedFile, setSelectedFile] = useState<any>(null);
+  const [selectedFile, setSelectedFile] = useState<any>(preSelectedFile || null);
   const [dragActive, setDragActive] = useState(false);
   const [isReadyToAnalyze, setIsReadyToAnalyze] = useState(false);
 
@@ -89,6 +97,14 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
       }).start();
     }
   }, [selectedFile, isUploading, isAnalyzingContract]);
+
+  // Handle pre-selected file from camera
+  useEffect(() => {
+    if (preSelectedFile && fromCamera) {
+      setSelectedFile(preSelectedFile);
+      clearSession();
+    }
+  }, [preSelectedFile, fromCamera]);
 
   const processFile = useCallback(async (file: any) => {
     if (file) {
@@ -249,15 +265,21 @@ const UploadArea: React.FC<UploadAreaProps> = ({ onAnalysisComplete }) => {
                 </View>
                 <Text style={styles.fileName} numberOfLines={2}>{selectedFile.name}</Text>
                 <Text style={styles.fileSize}>
-                  {selectedFile.size ? `${(selectedFile.size / 1024).toFixed(1)} KB` : t('upload.unknownSize')}
+                  {selectedFile.file?.size ? `${(selectedFile.file.size / 1024).toFixed(1)} KB` : 
+                   selectedFile.size ? `${(selectedFile.size / 1024).toFixed(1)} KB` : 
+                   fromCamera ? `Generated from ${pageCount} page${pageCount > 1 ? 's' : ''}` : 
+                   t('upload.unknownSize')}
                 </Text>
                 <View style={styles.fileTypeContainer}>
                   <Text style={styles.fileType}>
-                    {selectedFile.mimeType === 'application/pdf' ? 'PDF' :
-                     selectedFile.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' : 'TXT'}
+                    {selectedFile.type === 'application/pdf' ? 'PDF' :
+                     selectedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' : 
+                     selectedFile.type === 'text/plain' && fromCamera ? 'CAMERA' : 'TXT'}
                   </Text>
                 </View>
-                <Text style={styles.statusSubText}>{t('upload.readyToAnalyze')}</Text>
+                <Text style={styles.statusSubText}>
+                  {fromCamera ? `${t('camera.title')} - ${t('upload.readyToAnalyze')}` : t('upload.readyToAnalyze')}
+                </Text>
               </View>
             ) : hasError ? (
               <View style={styles.statusContainer}>

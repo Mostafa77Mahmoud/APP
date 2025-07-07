@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSession } from '../contexts/SessionContext';
+import { useContract } from '../contexts/ContractContext';
 import UploadArea from '../components/UploadArea';
 import AnalyzingAnimation from '../components/AnalyzingAnimation';
 import { ArrowLeft, ArrowRight, Upload as UploadIcon, FileText, Loader, UserCheck } from 'lucide-react-native';
@@ -11,13 +12,23 @@ import { ArrowLeft, ArrowRight, Upload as UploadIcon, FileText, Loader, UserChec
 interface UploadScreenProps {
   onAnalysisComplete: (sessionId: string) => void;
   onBack: () => void;
+  preSelectedFile?: any;
+  fromCamera?: boolean;
+  pageCount?: number;
 }
 
-const UploadScreen: React.FC<UploadScreenProps> = ({ onAnalysisComplete, onBack }) => {
+const UploadScreen: React.FC<UploadScreenProps> = ({ 
+  onAnalysisComplete, 
+  onBack, 
+  preSelectedFile, 
+  fromCamera = false, 
+  pageCount = 1 
+}) => {
   const { t, isRTL } = useLanguage();
   const { theme } = useTheme();
   const { isAnalyzingContract, isUploading, uploadProgress, currentUserRole } = useSession();
   const [analysisStage, setAnalysisStage] = useState(1);
+  const [cameraDocument, setCameraDocument] = useState<any>(preSelectedFile);
 
   const isDark = theme === 'dark';
   const styles = getStyles(isDark, isRTL);
@@ -48,6 +59,43 @@ const UploadScreen: React.FC<UploadScreenProps> = ({ onAnalysisComplete, onBack 
     }, 1500);
   };
 
+  // Auto-trigger analysis if coming from camera
+  React.useEffect(() => {
+    if (cameraDocument && fromCamera) {
+      // Small delay to show the upload screen briefly
+      setTimeout(() => {
+        // Trigger analysis automatically
+        handleCameraDocumentAnalysis();
+      }, 1000);
+    }
+  }, [cameraDocument, fromCamera]);
+
+  const handleCameraDocumentAnalysis = async () => {
+    if (!cameraDocument) return;
+
+    try {
+      const { uploadAndAnalyzeContract } = useSession();
+      const { addContract } = useContract();
+
+      const newSessionId = await uploadAndAnalyzeContract(cameraDocument);
+      if (newSessionId) {
+        // Add to contract history
+        addContract({
+          id: newSessionId,
+          name: cameraDocument.name,
+          analysisDate: new Date().toISOString(),
+          complianceScore: 0,
+          sessionId: newSessionId,
+          fileSize: cameraDocument.file ? `${(cameraDocument.file.size / 1024).toFixed(1)} KB` : 'Generated from camera',
+        });
+
+        handleAnalysisComplete(newSessionId);
+      }
+    } catch (error) {
+      console.error('Camera document analysis failed:', error);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -69,7 +117,12 @@ const UploadScreen: React.FC<UploadScreenProps> = ({ onAnalysisComplete, onBack 
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <UploadArea onAnalysisComplete={handleAnalysisComplete} />
+        <UploadArea 
+          onAnalysisComplete={handleAnalysisComplete}
+          preSelectedFile={cameraDocument}
+          fromCamera={fromCamera}
+          pageCount={pageCount}
+        />
       </ScrollView>
 
       {/* Show the AnalyzingAnimation as a full-screen overlay during analysis */}
