@@ -1,0 +1,34 @@
+📤 API: Added native file to FormData: 
+Object {uri: "file://documents/contract_1751885068323.pdf", type: "application/pdf", name: "contract_1751885068323.pdf"}
+Upload progress: 30%
+📤 API: Request headers prepared
+Upload progress: 50%
+📤 API: Sending request to: http://localhost:5000/analyze
+📤 API: FormData entries:
+  file: [object Object]
+📤 API: Response received: 
+Object {status: 400, statusText: "BAD REQUEST", contentType: "application/json"}
+Upload progress: 100%
+❌ API: Upload failed: 
+Object {status: 400, statusText: "BAD REQUEST", errorText: "{↵  "error": "No file sent."↵}↵"}
+errorText: "{↵ "error": "No file sent."↵}↵"
+status: 400
+statusText: "BAD REQUEST"
+[[Prototype]]: Object
+
+❌ API: Upload error: 
+Error {}
+message: "Upload failed (400): {↵ "error": "No file sent."↵}↵"
+stack: "Error: Upload failed (400): {↵ "error": "No file sent."↵}↵↵ at uploadContract (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:151485:15)↵ at async handleConfirm (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:152071:24)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object
+
+Upload progress: 0%
+Processing/Upload error: 
+Error {}
+message: "Upload failed (400): {↵ "error": "No file sent."↵}↵"
+stack: "Error: Upload failed (400): {↵ "error": "No file sent."↵}↵↵ at uploadContract (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:151485:15)↵ at async handleConfirm (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:152071:24)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object
