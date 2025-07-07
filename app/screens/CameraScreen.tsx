@@ -198,184 +198,74 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
     }
   };
 
-  // Enhanced document generation with proper multi-page support
-  const generateDocumentFromImages = async (): Promise<{ uri: string; name: string; type: string; images?: any[]; file?: File } | null> => {
+  // PDF generation for mobile platforms only
+  const generateDocumentFromImages = async (): Promise<{ uri: string; name: string; type: string } | null> => {
     try {
       if (capturedImages.length === 0) {
         throw new Error('No images to convert');
       }
 
+      // Skip PDF generation for web platform
+      if (Platform.OS === 'web') {
+        throw new Error('PDF generation is only supported on mobile platforms');
+      }
+
       setIsGeneratingPDF(true);
 
-      // Convert all images to base64
-      const base64Images = await Promise.all(
-        capturedImages.map(async (image, index) => {
-          try {
-            const base64 = await convertImageToBase64(image.uri);
-            return { ...image, base64, pageNumber: index + 1 };
-          } catch (error) {
-            console.error(`Error converting image ${index + 1}:`, error);
-            throw new Error(`Failed to process page ${index + 1}`);
-          }
-        })
-      );
+      // Dynamically import react-native-html-to-pdf
+      const RNHTMLtoPDF = require('react-native-html-to-pdf');
+
+      // Build HTML string with all captured images
+      const htmlContent = `
+        <html>
+          <head>
+            <meta charset="UTF-8">
+          </head>
+          <body style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
+            ${capturedImages.map((image, index) => `
+              <div style="page-break-after: ${index < capturedImages.length - 1 ? 'always' : 'avoid'}; text-align: center; padding: 20px;">
+                <img src="${image.uri}" style="width: 100%; height: auto; margin-bottom: 20px;" />
+              </div>
+            `).join('')}
+          </body>
+        </html>
+      `;
 
       const timestamp = Date.now();
-      const fileName = `contract_${timestamp}`;
+      const fileName = `contract_${timestamp}.pdf`;
 
-      if (Platform.OS === 'web') {
-        // Create HTML content for download
-        const htmlContent = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <title>Contract Document - ${capturedImages.length} ${capturedImages.length === 1 ? 'Page' : 'Pages'}</title>
-            <style>
-              * { margin: 0; padding: 0; box-sizing: border-box; }
-              body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; background: #f8fafc; }
-              .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-              .header { text-align: center; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
-              .header h1 { color: #10b981; font-size: 28px; margin-bottom: 10px; }
-              .header p { color: #6b7280; font-size: 16px; }
-              .page { background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); page-break-after: always; }
-              .page:last-child { page-break-after: avoid; margin-bottom: 0; }
-              .page-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; color: #1f2937; text-align: center; }
-              .image-container { text-align: center; border: 2px dashed #e5e7eb; border-radius: 8px; padding: 20px; background: #f9fafb; }
-              img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-              .page-info { margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; font-size: 14px; color: #6b7280; }
-              .stats { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-              @media print { 
-                body { background: white; }
-                .container { max-width: none; padding: 0; }
-                .page { margin-bottom: 0; box-shadow: none; border-radius: 0; }
-              }
-              @media (max-width: 768px) {
-                .container { padding: 10px; }
-                .header, .page { padding: 20px; }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h1>📄 Contract Analysis Document</h1>
-                <p>Generated on ${new Date().toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}</p>
-                <p><strong>${capturedImages.length}</strong> ${capturedImages.length === 1 ? 'Page' : 'Pages'} • Ready for Sharia Compliance Analysis</p>
-              </div>
-              
-              ${base64Images.map((image, index) => `
-                <div class="page">
-                  <div class="page-title">📋 Page ${index + 1} of ${capturedImages.length}</div>
-                  <div class="image-container">
-                    <img src="${image.base64}" alt="Contract Page ${index + 1}" loading="lazy" />
-                  </div>
-                  <div class="page-info">
-                    <div class="stats">
-                      <span><strong>Resolution:</strong> ${image.width} × ${image.height}px</span>
-                      <span><strong>Captured:</strong> ${new Date(image.timestamp).toLocaleString()}</span>
-                      <span><strong>Quality:</strong> High</span>
-                    </div>
-                  </div>
-                </div>
-              `).join('')}
-              
-              <div style="text-align: center; padding: 20px; color: #6b7280; font-size: 14px;">
-                <p>🔒 This document is ready for secure Sharia compliance analysis</p>
-              </div>
-            </div>
-          </body>
-          </html>
-        `;
+      // Generate PDF options
+      const options = {
+        html: htmlContent,
+        fileName: fileName,
+        directory: 'Documents',
+        base64: false,
+        width: 612,
+        height: 792,
+        paddingLeft: 0,
+        paddingRight: 0,
+        paddingTop: 0,
+        paddingBottom: 0,
+      };
 
-        // Create HTML blob for download
-        const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
-        const htmlUrl = URL.createObjectURL(htmlBlob);
-        
-        // Auto-download the HTML document
-        const a = document.createElement('a');
-        a.href = htmlUrl;
-        a.download = `${fileName}.html`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+      // Generate the PDF
+      const pdfResult = await RNHTMLtoPDF.convert(options);
 
-        // For multi-page uploads, return the first image as the primary file
-        // and pass the rest as additional data
-        if (capturedImages.length === 1) {
-          // Single page - send as regular image
-          const singleImageBlob = await fetch(base64Images[0].base64).then(r => r.blob());
-          const singleImageFile = new File([singleImageBlob], `${fileName}.jpg`, { type: 'image/jpeg' });
-          
-          return {
-            uri: URL.createObjectURL(singleImageFile),
-            name: `${fileName}.jpg`,
-            type: 'image/jpeg',
-            file: singleImageFile
-          };
-        } else {
-          // Multi-page - create a text file with all base64 images
-          const multiPageData = base64Images.map((img, index) => 
-            `--- PAGE ${index + 1} ---\n${img.base64}\n`
-          ).join('\n');
-          
-          const multiPageBlob = new Blob([multiPageData], { type: 'text/plain' });
-          const multiPageFile = new File([multiPageBlob], `${fileName}_multipage.txt`, { type: 'text/plain' });
-          
-          return {
-            uri: URL.createObjectURL(multiPageFile),
-            name: `${fileName}_multipage.txt`,
-            type: 'text/plain',
-            file: multiPageFile,
-            images: base64Images,
-            metadata: {
-              totalPages: capturedImages.length,
-              createdAt: new Date().toISOString(),
-              platform: 'web'
-            }
-          };
-        }
-      } else {
-        // For native platforms, create a text file with base64 data
-        if (capturedImages.length === 1) {
-          // Single page
-          return {
-            uri: base64Images[0].uri,
-            name: `${fileName}.jpg`,
-            type: 'image/jpeg',
-            images: base64Images
-          };
-        } else {
-          // Multi-page
-          const multiPageData = base64Images.map((img, index) => 
-            `--- PAGE ${index + 1} ---\n${img.base64}\n`
-          ).join('\n');
-          
-          return {
-            uri: `data:text/plain;charset=utf-8,${encodeURIComponent(multiPageData)}`,
-            name: `${fileName}_multipage.txt`,
-            type: 'text/plain',
-            images: base64Images,
-            metadata: {
-              totalPages: capturedImages.length,
-              createdAt: new Date().toISOString(),
-              platform: 'native'
-            }
-          };
-        }
+      if (!pdfResult.filePath) {
+        throw new Error('PDF generation failed - no file path returned');
       }
+
+      return {
+        uri: pdfResult.filePath,
+        name: fileName,
+        type: 'application/pdf'
+      };
+
     } catch (error) {
-      console.error('Document generation error:', error);
+      console.error('PDF generation error:', error);
       Alert.alert(
-        'Document Generation Error',
-        error instanceof Error ? error.message : 'Failed to generate document. Please try again.'
+        'PDF Generation Error',
+        error instanceof Error ? error.message : 'Failed to generate PDF. Please try again.'
       );
       return null;
     } finally {

@@ -1,0 +1,39 @@
+Processing/Upload error: 
+Error {}
+message: "Failed to generate document"
+stack: "Error: Failed to generate document↵ at handleConfirm (http://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/app/screens/CameraScreen.bundle//&platform=web&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable&dev=true&minify=false&modulesOnly=true&runModule=false&shallow=true:261:17)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object
+
+PDF generation error: 
+Error {}
+message: "PDF generation is only supported on mobile platforms"
+stack: "Error: PDF generation is only supported on mobile platforms↵ at generateDocumentFromImages (http://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/app/screens/CameraScreen.bundle//&platform=web&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable&dev=true&minify=false&modulesOnly=true&runModule=false&shallow=true:194:17)↵ at handleConfirm (http://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/app/screens/CameraScreen.bundle//&platform=web&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable&dev=true&minify=false&modulesOnly=true&runModule=false&shallow=true:259:36)↵ at onClick (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:32797:15)↵ at processDispatchQueue (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:15397:15)↵ at https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:15694:9↵ at batchedUpdates$1 (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:9065:40)↵ at dispatchEventForPluginEventSystem (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:15477:7)↵ at dispatchEvent (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:17559:33)↵ at dispatchDiscreteEvent (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:17541:60)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object
+
+Processing/Upload error: 
+Error {}
+message: "Failed to generate document"
+stack: "Error: Failed to generate document↵ at handleConfirm (http://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/app/screens/CameraScreen.bundle//&platform=web&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable&dev=true&minify=false&modulesOnly=true&runModule=false&shallow=true:261:17)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object
+
+PDF generation error: 
+Error {}
+message: "PDF generation is only supported on mobile platforms"
+stack: "Error: PDF generation is only supported on mobile platforms↵ at generateDocumentFromImages (http://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/app/screens/CameraScreen.bundle//&platform=web&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable&dev=true&minify=false&modulesOnly=true&runModule=false&shallow=true:194:17)↵ at handleConfirm (http://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/app/screens/CameraScreen.bundle//&platform=web&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable&dev=true&minify=false&modulesOnly=true&runModule=false&shallow=true:259:36)↵ at onClick (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:32797:15)↵ at processDispatchQueue (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:15397:15)↵ at https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:15694:9↵ at batchedUpdates$1 (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:9065:40)↵ at dispatchEventForPluginEventSystem (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:15477:7)↵ at dispatchEvent (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:17559:33)↵ at dispatchDiscreteEvent (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:17541:60)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object
+
+Processing/Upload error: 
+Error {}
+
+at t.value (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
