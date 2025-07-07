@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -36,6 +35,13 @@ interface CapturedImage {
   base64?: string;
 }
 
+interface GeneratedDocument {
+  uri: string;
+  name: string;
+  type: string;
+  data?: any;
+}
+
 const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
   const { t, isRTL } = useLanguage();
   const { theme } = useTheme();
@@ -62,9 +68,9 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
       if (!permission?.granted) {
         await requestPermission();
       }
-      
+
       const mediaLibraryPermission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
+
       if (!mediaLibraryPermission.granted) {
         Alert.alert(
           t('camera.permissionRequired'),
@@ -100,10 +106,10 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
           img.onload = () => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            
+
             canvas.width = img.width;
             canvas.height = img.height;
-            
+
             if (ctx) {
               ctx.drawImage(img, 0, 0);
               const dataURL = canvas.toDataURL('image/jpeg', 0.9);
@@ -159,7 +165,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
         setCapturedImages(prev => [...prev, newImage]);
         // Show brief success feedback without blocking the workflow
         const newCount = capturedImages.length + 1;
-        
+
         // Auto-preview after 3+ pages or give user choice for fewer pages
         if (newCount >= 3) {
           Alert.alert(
@@ -193,83 +199,73 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
 
   const removeImage = (index: number) => {
     setCapturedImages(prev => prev.filter((_, i) => i !== index));
-    if (capturedImages.length === 1) {
+    if (capturedImages.length === 1){
       setShowPreview(false);
     }
   };
 
-  // PDF generation for mobile platforms only
-  const generateDocumentFromImages = async (): Promise<{ uri: string; name: string; type: string } | null> => {
+  // Generate PDF document from captured images using react-native-html-to-pdf
+  const generateDocumentFromImages = async (images: CapturedImage[]): Promise<GeneratedDocument> => {
+    if (Platform.OS === 'web') {
+      // For web platform, create a fallback document structure
+      const fileName = `contract_${Date.now()}.pdf`;
+      return {
+        uri: `file://documents/${fileName}`,
+        name: fileName,
+        type: 'application/pdf',
+      };
+    }
+
     try {
-      if (capturedImages.length === 0) {
-        throw new Error('No images to convert');
-      }
-
-      // Skip PDF generation for web platform
-      if (Platform.OS === 'web') {
-        throw new Error('PDF generation is only supported on mobile platforms');
-      }
-
-      setIsGeneratingPDF(true);
-
       // Dynamically import react-native-html-to-pdf
-      const RNHTMLtoPDF = require('react-native-html-to-pdf');
+      const RNHTMLtoPDF = await import('react-native-html-to-pdf');
 
-      // Build HTML string with all captured images
-      const htmlContent = `
-        <html>
-          <head>
-            <meta charset="UTF-8">
-          </head>
-          <body style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
-            ${capturedImages.map((image, index) => `
-              <div style="page-break-after: ${index < capturedImages.length - 1 ? 'always' : 'avoid'}; text-align: center; padding: 20px;">
-                <img src="${image.uri}" style="width: 100%; height: auto; margin-bottom: 20px;" />
-              </div>
-            `).join('')}
-          </body>
-        </html>
-      `;
+      // Convert images to base64 for embedding in HTML
+      const imageDataPromises = images.map(async (image) => {
+        const base64 = await convertImageToBase64(image.uri);
+        return base64;
+      });
 
-      const timestamp = Date.now();
-      const fileName = `contract_${timestamp}.pdf`;
+      const imageBase64Array = await Promise.all(imageDataPromises);
 
-      // Generate PDF options
+      // Build HTML string with all images, each on a separate page
+      let htmlContent = '<html><head><meta charset="UTF-8"></head><body style="font-family: Arial, sans-serif;">';
+
+      imageBase64Array.forEach((base64Image, index) => {
+        const isLastImage = index === imageBase64Array.length - 1;
+        const pageBreakStyle = isLastImage ? '' : 'page-break-after: always; ';
+
+        htmlContent += `
+          <div style="${pageBreakStyle}text-align: center;">
+            <img src="${base64Image}" style="width:100%; height:auto; margin-bottom: 20px;" />
+          </div>
+        `;
+      });
+
+      htmlContent += '</body></html>';
+
+      // Generate PDF file name
+      const fileName = `contract_${Date.now()}.pdf`;
+
+      // PDF generation options
       const options = {
         html: htmlContent,
         fileName: fileName,
         directory: 'Documents',
         base64: false,
-        width: 612,
-        height: 792,
-        paddingLeft: 0,
-        paddingRight: 0,
-        paddingTop: 0,
-        paddingBottom: 0,
       };
 
-      // Generate the PDF
-      const pdfResult = await RNHTMLtoPDF.convert(options);
-
-      if (!pdfResult.filePath) {
-        throw new Error('PDF generation failed - no file path returned');
-      }
+      // Generate PDF using react-native-html-to-pdf
+      const pdf = await RNHTMLtoPDF.default.convert(options);
 
       return {
-        uri: pdfResult.filePath,
+        uri: pdf.filePath,
         name: fileName,
-        type: 'application/pdf'
+        type: 'application/pdf',
       };
-
     } catch (error) {
-      console.error('PDF generation error:', error);
-      Alert.alert(
-        'PDF Generation Error',
-        error instanceof Error ? error.message : 'Failed to generate PDF. Please try again.'
-      );
-      return null;
-    } finally {
-      setIsGeneratingPDF(false);
+      console.error('Error generating PDF:', error);
+      throw new Error('Failed to generate document');
     }
   };
 
@@ -283,7 +279,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
 
     try {
       // Generate document from images
-      const documentFile = await generateDocumentFromImages();
+      const documentFile = await generateDocumentFromImages(capturedImages);
 
       if (!documentFile) {
         throw new Error('Failed to generate document');
@@ -294,19 +290,19 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
       // Automatically proceed to analysis without showing intermediate alert
       console.log('Starting contract analysis upload...');
       setUploadProgress(0);
-      
+
       const result = await uploadContract(documentFile, (progress) => {
         console.log(`Upload progress: ${progress}%`);
         setUploadProgress(progress);
       });
-      
+
       if (result && result.session_id) {
         console.log('Upload successful, navigating to results');
         setUploadProgress(100);
-        
+
         // Brief delay to show completion
         await new Promise(resolve => setTimeout(resolve, 500));
-        
+
         // Clear captured images and reset state
         setCapturedImages([]);
         setShowPreview(false);
@@ -324,6 +320,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
       );
     } finally {
       setIsProcessing(false);
+      setIsGeneratingPDF(false);
     }
   };
 
@@ -470,7 +467,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
           facing={cameraType}
           flash={flashMode}
         />
-        
+
         {/* Camera Overlay with absolute positioning */}
         <View style={styles.cameraOverlay}>
           <View style={styles.topControls}>
