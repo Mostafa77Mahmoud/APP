@@ -40,6 +40,8 @@ interface GeneratedDocument {
   name: string;
   type: string;
   data?: any;
+  file?: File; // For web platform File object
+  images?: CapturedImage[]; // For multi-page processing
 }
 
 const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
@@ -207,17 +209,51 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
   // Generate PDF document from captured images using react-native-html-to-pdf
   const generateDocumentFromImages = async (images: CapturedImage[]): Promise<GeneratedDocument> => {
     if (Platform.OS === 'web') {
-      // For web platform, create a fallback document structure
-      const fileName = `contract_${Date.now()}.pdf`;
-      return {
-        uri: `file://documents/${fileName}`,
-        name: fileName,
-        type: 'application/pdf',
-      };
+      try {
+        // For web platform, we'll create a multi-page document with images
+        // Convert images to base64 for embedding in HTML
+        const imageDataPromises = images.map(async (image) => {
+          const base64 = await convertImageToBase64(image.uri);
+          return base64;
+        });
+
+        const imageBase64Array = await Promise.all(imageDataPromises);
+
+        // Create a text file containing the image data for backend processing
+        const fileName = `contract_multipage_${Date.now()}.txt`;
+        const imageDataString = JSON.stringify({
+          images: imageBase64Array,
+          metadata: {
+            totalPages: images.length,
+            timestamp: Date.now(),
+            captureInfo: images.map((img, index) => ({
+              pageNumber: index + 1,
+              width: img.width,
+              height: img.height,
+              timestamp: img.timestamp
+            }))
+          }
+        });
+
+        // Create a Blob for web upload
+        const blob = new Blob([imageDataString], { type: 'text/plain' });
+        const file = new File([blob], fileName, { type: 'text/plain' });
+
+        return {
+          uri: URL.createObjectURL(blob),
+          name: fileName,
+          type: 'text/plain',
+          file: file, // Include the File object for web FormData
+          images: images, // Include images for multi-page processing
+        };
+      } catch (error) {
+        console.error('Error creating web document:', error);
+        throw new Error('Failed to generate document for web platform');
+      }
     }
 
     try {
-      // Dynamically import react-native-html-to-pdf
+      // Dynamically import react-native-html-to-pdf for native platforms
       const RNHTMLtoPDF = await import('react-native-html-to-pdf');
 
       // Convert images to base64 for embedding in HTML
@@ -276,6 +312,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
     }
 
     setIsProcessing(true);
+    setIsGeneratingPDF(true);
 
     try {
       // Generate document from images
@@ -286,6 +323,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
       }
 
       console.log('Generated document:', documentFile);
+      setIsGeneratingPDF(false);
 
       // Automatically proceed to analysis without showing intermediate alert
       console.log('Starting contract analysis upload...');
