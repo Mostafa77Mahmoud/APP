@@ -20,6 +20,7 @@
     "@types/react-native-dotenv": "^0.2.2",
     "@vitejs/plugin-react": "^4.6.0",
     "clsx": "^2.1.1",
+    "dotenv": "^17.1.0",
     "drizzle-kit": "^0.31.4",
     "drizzle-zod": "^0.8.2",
     "expo": "^53.0.17",
