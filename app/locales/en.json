@@ -77,10 +77,11 @@
     "non-compliant": "Non-Compliant",
     "fullText": "Full Term Text",
     "why": "Why This Term Is Problematic",
-    "reference": "Reference",
+    "reference": "AAOIFI Reference",
     "suggestion": "Suggested Modification",
     "editSuggestion": "Edit Suggestion",
     "questionPlaceholder": "Ask a question about this term...",
+    "askQuestion": "Ask a Question",
     "saveAndReview": "Save & Review",
     "cancel": "Cancel",
     "confirmed": "Changes Confirmed",
@@ -333,7 +334,9 @@
     "close": "Close",
     "clear": "Clear",
     "loading": "Loading...",
-    "success": "Success"
+    "success": "Success",
+    "download": "Download",
+    "share": "Share"
   },
    "sidebar": {
     "title": "Menu",
