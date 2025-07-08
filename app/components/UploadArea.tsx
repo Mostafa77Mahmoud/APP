@@ -100,10 +100,19 @@ const UploadArea: React.FC<UploadAreaProps> = ({
   // Handle pre-selected file from camera
   useEffect(() => {
     if (preSelectedFile && fromCamera) {
+      console.log('🎯 UploadArea: Received camera document:', {
+        name: preSelectedFile.name,
+        type: preSelectedFile.type,
+        size: preSelectedFile.size,
+        hasFile: !!preSelectedFile.file,
+        hasImages: !!preSelectedFile.images,
+        pageCount: preSelectedFile.images?.length || 1
+      });
       setSelectedFile(preSelectedFile);
+      setIsReadyToAnalyze(true);
       clearSession();
     }
-  }, [preSelectedFile, fromCamera]);
+  }, [preSelectedFile, fromCamera, clearSession]);
 
   const processFile = useCallback(async (file: any) => {
     if (file) {
@@ -201,39 +210,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
   const isProcessing = isUploading || isAnalyzingContract;
   const hasError = uploadError || analysisError;
 
-  const handleCameraDocumentAnalysis = async () => {
-    if (!cameraDocument) {
-      console.error('No camera document available for analysis');
-      return;
-    }
-
-    try {
-      console.log('Starting camera document analysis:', {
-        name: cameraDocument.name,
-        type: cameraDocument.type,
-        hasFile: !!cameraDocument.file,
-        hasImages: !!cameraDocument.images
-      });
-
-      const newSessionId = await uploadAndAnalyzeContract(cameraDocument);
-      if (newSessionId) {
-        // Add to contract history
-        addContract({
-          id: newSessionId,
-          name: cameraDocument.name,
-          analysisDate: new Date().toISOString(),
-          complianceScore: 0,
-          sessionId: newSessionId,
-          fileSize: cameraDocument.file ? `${(cameraDocument.file.size / 1024).toFixed(1)} KB` : 'Generated from camera',
-        });
-
-        console.log('Camera document analysis completed successfully:', newSessionId);
-        handleAnalysisComplete(newSessionId);
-      }
-    } catch (error) {
-      console.error('Camera document analysis failed:', error);
-    }
-  };
+  
 
   return (
     <Animated.View style={[{ transform: [{ scale: scaleAnim }] }]}>
@@ -298,9 +275,9 @@ const UploadArea: React.FC<UploadAreaProps> = ({
                 </View>
                 <Text style={styles.fileName} numberOfLines={2}>{selectedFile.name}</Text>
                 <Text style={styles.fileSize}>
-                  {selectedFile.file?.size ? `${(selectedFile.file.size / 1024).toFixed(1)} KB` : 
-                   selectedFile.size ? `${(selectedFile.size / 1024).toFixed(1)} KB` : 
-                   fromCamera ? `Generated from ${pageCount} page${pageCount > 1 ? 's' : ''}` : 
+                  {selectedFile.size ? `${(selectedFile.size / 1024).toFixed(1)} KB` : 
+                   selectedFile.file?.size ? `${(selectedFile.file.size / 1024).toFixed(1)} KB` : 
+                   fromCamera ? `Generated from ${selectedFile.images?.length || pageCount} page${(selectedFile.images?.length || pageCount) > 1 ? 's' : ''}` : 
                    t('upload.unknownSize')}
                 </Text>
                 <View style={styles.fileTypeContainer}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -30,6 +30,20 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   const [analysisStage, setAnalysisStage] = useState(1);
   const [cameraDocument, setCameraDocument] = useState<any>(preSelectedFile);
 
+  // Update camera document when preSelectedFile changes
+  useEffect(() => {
+    if (preSelectedFile && fromCamera) {
+      console.log('📱 UploadScreen: Received camera document:', {
+        name: preSelectedFile.name,
+        type: preSelectedFile.type,
+        size: preSelectedFile.size,
+        hasFile: !!preSelectedFile.file,
+        imageCount: preSelectedFile.images?.length || 1
+      });
+      setCameraDocument(preSelectedFile);
+    }
+  }, [preSelectedFile, fromCamera]);
+
   const isDark = theme === 'dark';
   const styles = getStyles(isDark, isRTL);
 
@@ -59,42 +73,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
     }, 1500);
   };
 
-  // Auto-trigger analysis if coming from camera
-  React.useEffect(() => {
-    if (cameraDocument && fromCamera) {
-      // Small delay to show the upload screen briefly
-      setTimeout(() => {
-        // Trigger analysis automatically
-        handleCameraDocumentAnalysis();
-      }, 1000);
-    }
-  }, [cameraDocument, fromCamera]);
-
-  const handleCameraDocumentAnalysis = async () => {
-    if (!cameraDocument) return;
-
-    try {
-      const { uploadAndAnalyzeContract } = useSession();
-      const { addContract } = useContract();
-
-      const newSessionId = await uploadAndAnalyzeContract(cameraDocument);
-      if (newSessionId) {
-        // Add to contract history
-        addContract({
-          id: newSessionId,
-          name: cameraDocument.name,
-          analysisDate: new Date().toISOString(),
-          complianceScore: 0,
-          sessionId: newSessionId,
-          fileSize: cameraDocument.file ? `${(cameraDocument.file.size / 1024).toFixed(1)} KB` : 'Generated from camera',
-        });
-
-        handleAnalysisComplete(newSessionId);
-      }
-    } catch (error) {
-      console.error('Camera document analysis failed:', error);
-    }
-  };
+  
 
   return (
     <SafeAreaView style={styles.container}>
