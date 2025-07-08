@@ -111,6 +111,13 @@ const UploadArea: React.FC<UploadAreaProps> = ({
       setSelectedFile(preSelectedFile);
       setIsReadyToAnalyze(true);
       clearSession();
+      
+      // Add slide-in animation for the analyze button
+      Animated.timing(slideAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
     }
   }, [preSelectedFile, fromCamera, clearSession]);
 

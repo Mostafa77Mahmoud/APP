@@ -13,6 +13,7 @@ interface UploadScreenProps {
   onAnalysisComplete: (sessionId: string) => void;
   onBack: () => void;
   preSelectedFile?: any;
+  file?: any;
   fromCamera?: boolean;
   pageCount?: number;
 }
@@ -21,6 +22,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   onAnalysisComplete, 
   onBack, 
   preSelectedFile, 
+  file,
   fromCamera = false, 
   pageCount = 1 
 }) => {
@@ -28,21 +30,22 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   const { theme } = useTheme();
   const { isAnalyzingContract, isUploading, uploadProgress, currentUserRole } = useSession();
   const [analysisStage, setAnalysisStage] = useState(1);
-  const [cameraDocument, setCameraDocument] = useState<any>(preSelectedFile);
+  const [cameraDocument, setCameraDocument] = useState<any>(preSelectedFile || file);
 
-  // Update camera document when preSelectedFile changes
+  // Update camera document when preSelectedFile or file changes
   useEffect(() => {
-    if (preSelectedFile && fromCamera) {
+    const documentToUse = preSelectedFile || file;
+    if (documentToUse && fromCamera) {
       console.log('📱 UploadScreen: Received camera document:', {
-        name: preSelectedFile.name,
-        type: preSelectedFile.type,
-        size: preSelectedFile.size,
-        hasFile: !!preSelectedFile.file,
-        imageCount: preSelectedFile.images?.length || 1
+        name: documentToUse.name,
+        type: documentToUse.type,
+        size: documentToUse.size,
+        hasFile: !!documentToUse.file,
+        imageCount: documentToUse.images?.length || 1
       });
-      setCameraDocument(preSelectedFile);
+      setCameraDocument(documentToUse);
     }
-  }, [preSelectedFile, fromCamera]);
+  }, [preSelectedFile, file, fromCamera]);
 
   const isDark = theme === 'dark';
   const styles = getStyles(isDark, isRTL);

@@ -405,7 +405,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
       // Navigate to upload screen with the generated document
       // This provides the same UX as regular file uploads
       onNavigate('upload', { 
-        preSelectedFile: documentFile,
+        file: documentFile,
         fromCamera: true,
         pageCount: pageCount
       });
