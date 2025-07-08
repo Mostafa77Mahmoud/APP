@@ -7,9 +7,6 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "android": {
-        "buildType": "apk"
-      },
       "env": {
         "API_URL": "http://localhost:5000"
       }
@@ -28,9 +25,6 @@
       }
     },
     "production": {
-      "android": {
-        "buildType": "aab"
-      },
       "env": {
         "API_URL": "https://75ad075cf608.ngrok-free.app"
       }
