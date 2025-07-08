@@ -210,14 +210,18 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
   const generateDocumentFromImages = async (images: CapturedImage[]): Promise<GeneratedDocument> => {
     if (Platform.OS === 'web') {
       try {
+        console.log('Generating web document from', images.length, 'images');
+        
         // For web platform, we'll create a multi-page document with images
         // Convert images to base64 for embedding in HTML
-        const imageDataPromises = images.map(async (image) => {
+        const imageDataPromises = images.map(async (image, index) => {
+          console.log(`Converting image ${index + 1} to base64`);
           const base64 = await convertImageToBase64(image.uri);
           return base64;
         });
 
         const imageBase64Array = await Promise.all(imageDataPromises);
+        console.log('All images converted to base64');
 
         // Create a text file containing the image data for backend processing
         const fileName = `contract_multipage_${Date.now()}.txt`;
@@ -239,69 +243,120 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
         const blob = new Blob([imageDataString], { type: 'text/plain' });
         const file = new File([blob], fileName, { type: 'text/plain' });
 
+        console.log('Created file:', { name: fileName, size: file.size, type: file.type });
+
         return {
           uri: URL.createObjectURL(blob),
           name: fileName,
           type: 'text/plain',
+          size: file.size,
           file: file, // Include the File object for web FormData
           images: images, // Include images for multi-page processing
         };
       } catch (error) {
         console.error('Error creating web document:', error);
-        throw new Error('Failed to generate document for web platform');
+        throw new Error(`Failed to generate document for web platform: ${error.message}`);
       }
     }
 
     try {
-      // Dynamically import react-native-html-to-pdf for native platforms
-      const RNHTMLtoPDF = await import('react-native-html-to-pdf');
+      console.log('Generating native document from', images.length, 'images');
+      
+      // For native platforms, try to use react-native-html-to-pdf if available
+      try {
+        const RNHTMLtoPDF = await import('react-native-html-to-pdf');
 
-      // Convert images to base64 for embedding in HTML
-      const imageDataPromises = images.map(async (image) => {
-        const base64 = await convertImageToBase64(image.uri);
-        return base64;
-      });
+        // Convert images to base64 for embedding in HTML
+        const imageDataPromises = images.map(async (image, index) => {
+          console.log(`Converting native image ${index + 1} to base64`);
+          const base64 = await convertImageToBase64(image.uri);
+          return base64;
+        });
 
-      const imageBase64Array = await Promise.all(imageDataPromises);
+        const imageBase64Array = await Promise.all(imageDataPromises);
+        console.log('All native images converted to base64');
 
-      // Build HTML string with all images, each on a separate page
-      let htmlContent = '<html><head><meta charset="UTF-8"></head><body style="font-family: Arial, sans-serif;">';
+        // Build HTML string with all images, each on a separate page
+        let htmlContent = '<html><head><meta charset="UTF-8"></head><body style="font-family: Arial, sans-serif;">';
 
-      imageBase64Array.forEach((base64Image, index) => {
-        const isLastImage = index === imageBase64Array.length - 1;
-        const pageBreakStyle = isLastImage ? '' : 'page-break-after: always; ';
+        imageBase64Array.forEach((base64Image, index) => {
+          const isLastImage = index === imageBase64Array.length - 1;
+          const pageBreakStyle = isLastImage ? '' : 'page-break-after: always; ';
 
-        htmlContent += `
-          <div style="${pageBreakStyle}text-align: center;">
-            <img src="${base64Image}" style="width:100%; height:auto; margin-bottom: 20px;" />
-          </div>
-        `;
-      });
+          htmlContent += `
+            <div style="${pageBreakStyle}text-align: center;">
+              <img src="${base64Image}" style="width:100%; height:auto; margin-bottom: 20px;" />
+            </div>
+          `;
+        });
 
-      htmlContent += '</body></html>';
+        htmlContent += '</body></html>';
 
-      // Generate PDF file name
-      const fileName = `contract_${Date.now()}.pdf`;
+        // Generate PDF file name
+        const fileName = `contract_${Date.now()}.pdf`;
 
-      // PDF generation options
-      const options = {
-        html: htmlContent,
-        fileName: fileName,
-        directory: 'Documents',
-        base64: false,
-      };
+        // PDF generation options
+        const options = {
+          html: htmlContent,
+          fileName: fileName,
+          directory: 'Documents',
+          base64: false,
+        };
 
-      // Generate PDF using react-native-html-to-pdf
-      const pdf = await RNHTMLtoPDF.default.convert(options);
+        // Generate PDF using react-native-html-to-pdf
+        const pdf = await RNHTMLtoPDF.default.convert(options);
 
-      return {
-        uri: pdf.filePath,
-        name: fileName,
-        type: 'application/pdf',
-      };
+        console.log('PDF generated:', pdf.filePath);
+
+        return {
+          uri: pdf.filePath,
+          name: fileName,
+          type: 'application/pdf',
+        };
+      } catch (pdfError) {
+        console.log('PDF generation failed, falling back to text format:', pdfError.message);
+        
+        // Fallback: Create a text file with image data (similar to web approach)
+        const imageDataPromises = images.map(async (image, index) => {
+          console.log(`Converting fallback image ${index + 1} to base64`);
+          const base64 = await convertImageToBase64(image.uri);
+          return base64;
+        });
+
+        const imageBase64Array = await Promise.all(imageDataPromises);
+        
+        const fileName = `contract_multipage_${Date.now()}.txt`;
+        const imageDataString = JSON.stringify({
+          images: imageBase64Array,
+          metadata: {
+            totalPages: images.length,
+            timestamp: Date.now(),
+            captureInfo: images.map((img, index) => ({
+              pageNumber: index + 1,
+              width: img.width,
+              height: img.height,
+              timestamp: img.timestamp
+            }))
+          }
+        });
+
+        // For native, we'll create a temporary file
+        const FileSystem = require('expo-file-system');
+        const fileUri = `${FileSystem.documentDirectory}${fileName}`;
+        await FileSystem.writeAsStringAsync(fileUri, imageDataString);
+
+        console.log('Text file generated:', fileUri);
+
+        return {
+          uri: fileUri,
+          name: fileName,
+          type: 'text/plain',
+          images: images,
+        };
+      }
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      throw new Error('Failed to generate document');
+      console.error('Error generating document:', error);
+      throw new Error(`Failed to generate document: ${error.message}`);
     }
   };
 
@@ -315,15 +370,33 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
     setIsGeneratingPDF(true);
 
     try {
+      console.log('Starting document generation for', capturedImages.length, 'images');
+      
       // Generate document from images
       const documentFile = await generateDocumentFromImages(capturedImages);
 
-      if (!documentFile) {
-        throw new Error('Failed to generate document');
+      if (!documentFile || !documentFile.uri) {
+        throw new Error('Generated document is invalid - missing URI');
       }
 
-      console.log('Generated document:', documentFile);
+      if (Platform.OS === 'web' && !documentFile.file) {
+        throw new Error('Generated document is invalid - missing file object for web');
+      }
+
+      console.log('Document generation successful:', {
+        uri: documentFile.uri,
+        name: documentFile.name,
+        type: documentFile.type,
+        size: documentFile.size || 'unknown',
+        hasFile: !!documentFile.file,
+        hasImages: !!documentFile.images,
+        imageCount: documentFile.images?.length || 0
+      });
+
       setIsGeneratingPDF(false);
+
+      // Store the page count before clearing
+      const pageCount = capturedImages.length;
 
       // Clear captured images and reset camera state
       setCapturedImages([]);
@@ -334,18 +407,19 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ onBack, onNavigate }) => {
       onNavigate('upload', { 
         preSelectedFile: documentFile,
         fromCamera: true,
-        pageCount: capturedImages.length 
+        pageCount: pageCount
       });
 
     } catch (error) {
       console.error('Document generation error:', error);
+      setIsGeneratingPDF(false);
+      
       Alert.alert(
         'Document Generation Error',
-        `Failed to generate document: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Failed to generate document: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again or use a different approach.`
       );
     } finally {
       setIsProcessing(false);
-      setIsGeneratingPDF(false);
     }
   };
 

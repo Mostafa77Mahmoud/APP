@@ -94,7 +94,7 @@ export const uploadContract = async (fileAsset: any, onUploadProgress?: (progres
   
   try {
     // Handle multi-page image documents
-    if (fileAsset.images && Array.isArray(fileAsset.images) && fileAsset.images.length > 1) {
+    if (fileAsset.images && Array.isArray(fileAsset.images) && fileAsset.images.length >= 1) {
       console.log('📤 API: Processing multi-page document with', fileAsset.images.length, 'pages');
       
       if (Platform.OS === 'web' && fileAsset.file) {

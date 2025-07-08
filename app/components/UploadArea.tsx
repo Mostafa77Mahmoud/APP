@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, Animated, Dimensions } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
@@ -38,7 +37,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
     sessionId,
     clearSession 
   } = useSession();
-  
+
   const [selectedFile, setSelectedFile] = useState<any>(preSelectedFile || null);
   const [dragActive, setDragActive] = useState(false);
   const [isReadyToAnalyze, setIsReadyToAnalyze] = useState(false);
@@ -113,7 +112,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
         "text/plain", 
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       ];
-      
+
       if (!allowedMimeTypes.includes(file.mimeType)) {
         Alert.alert(t('error.fileType'), t('upload.formats'));
         setSelectedFile(null);
@@ -201,6 +200,40 @@ const UploadArea: React.FC<UploadAreaProps> = ({
 
   const isProcessing = isUploading || isAnalyzingContract;
   const hasError = uploadError || analysisError;
+
+  const handleCameraDocumentAnalysis = async () => {
+    if (!cameraDocument) {
+      console.error('No camera document available for analysis');
+      return;
+    }
+
+    try {
+      console.log('Starting camera document analysis:', {
+        name: cameraDocument.name,
+        type: cameraDocument.type,
+        hasFile: !!cameraDocument.file,
+        hasImages: !!cameraDocument.images
+      });
+
+      const newSessionId = await uploadAndAnalyzeContract(cameraDocument);
+      if (newSessionId) {
+        // Add to contract history
+        addContract({
+          id: newSessionId,
+          name: cameraDocument.name,
+          analysisDate: new Date().toISOString(),
+          complianceScore: 0,
+          sessionId: newSessionId,
+          fileSize: cameraDocument.file ? `${(cameraDocument.file.size / 1024).toFixed(1)} KB` : 'Generated from camera',
+        });
+
+        console.log('Camera document analysis completed successfully:', newSessionId);
+        handleAnalysisComplete(newSessionId);
+      }
+    } catch (error) {
+      console.error('Camera document analysis failed:', error);
+    }
+  };
 
   return (
     <Animated.View style={[{ transform: [{ scale: scaleAnim }] }]}>
