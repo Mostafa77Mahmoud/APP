@@ -93,6 +93,10 @@ const MobileApp = () => {
     handleNavigate('home');
   };
 
+  const handleAnalysisComplete = (sessionId: string) => {
+    handleNavigate('results', { sessionId });
+  };
+
   const renderScreen = () => {
     const screenProps = {
       onNavigate: handleNavigate,
@@ -112,7 +116,16 @@ const MobileApp = () => {
       case 'profile':
         return <ProfileScreen {...screenProps} />;
       case 'upload':
-        return <UploadScreen onAnalysisComplete={(sessionId) => handleNavigate('results', { sessionId })} onBack={handleBack} />;
+        return (
+          <UploadScreen
+            onAnalysisComplete={handleAnalysisComplete}
+            onBack={handleBack}
+            preSelectedFile={navigationData?.preSelectedFile}
+            fromCamera={navigationData?.fromCamera}
+            pageCount={navigationData?.pageCount}
+            autoUpload={navigationData?.autoUpload}
+          />
+        );
       case 'results':
         return <ResultsScreen {...screenProps} />;
       default:

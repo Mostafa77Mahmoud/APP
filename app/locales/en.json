@@ -160,7 +160,8 @@
     "pdfSuccessMessage": "Your contract has been converted to PDF format",
     "multiPageDocument": "Multi-page Document",
     "reviewPages": "Review Pages",
-    "capturedPages": "Captured Pages"
+    "capturedPages": "Captured Pages",
+    "analyzeDocument": "Analyze Document"
   },
   "history": {
     "title": "Contract History",
@@ -273,5 +274,10 @@
     "close": "Close",
     "clear": "Clear",
     "loading": "Loading..."
-  }
+  },
+  "readyToAnalyze": "Ready to analyze",
+    "analyzeContract": "Analyze Contract",
+    "uploadProgress": "Upload Progress",
+    "unknownSize": "Unknown size",
+    "autoAnalyzing": "Auto-analyzing document..."
 }

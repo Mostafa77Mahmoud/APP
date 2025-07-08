@@ -14,6 +14,7 @@ interface UploadAreaProps {
   preSelectedFile?: any;
   fromCamera?: boolean;
   pageCount?: number;
+  autoUpload?: boolean;
 }
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -22,7 +23,8 @@ const UploadArea: React.FC<UploadAreaProps> = ({
   onAnalysisComplete, 
   preSelectedFile, 
   fromCamera = false, 
-  pageCount = 1 
+  pageCount = 1,
+  autoUpload = false 
 }) => {
   const { t, isRTL } = useLanguage();
   const { theme } = useTheme();
@@ -106,7 +108,8 @@ const UploadArea: React.FC<UploadAreaProps> = ({
         size: preSelectedFile.size,
         hasFile: !!preSelectedFile.file,
         hasImages: !!preSelectedFile.images,
-        pageCount: preSelectedFile.images?.length || 1
+        pageCount: preSelectedFile.images?.length || 1,
+        autoUpload: autoUpload
       });
       setSelectedFile(preSelectedFile);
       setIsReadyToAnalyze(true);
@@ -118,8 +121,16 @@ const UploadArea: React.FC<UploadAreaProps> = ({
         duration: 500,
         useNativeDriver: true,
       }).start();
+
+      // Auto-upload if specified
+      if (autoUpload) {
+        console.log('🚀 UploadArea: Auto-uploading camera document...');
+        setTimeout(() => {
+          handleAnalyze();
+        }, 1000); // Small delay to let animations complete
+      }
     }
-  }, [preSelectedFile, fromCamera, clearSession]);
+  }, [preSelectedFile, fromCamera, clearSession, autoUpload]);
 
   const processFile = useCallback(async (file: any) => {
     if (file) {
@@ -295,7 +306,10 @@ const UploadArea: React.FC<UploadAreaProps> = ({
                   </Text>
                 </View>
                 <Text style={styles.statusSubText}>
-                  {fromCamera ? `${t('camera.title')} - ${t('upload.readyToAnalyze')}` : t('upload.readyToAnalyze')}
+                  {fromCamera ? 
+                    (autoUpload ? `${t('camera.title')} - ${t('upload.autoAnalyzing')}` : `${t('camera.title')} - ${t('upload.readyToAnalyze')}`) : 
+                    t('upload.readyToAnalyze')
+                  }
                 </Text>
               </View>
             ) : hasError ? (
@@ -338,7 +352,9 @@ const UploadArea: React.FC<UploadAreaProps> = ({
                 disabled={isProcessing}
               >
                 <Play size={20} color="#fff" />
-                <Text style={styles.analyzeButtonText}>{t('upload.analyzeContract')}</Text>
+                <Text style={styles.analyzeButtonText}>
+                  {fromCamera ? t('camera.analyzeDocument') : t('upload.analyzeContract')}
+                </Text>
                 <Sparkles size={16} color="#fff" />
               </Button>
             </Animated.View>

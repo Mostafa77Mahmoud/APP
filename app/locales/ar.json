@@ -14,9 +14,16 @@
     "redirecting": "جاري التوجيه إلى النتائج...",
     "error": "فشل في الرفع",
     "unknownSize": "حجم غير معروف",
+    "readyToAnalyze": "جاهز للتحليل",
+    "analyzeContract": "تحليل العقد",
+    "startingAnalysis": "بدء التحليل...",
+    "analyzeContract": "تحليل العقد",
     "readyToAnalyze": "الملف جاهز للتحليل",
     "startingAnalysis": "بدء التحليل...",
-    "analyzeContract": "تحليل العقد"
+    "analyzeContract": "تحليل العقد",
+    "uploadProgress": "تقدم التحميل",
+    "unknownSize": "حجم غير معروف",
+    "autoAnalyzing": "تحليل المستند تلقائياً..."
   },
   "analyzing": {
     "title": "تحليل العقد",
@@ -293,6 +300,7 @@
     "galleryError": "فشل في اختيار الصورة من المعرض",
     "pdfError": "خطأ في إنشاء ملف PDF",
     "pdfSuccess": "تم إنشاء ملف PDF بنجاح",
-    "pdfSuccessMessage": "تم تحويل عقدك إلى تنسيق PDF"
+    "pdfSuccessMessage": "تم تحويل عقدك إلى تنسيق PDF",
+    "analyzeDocument": "تحليل المستند"
   }
 }

@@ -16,6 +16,7 @@ interface UploadScreenProps {
   file?: any;
   fromCamera?: boolean;
   pageCount?: number;
+  autoUpload?: boolean;
 }
 
 const UploadScreen: React.FC<UploadScreenProps> = ({ 
@@ -24,7 +25,8 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
   preSelectedFile, 
   file,
   fromCamera = false, 
-  pageCount = 1 
+  pageCount = 1,
+  autoUpload = false 
 }) => {
   const { t, isRTL } = useLanguage();
   const { theme } = useTheme();
@@ -104,6 +106,7 @@ const UploadScreen: React.FC<UploadScreenProps> = ({
           preSelectedFile={cameraDocument}
           fromCamera={fromCamera}
           pageCount={pageCount}
+          autoUpload={autoUpload}
         />
       </ScrollView>
 
