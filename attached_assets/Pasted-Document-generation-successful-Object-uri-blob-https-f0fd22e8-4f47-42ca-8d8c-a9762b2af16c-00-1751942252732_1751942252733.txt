@@ -1,0 +1,44 @@
+Document generation successful: 
+Object {uri: "blob:https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/63bf3b61-0886-41…", name: "contract_multipage_1751942121445.txt", type: "text/plain", size: 48928, hasFile: true, …}
+hasFile: true
+hasImages: true
+imageCount: 1
+name: "contract_multipage_1751942121445.txt"
+size: 48928
+type: "text/plain"
+uri: "blob:https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/63bf3b61-0886-41e3-b7a7-e6c9443ed052"
+[[Prototype]]: Object
+📤 API: Starting upload with file: 
+Object {uri: "data:application/pdf;base64,JVBERi0xLjUNCiW1tbW1DQoxIDAgb2JqDQo8PC9UeXBlL0NhdGFsb2cvUGFnZXMgMiAwIFI…", type: undefined, name: "نموذج عقد المقاولة.pdf", size: 194785, hasMetadata: false, …}
+📤 API: Added web file to FormData
+📤 API: Request headers prepared
+📤 API: Sending request to: http://localhost:5000/analyze
+📤 API: FormData entries:
+  file: [File] نموذج عقد المقاولة.pdf (194785 bytes)
+📤 API: Response received: 
+Object {status: 200, statusText: "OK", contentType: "application/json"}
+✅ API: Upload successful, session ID: 944e44ce-8b01-404b-afed-a66f421f4ed5
+SessionContext: Loading session data for 944e44ce-8b01-404b-afed-a66f421f4ed5
+SessionContext: Received data 
+Object {sessionId: "944e44ce-8b01-404b-afed-a66f421f4ed5", termsCount: 18, sampleTerm: {…}}
+SessionContext: Setting enriched terms 
+Object {originalCount: 18, enrichedCount: 18, enrichedSample: {…}}
+Page 1 captured successfully
+Page 2 captured successfully
+Starting document generation for 2 images
+Generating web document from 2 images
+Converting image 1 to base64
+Converting image 2 to base64
+All images converted to base64
+Created file: 
+Object {name: "contract_multipage_1751942214636.txt", size: 101566, type: "text/plain"}
+Document generation successful: 
+Object {uri: "blob:https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/f5a35683-2f84-4a…", name: "contract_multipage_1751942214636.txt", type: "text/plain", size: 101566, hasFile: true, …}
+hasFile: true
+hasImages: true
+imageCount: 2
+name: "contract_multipage_1751942214636.txt"
+size: 101566
+type: "text/plain"
+uri: "blob:https://f0fd22e8-4f47-42ca-8d8c-a9762b2af16c-00-2be0dtoq0cb8d.kirk.replit.dev/f5a35683-2f84-4aba-b1ed-313f60dbca95"
+[[Prototype]]: Object
