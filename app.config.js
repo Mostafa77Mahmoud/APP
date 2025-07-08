@@ -21,14 +21,14 @@ export default {
     ],
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.shariaa.analyzer"
+      bundleIdentifier: "com.shariaaanalyzer.app"
     },
     android: {
       adaptiveIcon: {
         foregroundImage: "./client/public/logo-shariaa.png",
         backgroundColor: "#10b981"
       },
-      package: "com.shariaa.analyzer",
+      package: "com.shariaaanalyzer.app",
       permissions: [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
@@ -41,6 +41,7 @@ export default {
       bundler: "metro"
     },
     plugins: [
+      "expo-dev-client",
       "expo-camera",
       "expo-image-picker",
       [
