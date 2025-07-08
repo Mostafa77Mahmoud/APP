@@ -1,11 +1,12 @@
 // app/services/api.ts
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 
 // --- API Configuration ---
 // Use 10.0.2.2 for Android emulator to connect to localhost on the host machine.
 // For web and iOS simulator, 'localhost' or your computer's local IP should work.
-const API_BASE_URL = Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://localhost:5000';
+const API_BASE_URL = Constants?.expoConfig?.extra?.API_URL || 'http://localhost:5000';
 const NGROK_SKIP_BROWSER_WARNING_HEADER = { 'ngrok-skip-browser-warning': 'true' };
 
 // --- Exported Types ---
@@ -51,7 +52,7 @@ const getAuthToken = (): Promise<string | null> => AsyncStorage.getItem('auth_to
 
 const getHeaders = async (isFormData = false) => {
     const token = await getAuthToken();
-    const headers: Record<string, string> = { ...NGROK_SKIP_BROWSER_WARNING_HEADER };
+    const headers: Record of string, string> = { ...NGROK_SKIP_BROWSER_WARNING_HEADER };
 
     if (!isFormData) {
       headers['Content-Type'] = 'application/json';
@@ -91,18 +92,18 @@ export const uploadContract = async (fileAsset: any, onUploadProgress?: (progres
   });
 
   const formData = new FormData();
-  
+
   try {
     // Handle multi-page image documents
     if (fileAsset.images && Array.isArray(fileAsset.images) && fileAsset.images.length >= 1) {
       console.log('📤 API: Processing multi-page document with', fileAsset.images.length, 'pages');
-      
+
       if (Platform.OS === 'web' && fileAsset.file) {
         // For web, use the file directly (it's already a text file with base64 data)
         formData.append('file', fileAsset.file);
         formData.append('upload_type', 'multi-page-images');
         formData.append('total_pages', fileAsset.images.length.toString());
-        
+
         console.log('📤 API: Added web multi-page text file to FormData');
       } else {
         // For native platforms, create a file with the multi-page data
@@ -111,11 +112,11 @@ export const uploadContract = async (fileAsset: any, onUploadProgress?: (progres
           type: fileAsset.type || 'text/plain',
           name: fileAsset.name || `contract_multipage_${Date.now()}.txt`,
         } as any;
-        
+
         formData.append('file', fileData);
         formData.append('upload_type', 'multi-page-images');
         formData.append('total_pages', fileAsset.images.length.toString());
-        
+
         console.log('📤 API: Added native multi-page text file to FormData');
       }
     } 
@@ -130,28 +131,28 @@ export const uploadContract = async (fileAsset: any, onUploadProgress?: (progres
         type: fileAsset.type || fileAsset.mimeType || 'image/jpeg',
         name: fileAsset.name || `upload_${Date.now()}.jpg`,
       } as any;
-      
+
       if (fileAsset.size) {
         fileData.size = fileAsset.size;
       }
-      
+
       formData.append('file', fileData);
       console.log('📤 API: Added native file to FormData:', fileData);
-      
+
       // Add metadata if available
       if (fileAsset.metadata) {
         formData.append('metadata', JSON.stringify(fileAsset.metadata));
         console.log('📤 API: Added metadata:', fileAsset.metadata);
       }
     }
-    
+
     onUploadProgress?.(30);
-    
+
     const headers = await getHeaders(true);
     console.log('📤 API: Request headers prepared');
-    
+
     onUploadProgress?.(50);
-    
+
     console.log('📤 API: Sending request to:', `${API_BASE_URL}/analyze`);
     console.log('📤 API: FormData entries:');
     for (let pair of formData.entries()) {
@@ -161,7 +162,7 @@ export const uploadContract = async (fileAsset: any, onUploadProgress?: (progres
         console.log(`  ${pair[0]}: ${pair[1]}`);
       }
     }
-    
+
     const response = await fetch(`${API_BASE_URL}/analyze`, { 
       method: 'POST', 
       body: formData, 
@@ -175,7 +176,7 @@ export const uploadContract = async (fileAsset: any, onUploadProgress?: (progres
     });
 
     onUploadProgress?.(100);
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error('❌ API: Upload failed:', {
@@ -185,7 +186,7 @@ export const uploadContract = async (fileAsset: any, onUploadProgress?: (progres
       });
       throw new Error(`Upload failed (${response.status}): ${errorText || response.statusText}`);
     }
-    
+
     const result = await handleResponse<AnalyzeApiResponse>(response);
     console.log('✅ API: Upload successful, session ID:', result.session_id);
     return result;
@@ -202,13 +203,13 @@ export const getSessionHistory = async (): Promise<SessionDetailsApiResponse[]> 
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // Increased to 10 second timeout
-    
+
     const response = await fetch(`${API_BASE_URL}/api/history`, { 
       method: 'GET', 
       headers,
       signal: controller.signal
     });
-    
+
     clearTimeout(timeoutId);
     return handleResponse<SessionDetailsApiResponse[]>(response);
   } catch (error) {
