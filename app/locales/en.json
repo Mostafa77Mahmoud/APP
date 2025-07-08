@@ -16,7 +16,10 @@
     "unknownSize": "Unknown size",
     "readyToAnalyze": "File ready for analysis",
     "startingAnalysis": "Starting analysis...",
-    "analyzeContract": "Analyze Contract"
+    "analyzeContract": "Analyze Contract",
+    "uploadProgress": "Upload Progress",
+    "autoAnalyzing": "Auto-analyzing document...",
+    "newAnalysis": "Start New Analysis"
   },
   "analyzing": {
     "title": "Analyzing Contract",
@@ -58,7 +61,16 @@
     "generated": "Contract Generated",
     "generatedMessage": "Your modified contract has been generated successfully",
     "markedGenerated": "Marked Contract Generated",
-    "markedGeneratedMessage": "Your marked contract has been generated successfully"
+    "markedGeneratedMessage": "Your marked contract has been generated successfully",
+    "preview": {
+        "modifiedTitle": "Preview Modified Contract",
+        "markedTitle": "Preview Marked Contract",
+        "readyDescMobile": "Your contract is ready for download and review.",
+        "openInBrowser": "Open in Browser",
+        "downloadStarted": "Download started successfully",
+        "downloadFailed": "Failed to download document",
+        "errorTitle": "Error"
+    }
   },
   "term": {
     "compliant": "Compliant",
@@ -79,7 +91,15 @@
     "generalQuestionPlaceholder": "Ask a question about the entire contract...",
     "answer": "Answer",
     "generatingContract": "Generating Modified Contract",
-    "generatingMarkedContract": "Generating Marked Contract"
+    "generatingMarkedContract": "Generating Marked Contract",
+    "initialSuggestion": "Initial Suggestion",
+    "yourEdit": "Your Edit",
+    "reviewedSuggestion": "Reviewed Suggestion",
+    "editConfirmed": "Edit Confirmed",
+    "alreadyCompliant": "This term is already compliant with Sharia law.",
+    "newShariaIssue": "New Sharia Issue",
+    "answerReceived": "Answer Received",
+    "answerReceivedMessage": "Your question has been answered."
   },
   "generate": {
     "stage1": "Analyzing Structure",
@@ -105,7 +125,10 @@
     "reviewFailedDesc": "Could not review your modification. Please try again.",
     "couldNotReviewEdit": "Could not review your edit. Please try again.",
     "suggestionReviewed": "Suggestion Reviewed",
-    "suggestionReviewedDesc": "The AI has reviewed your suggestion"
+    "suggestionReviewedDesc": "The AI has reviewed your suggestion",
+    "looksGood": "Looks good",
+    "concern": "Concern",
+    "complianceIssue": "Compliance issue"
   },
   "user": {
     "regular": "Regular User",
@@ -124,12 +147,30 @@
     "commentPlaceholder": "Provide your expert comment...",
     "submitFeedback": "Submit Feedback",
     "feedbackSubmitted": "Feedback Submitted",
-    "feedbackSubmittedMessage": "Your expert feedback has been submitted successfully."
+    "feedbackSubmittedMessage": "Your expert feedback has been submitted successfully.",
+    "feedbackTitle": "Expert Feedback",
+    "aiAssessmentCorrect": "Is the AI assessment correct?",
+    "yes": "Yes",
+    "no": "No",
+    "correctedCompliance": "Corrected Compliance",
+    "comments": "Comments",
+    "correctedSuggestion": "Corrected Suggestion",
+    "validation": {
+        "assessmentMissing": "Assessment Missing",
+        "assessmentMissingDesc": "Please assess the AI analysis.",
+        "statusMissing": "Status Missing",
+        "statusMissingDesc": "Please specify the corrected compliance status."
+    },
+    "submissionFailed": "Submission Failed",
+    "submissionFailedDesc": "An error occurred while submitting your feedback.",
+    "feedbackError": "Failed to submit feedback"
   },
   "questionAnimation": {
     "processing": "Processing your question...",
     "analyzing": "Analyzing",
-    "formulating": "Formulating"
+    "formulating": "Formulating",
+    "thinking": "AI is thinking...",
+    "patience": "Please wait while we analyze your question"
   },
   "camera": {
     "title": "Capture Contract",
@@ -147,6 +188,9 @@
     "multiPageMode": "Multi-page mode enabled",
     "pageAdded": "Page Added",
     "pageAddedMessage": "Page {count} captured successfully. Add more pages or finish to continue.",
+    "multiPageDocument": "Multi-page Document",
+    "reviewPages": "Review Pages",
+    "capturedPages": "Captured Pages",
     "addMore": "Add More",
     "finish": "Finish",
     "page": "Page",
@@ -158,9 +202,6 @@
     "pdfError": "Document Generation Error",
     "pdfSuccess": "PDF Generated Successfully",
     "pdfSuccessMessage": "Your contract has been converted to PDF format",
-    "multiPageDocument": "Multi-page Document",
-    "reviewPages": "Review Pages",
-    "capturedPages": "Captured Pages",
     "analyzeDocument": "Analyze Document"
   },
   "history": {
@@ -213,35 +254,40 @@
     "help": "Help Center",
     "share": "Share App",
     "rate": "Rate App",
-    "temporaryAccount": "Temporary guest account"
+    "temporaryAccount": "Temporary guest account",
+    "logoutConfirm": "Are you sure you want to log out?"
   },
   "onboarding": {
     "title": "Welcome to Shariaa Contract Analyzer",
     "subtitle": "Your AI-powered Islamic compliance assistant",
     "step1": {
       "title": "Upload Contracts",
-      "description": "Upload PDF, DOCX, or TXT contract files for analysis",
+      "desc": "Upload PDF, DOCX, or TXT contract files for analysis",
       "feature1": "Support for multiple file formats",
       "feature2": "Camera scanning for physical documents",
       "feature3": "Multi-page document capture"
     },
     "step2": {
       "title": "AI Analysis",
-      "description": "Our AI analyzes each clause for Islamic law compliance"
+      "desc": "Our AI analyzes each clause for Islamic law compliance"
     },
     "step3": {
       "title": "Expert Review",
-      "description": "Get expert insights and modification suggestions",
+      "desc": "Get expert insights and modification suggestions",
       "feature1": "Term-specific compliance analysis",
       "feature2": "Interactive question and answer system",
       "feature3": "Expert feedback and corrections"
     },
     "step4": {
+        "title": "Export & Share",
+        "desc": "Download your modified contracts with ease",
       "feature1": "Generate modified contracts",
       "feature2": "Download marked contract versions"
     },
     "skip": "Skip",
     "next": "Next",
+    "previous": "Previous",
+    "done": "Done",
     "getStarted": "Get Started"
   },
   "navigation": {
@@ -252,18 +298,31 @@
     "profile": "Profile"
   },
   "home": {
+    "goodMorning": "Good Morning",
+    "goodAfternoon": "Good Afternoon",
+    "goodEvening": "Good Evening",
     "guestUser": "Guest User",
     "analytics": "Analytics",
     "totalAnalyses": "Total Analyses",
     "complianceRate": "Compliance Rate",
-    "thisMonth": "This Month"
+    "thisMonth": "This Month",
+    "scanDocument": "Scan Document",
+    "useCamera": "Use your camera",
+    "uploadFile": "Upload File",
+    "fromDevice": "From your device",
+    "recentAnalyses": "Recent Analyses",
+    "viewAll": "View All",
+    "noAnalyses": "No recent analyses",
+    "startFirst": "Start your first analysis!"
   },
   "error": {
     "generic": "An error occurred",
     "fileType": "Invalid file type",
     "confirmationFailed": "Failed to confirm changes",
     "generationFailed": "Failed to generate contract",
-    "interactionFailed": "Failed to process request"
+    "interactionFailed": "Failed to process request",
+    "deleteFailed": "Deletion Failed",
+    "deleteFailedMessage": "Could not delete the session. Please try again."
   },
   "processing": "Processing...",
   "loading": "Loading...",
@@ -273,11 +332,58 @@
     "delete": "Delete",
     "close": "Close",
     "clear": "Clear",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "success": "Success"
   },
-  "readyToAnalyze": "Ready to analyze",
-    "analyzeContract": "Analyze Contract",
-    "uploadProgress": "Upload Progress",
-    "unknownSize": "Unknown size",
-    "autoAnalyzing": "Auto-analyzing document..."
+   "sidebar": {
+    "title": "Menu",
+    "welcome": "Welcome to Shariaa Analyzer",
+    "description_new": "Your AI-powered assistant for Islamic compliance analysis in contracts.",
+    "howTo_new": "How It Works",
+    "step1_new": "Upload or scan your contract",
+    "step2_new": "AI identifies and analyzes clauses",
+    "step3_new": "Get Sharia-compliant suggestions",
+    "step4_new": "Review and approve recommendations",
+    "step5_new": "Ask questions about any term",
+    "step6_new": "Download your revised contract",
+    "features_new": "Features",
+    "instantAnalysis_new": "Instant AI-powered analysis",
+    "designedForIslamicLaw": "Designed for Islamic Law",
+    "multilingual_new": "Multilingual Support (AR/EN)",
+    "darkMode_new": "Dark Mode & Customizable UI",
+    "exportDocuments": "Export documents in multiple formats",
+    "dataPrivacy_new": "Data privacy and security assured"
+  },
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "loggedInAs": "Logged in as"
+  },
+  "guest": {
+    "mode": "Guest Mode",
+    "featuresAvailable": "Limited features available",
+    "exit": "Exit Guest Mode"
+  },
+  "app": {
+    "logout": "Logout"
+  },
+  "compliance": {
+    "excellent": "Excellent Compliance",
+    "good": "Good Compliance",
+    "moderate": "Moderate Compliance",
+    "poor": "Poor Compliance",
+    "critical": "Critical Issues",
+    "unknown": "Unknown Status",
+    "excellentDesc": "Contract meets all Sharia requirements",
+    "goodDesc": "Contract mostly complies with Sharia law",
+    "moderateDesc": "Some terms need attention",
+    "poorDesc": "Several terms require modification",
+    "criticalDesc": "Major Sharia compliance issues found",
+    "terms": "Contract analysis results",
+    "totalTerms": "total terms analyzed",
+    "compliantTerms": "Compliant",
+    "nonCompliantTerms": "Non-Compliant",
+    "overall": "Overall Compliance"
+  }
 }
